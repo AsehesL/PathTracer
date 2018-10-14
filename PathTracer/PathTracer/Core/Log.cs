@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace ASL.PathTracer
 {
-    enum LogType
+    public enum LogType
     {
         Info,
         Warnning,
@@ -15,7 +15,7 @@ namespace ASL.PathTracer
         Complete,
     }
 
-    class Log
+    public class Log
     {
         private static Log sInstance;
 
@@ -71,7 +71,7 @@ namespace ASL.PathTracer
         {
             if (sInstance == null)
                 return;
-            sInstance.m_ListView.Clear();
+            sInstance.m_ListView.Items.Clear();
         }
 
         private void AddLogItem(LogType type, string message)
@@ -90,10 +90,11 @@ namespace ASL.PathTracer
             switch (type)
             {
                 case LogType.Error:
-                    return System.Drawing.Color.Red;
+                    return System.Drawing.Color.Maroon;
+                case LogType.Complete:
+                    return System.Drawing.Color.MediumBlue;
                 case LogType.Info:
                 case LogType.Warnning:
-                case LogType.Complete:
                 default:
                     return System.Drawing.Color.Black;
             }
@@ -104,6 +105,7 @@ namespace ASL.PathTracer
             switch (type)
             {
                 case LogType.Error:
+                    return System.Drawing.Color.DarkOrange;
                 case LogType.Warnning:
                     return System.Drawing.Color.Yellow;
                 case LogType.Complete:

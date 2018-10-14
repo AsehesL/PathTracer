@@ -160,15 +160,10 @@ namespace ASL.PathTracer
             //if (m_Sampler == null)
             //    throw new System.NullReferenceException("未设置采样器");
 
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             if(multiThread)
                 RenderMultiThread(scene, progressCallBackAction);
             else 
                 RenderSingleThread(scene, progressCallBackAction);
-            stopWatch.Stop();
-            var log = $"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}";
-            MessageBox.Show(log);
         }
 
         private void RenderSingleThread(Scene scene, System.Action<int, int> progressCallBackAction)

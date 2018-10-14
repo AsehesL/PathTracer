@@ -34,7 +34,10 @@ namespace ASL.PathTracer
         {
             var sceneData = ASL.PathTracer.SceneSerialization.SceneSerialization.Deserialize(scenePath);
             if (sceneData == null)
+            {
+                Log.Err("场景序列化失败！");
                 return null;
+            }
 
             Scene scene = new Scene();
             scene.m_Camera = sceneData.camera.CreateCamera();
@@ -45,9 +48,13 @@ namespace ASL.PathTracer
             {
                 for (int i = 0; i < sceneData.shaders.Count; i++)
                 {
-                    shaders.Add(sceneData.shaders[i].name, sceneData.shaders[i].CreateShader());
+                    var s = sceneData.shaders[i].CreateShader();
+                    if (shaders != null)
+                        shaders.Add(sceneData.shaders[i].name, s);
                 }
             }
+
+            Log.Info($"Shader加载完毕：共{shaders.Count}个Shader");
 
             List<Geometry> geometries = new List<Geometry>();
 
@@ -59,7 +66,11 @@ namespace ASL.PathTracer
                 }
             }
 
-            scene.m_SceneData = new ListSceneData();
+            Log.Info($"几何体加载完毕：共{geometries.Count}个几何体");
+
+            scene.m_SceneData = new OcTree();
+
+            Log.Info($"开始构建场景数据，场景数据类型：{scene.m_SceneData.GetType()}");
             scene.m_SceneData.Build(geometries);
             
             return scene;
@@ -72,7 +83,14 @@ namespace ASL.PathTracer
             m_Tracer.sceneData = m_SceneData;
             m_Camera.SetSampler(samplerType, numSamples, numSets);
             m_Camera.SetRenderTarget(result);
-            m_Camera.Render(this, multiThread, progressCallBackAction);
+            try
+            {
+                m_Camera.Render(this, multiThread, progressCallBackAction);
+            }
+            catch (System.Exception e)
+            {
+                Log.Err(e.Message);
+            }
             //m_Camera.Render(this, );
 
             return result;

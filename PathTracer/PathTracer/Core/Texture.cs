@@ -66,7 +66,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public System.Drawing.Image SaveToImage()
+        public System.Drawing.Bitmap SaveToImage()
         {
             var img = new System.Drawing.Bitmap(m_Width, m_Height);
             for (int i = 0; i < m_Width; i++)

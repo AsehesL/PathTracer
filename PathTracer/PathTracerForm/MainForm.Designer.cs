@@ -55,6 +55,7 @@
             this.bounceLabel = new System.Windows.Forms.Label();
             this.bounceInputBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -102,6 +103,7 @@
             this.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem";
             this.SaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SaveToolStripMenuItem.Text = "保存渲染结果";
+            this.SaveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // panel
             // 
@@ -220,6 +222,7 @@
             this.renderButton.TabIndex = 16;
             this.renderButton.Text = "渲染";
             this.renderButton.UseVisualStyleBackColor = true;
+            this.renderButton.Click += new System.EventHandler(this.renderButton_Click);
             // 
             // fastPreviewButton
             // 
@@ -325,6 +328,10 @@
             // 
             this.openFileDialog.Filter = "场景文件|*.scene";
             // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.Filter = "BMP文件|*.bmp";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -380,6 +387,7 @@
         private System.Windows.Forms.Label fileNameLabel;
         private System.Windows.Forms.Label infoLabel;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
 

@@ -42,6 +42,7 @@ namespace ASL.PathTracer.SceneSerialization
             Vector3 rot = StringUtils.StringToVector3(euler);
             Camera cam = new Camera(pos, rot, near, fieldOfView);
 
+            Log.Info($"相机创建成功:Position:{pos},Rotation:{rot}");
             return cam;
         }
     }
@@ -66,6 +67,7 @@ namespace ASL.PathTracer.SceneSerialization
             if (type == "Sphere")
             {
                 output.Add(new Sphere(pos, radius, s));
+                return;
             }
             else if (type == "Mesh")
             {
@@ -81,7 +83,9 @@ namespace ASL.PathTracer.SceneSerialization
                 {
                     output.Add(tri);
                 }
+                return;
             }
+            Log.Warn($"几何体创建失败！不确定的几何体类型：{type}");
         }
     }
 
@@ -102,7 +106,10 @@ namespace ASL.PathTracer.SceneSerialization
             var assembly = typeof(Shader).Assembly;
             var tp = assembly.GetType(className);
             if (tp == null)
+            {
+                Log.Warn($"Shader初时化失败！未找到该类型的Shader:{className}");
                 return null;
+            }
 
             Shader shader = System.Activator.CreateInstance(tp) as Shader;
 
@@ -157,7 +164,7 @@ namespace ASL.PathTracer.SceneSerialization
                     sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, shaderParams[i].paramValue);
                 }
             }
-
+            Log.Info($"天空盒创建成功:{tp}");
             return sky;
         }
     }
@@ -167,11 +174,23 @@ namespace ASL.PathTracer.SceneSerialization
         public static SceneDataRoot Deserialize(string path)
         {
             if (System.IO.File.Exists(path) == false)
+            {
+                Log.Err($"无法定位该文件位置：" + path);
                 return null;
+            }
+
             FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
             XmlSerializer serializer = new XmlSerializer(typeof(SceneDataRoot));
-            SceneDataRoot root = (SceneDataRoot)serializer.Deserialize(stream);
+            SceneDataRoot root = null;
+            try
+            {
+                root = (SceneDataRoot) serializer.Deserialize(stream);
+            }
+            catch (System.Exception e)
+            {
+                Log.Err(e.Message);
+            }
 
             stream.Dispose();
             stream.Close();
