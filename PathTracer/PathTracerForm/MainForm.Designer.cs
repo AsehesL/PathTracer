@@ -73,6 +73,7 @@
             // 
             // menuStrip
             // 
+            this.menuStrip.BackColor = System.Drawing.SystemColors.MenuBar;
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FileToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
@@ -336,6 +337,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(767, 520);
             this.Controls.Add(this.settingPanel);
             this.Controls.Add(this.logListView);

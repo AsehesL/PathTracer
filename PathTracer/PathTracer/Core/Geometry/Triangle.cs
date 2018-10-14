@@ -104,7 +104,7 @@ namespace ASL.PathTracer
 
             double finvdet = 1.0 / det;
             rt *= finvdet;
-            if (rt < 0.001)
+            if (rt < 0.0001)
                 return false;
             if (rt > hit.distance)
                 return false;
