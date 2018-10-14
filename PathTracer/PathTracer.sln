@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer", "PathTracer\PathTracer.csproj", "{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracerForm", "PathTracerForm\PathTracerForm.csproj", "{1C5C759B-5ABA-48CE-A49F-25E8E8151F2B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4} = {05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05AE82F7-1C03-44C6-A929-1AFEDCBDACB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C5C759B-5ABA-48CE-A49F-25E8E8151F2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C5C759B-5ABA-48CE-A49F-25E8E8151F2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C5C759B-5ABA-48CE-A49F-25E8E8151F2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C5C759B-5ABA-48CE-A49F-25E8E8151F2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33E2F697-5838-4853-8860-0583388AB958}
+	EndGlobalSection
+EndGlobal

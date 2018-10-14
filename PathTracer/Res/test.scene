@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="gb2312"?>
+<SceneRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Shaders>
+    <Shader Name="whiteshader" ClassName="ASL.PathTracer.TestShader" />
+  </Shaders>
+  <Sky ClassName="ASL.PathTracer.TestSky" />
+  <Camera Position="-0.8759154,1.980812,2.493138" Euler="36.956,164.53,0.0" Near="0.3" FieldOfView="60" />
+  <Geometries>
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+  </Geometries>
+</SceneRoot>
