@@ -1,12 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+    public enum WrapMode
+    {
+        Repeat,
+        Clamp,
+    }
+
+    public enum FilterMode
+    {
+        Point,
+        /// <summary>
+        /// 双线性插值
+        /// </summary>
+        Bilinear,
+    }
     public class Texture
     {
         public int width { get { return m_Width; } }
@@ -14,6 +29,12 @@ namespace ASL.PathTracer
 
         private int m_Width;
         private int m_Height;
+
+        private float m_UDelta;
+        private float m_VDelta;
+
+        public WrapMode wrapMode;
+        public FilterMode filterMode;
 
         private System.Object m_Lock;
 
@@ -23,6 +44,9 @@ namespace ASL.PathTracer
         {
             m_Width = width;
             m_Height = height;
+
+            m_UDelta = 1.0f / width;
+            m_VDelta = 1.0f / height;
 
             m_Colors = new Color[width * height];
 
@@ -60,10 +84,57 @@ namespace ASL.PathTracer
 
         public Color GetPixel(int x, int y)
         {
-            lock (m_Lock)
+            if (wrapMode == WrapMode.Clamp)
             {
-                return m_Colors[y * m_Width + x];
+                if (x < 0)
+                    x = 0;
+                else if (x >= m_Width)
+                    x = m_Width - 1;
+                if (y < 0)
+                    y = 0;
+                else if (y >= m_Height)
+                    y = m_Height - 1;
             }
+            else if (wrapMode == WrapMode.Repeat)
+            {
+                if (x < 0)
+                    x = m_Width + x % m_Width;
+                else if (x >= m_Width)
+                    x = x % m_Width;
+                if (y < 0)
+                    y = m_Height + y % m_Height;
+                else if (y >= m_Height)
+                    y = y % m_Height;
+            }
+            return m_Colors[y * m_Width + x];
+        }
+
+        public Color Sample(float u, float v)
+        {
+            if (filterMode == FilterMode.Bilinear)
+            {
+                int cellx = (int) Math.Floor(u / m_UDelta);
+                int celly = (int) Math.Floor(v / m_VDelta);
+
+                float cx = (u - m_UDelta * cellx) / m_UDelta;
+                float cy = (v - m_VDelta * celly) / m_VDelta;
+
+                Color topleft = GetPixel(cellx, celly);
+                Color topright = GetPixel(cellx + 1, celly);
+                Color bottomleft = GetPixel(cellx, celly + 1);
+                Color bottomright = GetPixel(cellx + 1, celly + 1);
+
+                Color lerp = Color.Lerp(Color.Lerp(topleft, topright, cx), Color.Lerp(bottomleft, bottomright, cx), cy);
+                return lerp;
+            }
+            else if (filterMode == FilterMode.Point)
+            {
+                int x = (int)Math.Floor(u * m_Width);
+                int y = (int)Math.Floor(v * m_Height);
+                return GetPixel(x, y);
+            }
+
+            return default(Color);
         }
 
         public System.Drawing.Bitmap SaveToImage()

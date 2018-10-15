@@ -89,6 +89,26 @@ namespace ASL.PathTracer.SceneSerialization
         }
     }
 
+    public class TextureData
+    {
+        [XmlAttribute("Name")]
+        public string name;
+
+        [XmlAttribute("Path")]
+        public string path;
+
+        [XmlAttribute("WrapMode")]
+        public string wrapMode;
+
+        [XmlAttribute("FilterMode")]
+        public string filterMode;
+
+        //public Texture CreateShader()
+        //{
+
+        //}
+    }
+
     public class ShaderData
     {
         [XmlAttribute("Name")]

@@ -127,6 +127,39 @@ namespace PathTracerForm
             }
         }
 
+        private void fastPreviewButton_Click(object sender, EventArgs e)
+        {
+            if (m_Scene == null)
+                return;
+            bool multiThread = this.multiThreadCheckBox.Checked;
+            int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
+            int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
+            if (width <= 0 || height <= 0)
+            {
+                MessageBox.Show("请输入宽高合法的宽高!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            Log.Info("开始快速预览");
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            this.progressBar.Value = 0;
+            this.progressBar.Maximum = 100;
+            var result = m_Scene.FastRender(multiThread, width, height, this.ProgressCallBack);
+            stopWatch.Stop();
+
+            if (result != null)
+            {
+                Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
+
+                this.renderResultBox.BackgroundImage = result.SaveToImage();
+
+                this.progressBar.Value = 0;
+            }
+            else
+                Log.Err("渲染预览!");
+        }
+
         private void renderButton_Click(object sender, EventArgs e)
         {
             if (m_Scene == null)

@@ -37,6 +37,30 @@ namespace ASL.PathTracer
             }
         }
 
+        private class FastRenderJob
+        {
+            public int x;
+            public int y;
+            public Camera camera;
+            public Scene scene;
+            public ManualResetEvent resetEvent;
+
+            public FastRenderJob(int x, int y, Scene scene, Camera camera)
+            {
+                this.x = x;
+                this.y = y;
+                this.scene = scene;
+                this.camera = camera;
+                this.resetEvent = new ManualResetEvent(false);
+            }
+
+            public void Render(System.Object stateObject)
+            {
+                camera.FastRenderPixel(x, y, scene);
+                resetEvent.Set();
+            }
+        }
+
         public Vector3 position { get; private set; }
 
         public Vector3 right { get { return m_Right; } }
@@ -157,13 +181,24 @@ namespace ASL.PathTracer
                 throw new System.ArgumentNullException();
             if (m_RenderTarget == null)
                 throw new System.NullReferenceException("未设置RenderTarget");
-            //if (m_Sampler == null)
-            //    throw new System.NullReferenceException("未设置采样器");
 
             if(multiThread)
                 RenderMultiThread(scene, progressCallBackAction);
             else 
                 RenderSingleThread(scene, progressCallBackAction);
+        }
+
+        public void FastRender(Scene scene, bool multiThread, System.Action<int, int> progressCallBackAction = null)
+        {
+            if (scene == null)
+                throw new System.ArgumentNullException();
+            if (m_RenderTarget == null)
+                throw new System.NullReferenceException("未设置RenderTarget");
+
+            if (multiThread)
+                FastRenderMultiThread(scene, progressCallBackAction);
+            else
+                FastRenderSingleThread(scene, progressCallBackAction);
         }
 
         private void RenderSingleThread(Scene scene, System.Action<int, int> progressCallBackAction)
@@ -175,6 +210,19 @@ namespace ASL.PathTracer
                 for (int i = 0; i < m_RenderTarget.width; i++)
                 {
                     RenderPixel(i, j, sampler, scene);
+                    progressCallBackAction?.Invoke(j * m_RenderTarget.width + i, total);
+                }
+            }
+        }
+
+        private void FastRenderSingleThread(Scene scene, System.Action<int, int> progressCallBackAction)
+        {
+            int total = m_RenderTarget.width * m_RenderTarget.height;
+            for (int j = 0; j < m_RenderTarget.height; j++)
+            {
+                for (int i = 0; i < m_RenderTarget.width; i++)
+                {
+                    FastRenderPixel(i, j, scene);
                     progressCallBackAction?.Invoke(j * m_RenderTarget.width + i, total);
                 }
             }
@@ -215,6 +263,37 @@ namespace ASL.PathTracer
             }
         }
 
+        private void FastRenderMultiThread(Scene scene, System.Action<int, int> progressCallBackAction)
+        {
+            List<ManualResetEvent> eventList = new List<ManualResetEvent>();
+            
+            int total = m_RenderTarget.width * m_RenderTarget.height;
+            int finished = 0;
+            for (int j = 0; j < m_RenderTarget.height; j++)
+            {
+                for (int i = 0; i < m_RenderTarget.width; i++)
+                {
+                    var job = new FastRenderJob(i, j, scene, this);
+                    eventList.Add(job.resetEvent);
+                    ThreadPool.QueueUserWorkItem(job.Render);
+
+                    if (eventList.Count >= Environment.ProcessorCount)
+                    {
+                        WaitRender(eventList);
+                        progressCallBackAction?.Invoke(finished, total);
+                        finished++;
+                    }
+                }
+            }
+
+            while (eventList.Count > 0)
+            {
+                WaitRender(eventList);
+                progressCallBackAction?.Invoke(finished, total);
+                finished++;
+            }
+        }
+
         internal void RenderPixel(int x, int y, SamplerBase sampler, Scene scene)
         {
             for (int k = 0; k < sampler.numSamples; k++)
@@ -223,6 +302,12 @@ namespace ASL.PathTracer
                 Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
                 m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
             }
+        }
+
+        internal void FastRenderPixel(int x, int y, Scene scene)
+        {
+            Ray ray = GetRayFromPixel(x + 0.5f, y + 0.5f);
+            m_RenderTarget.SetPixel(x, y, scene.tracer.FastTracing(ray));
         }
 
         private void WaitRender(List<ManualResetEvent> events)

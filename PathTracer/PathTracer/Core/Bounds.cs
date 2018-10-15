@@ -33,7 +33,7 @@ namespace ASL.PathTracer
             Vector3 min = Vector3.Min(bounds.min, this.min);
 
             Vector3 si = new Vector3(max.x - min.x, max.y - min.y, max.z - min.z);
-            Vector3 ct = new Vector3(min.x, min.y, min.z) + si / 2;
+            Vector3 ct = new Vector3(min.x, min.y, min.z) + si *0.5;
 
             if (si.x <= 0)
                 si.x = 0.1f;

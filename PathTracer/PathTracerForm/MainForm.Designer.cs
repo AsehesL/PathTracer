@@ -94,7 +94,7 @@
             // OpenToolStripMenuItem
             // 
             this.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem";
-            this.OpenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.OpenToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.OpenToolStripMenuItem.Text = "打开";
             this.OpenToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
@@ -102,7 +102,7 @@
             // 
             this.SaveToolStripMenuItem.Enabled = false;
             this.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem";
-            this.SaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SaveToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.SaveToolStripMenuItem.Text = "保存渲染结果";
             this.SaveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
@@ -234,6 +234,7 @@
             this.fastPreviewButton.TabIndex = 15;
             this.fastPreviewButton.Text = "快速预览";
             this.fastPreviewButton.UseVisualStyleBackColor = true;
+            this.fastPreviewButton.Click += new System.EventHandler(this.fastPreviewButton_Click);
             // 
             // heightInputBox
             // 

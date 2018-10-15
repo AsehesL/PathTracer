@@ -119,34 +119,4 @@ namespace ASL.PathTracer
             return true;
         }
     }
-
-    //class Mesh
-    //{
-    //    private List<Triangle> m_Triangles;
-
-    //    public Mesh(Vector3 position, Vector3 euler, Vector3 scale, string path, Shader shader)
-    //    {
-    //        Matrix matrix = Matrix.TRS(position, euler, scale);
-
-    //        m_Triangles = MeshLoader.LoadMesh(path, matrix, shader);
-
-    //    }
-
-    //    //public override bool RayCast(Ray ray, ref RayCastHit hit)
-    //    //{
-    //    //    if (m_Triangles == null)
-    //    //        return false;
-
-    //    //    bool result = false;
-    //    //    for (int i = 0; i < m_Triangles.Length; i ++)
-    //    //    {
-    //    //        if (RaycastTriangle(ray, m_Triangles[i], ref hit))
-    //    //            result = true;
-    //    //    }
-    //    //    return result;
-    //    //}
-
-        
-        
-    //}
 }

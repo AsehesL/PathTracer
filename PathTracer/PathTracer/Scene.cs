@@ -95,5 +95,41 @@ namespace ASL.PathTracer
 
             return result;
         }
+
+        public Texture FastRender(bool multiThread, int width, int height, System.Action<int, int> progressCallBackAction = null)
+        {
+            //对图片按原始比例压缩到宽高不超过512
+            int w, h;
+            if (width < 256 && height < 256)
+            {
+                w = width;
+                h = height;
+            }
+            else if (width > height)
+            {
+                w = 256;
+                h = (int) (((float) height) / width * w);
+            }
+            else
+            {
+                h = 256;
+                w = (int)(((float)width) / height * h);
+            }
+
+            Texture result = new Texture(w, h);
+            m_Tracer = new PathTracer(0, 0.000001);
+            m_Tracer.sceneData = m_SceneData;
+            m_Camera.SetRenderTarget(result);
+            try
+            {
+                m_Camera.FastRender(this, multiThread, progressCallBackAction);
+            }
+            catch (System.Exception e)
+            {
+                Log.Err(e.Message);
+            }
+
+            return result;
+        }
     }
 }
