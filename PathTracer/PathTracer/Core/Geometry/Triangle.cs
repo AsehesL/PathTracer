@@ -57,7 +57,7 @@ namespace ASL.PathTracer
         {
             if (bounds.Raycast(ray) == false)
                 return false;
-            double rt = 0.0f;
+            double rt = 0.0;
 
             Vector3 e1 = this.v1 - this.v0;
             Vector3 e2 = this.v2 - this.v0;
@@ -112,8 +112,8 @@ namespace ASL.PathTracer
             v *= finvdet;
 
             hit.hit = ray.origin + ray.direction * rt;
-            hit.texcoord = (1.0f - u - v) * uv0 + u * uv1 + v * uv2; ;
-            hit.normal = (1.0f - u - v) * n0 + u * n1 + v * n2;
+            hit.texcoord = (1.0 - u - v) * uv0 + u * uv1 + v * uv2; ;
+            hit.normal = (1.0 - u - v) * n0 + u * n1 + v * n2;
             hit.shader = shader;
             hit.distance = rt;
             return true;
