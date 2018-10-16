@@ -13,12 +13,12 @@ namespace ASL.PathTracer
 
         public Vector3 max
         {
-            get { return new Vector3(center.x + size.x * 0.5f, center.y + size.y * 0.5f, center.z + size.z * 0.5f); }
+            get { return new Vector3(center.x + size.x * 0.5, center.y + size.y * 0.5, center.z + size.z * 0.5); }
         }
 
         public Vector3 min
         {
-            get { return new Vector3(center.x - size.x * 0.5f, center.y - size.y * 0.5f, center.z - size.z * 0.5f); }
+            get { return new Vector3(center.x - size.x * 0.5, center.y - size.y * 0.5, center.z - size.z * 0.5); }
         }
 
         public Bounds(Vector3 center, Vector3 size)
@@ -36,11 +36,11 @@ namespace ASL.PathTracer
             Vector3 ct = new Vector3(min.x, min.y, min.z) + si *0.5;
 
             if (si.x <= 0)
-                si.x = 0.1f;
+                si.x = 0.1;
             if (si.y <= 0)
-                si.y = 0.1f;
+                si.y = 0.1;
             if (si.z <= 0)
-                si.z = 0.1f;
+                si.z = 0.1;
 
             this.center = ct;
             this.size = si;
@@ -162,11 +162,11 @@ namespace ASL.PathTracer
 
         public bool Contains(Vector3 point)
         {
-            if (point.x < min.x || point.x > max.x)
+            if (point.x <= min.x || point.x >= max.x)
                 return false;
-            if (point.y < min.y || point.y > max.z)
+            if (point.y <= min.y || point.y >= max.y)
                 return false;
-            if (point.z < min.z || point.z > max.z)
+            if (point.z <= min.z || point.z >= max.z)
                 return false;
             return true;
         }
