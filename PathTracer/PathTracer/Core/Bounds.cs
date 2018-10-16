@@ -173,21 +173,21 @@ namespace ASL.PathTracer
 
         public bool Contains(Bounds compareTo)
         {
-            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, compareTo.size.y / 2, -compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x * 0.5, compareTo.size.y * 0.5, -compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(compareTo.size.x / 2, compareTo.size.y / 2, -compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(compareTo.size.x * 0.5, compareTo.size.y * 0.5, -compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(compareTo.size.x / 2, compareTo.size.y / 2, compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(compareTo.size.x * 0.5, compareTo.size.y * 0.5, compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, compareTo.size.y / 2, compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x * 0.5, compareTo.size.y * 0.5, compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, -compareTo.size.y / 2, -compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x * 0.5, -compareTo.size.y * 0.5, -compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(compareTo.size.x / 2, -compareTo.size.y / 2, -compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(compareTo.size.x * 0.5, -compareTo.size.y * 0.5, -compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(compareTo.size.x / 2, -compareTo.size.y / 2, compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(compareTo.size.x * 0.5, -compareTo.size.y * 0.5, compareTo.size.z * 0.5)))
                 return false;
-            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, -compareTo.size.y / 2, compareTo.size.z / 2)))
+            if (!Contains(compareTo.center + new Vector3(-compareTo.size.x * 0.5, -compareTo.size.y * 0.5, compareTo.size.z * 0.5)))
                 return false;
             return true;
         }

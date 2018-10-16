@@ -18,11 +18,13 @@ namespace ASL.PathTracer
                 bounds.Encapsulate(geometries[i].bounds);
             }
 
+            bounds.size *= 1.1;
+
             m_Node = new OcTreeNode(bounds);
 
             for (int i = 0; i < geometries.Count; i++)
             {
-                m_Node.Insert(geometries[i], 0, 7);
+                m_Node.Insert(geometries[i], 0, 5);
             }
         }
 

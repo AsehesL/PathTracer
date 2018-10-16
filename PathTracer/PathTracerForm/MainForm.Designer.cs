@@ -56,6 +56,7 @@
             this.bounceInputBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.pixelDebugCheckBox = new System.Windows.Forms.CheckBox();
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -153,6 +154,7 @@
             this.renderResultBox.Size = new System.Drawing.Size(495, 288);
             this.renderResultBox.TabIndex = 0;
             this.renderResultBox.TabStop = false;
+            this.renderResultBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.renderResultBox_MouseClick);
             // 
             // logListView
             // 
@@ -196,6 +198,7 @@
             // 
             this.settingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.settingPanel.Controls.Add(this.pixelDebugCheckBox);
             this.settingPanel.Controls.Add(this.renderButton);
             this.settingPanel.Controls.Add(this.fastPreviewButton);
             this.settingPanel.Controls.Add(this.heightInputBox);
@@ -334,6 +337,20 @@
             // 
             this.saveFileDialog.Filter = "BMP文件|*.bmp";
             // 
+            // pixelDebugCheckBox
+            // 
+            this.pixelDebugCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pixelDebugCheckBox.AutoSize = true;
+            this.pixelDebugCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.pixelDebugCheckBox.Enabled = false;
+            this.pixelDebugCheckBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
+            this.pixelDebugCheckBox.Location = new System.Drawing.Point(3, 265);
+            this.pixelDebugCheckBox.Name = "pixelDebugCheckBox";
+            this.pixelDebugCheckBox.Size = new System.Drawing.Size(84, 16);
+            this.pixelDebugCheckBox.TabIndex = 6;
+            this.pixelDebugCheckBox.Text = "单像素调试";
+            this.pixelDebugCheckBox.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -391,6 +408,7 @@
         private System.Windows.Forms.Label infoLabel;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
+        private System.Windows.Forms.CheckBox pixelDebugCheckBox;
     }
 }
 

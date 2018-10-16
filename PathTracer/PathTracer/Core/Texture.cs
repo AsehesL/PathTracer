@@ -53,6 +53,17 @@ namespace ASL.PathTracer
             m_Lock = new object();
         }
 
+        public void Fill(Color color)
+        {
+            for (int i = 0; i < m_Width; i++)
+            {
+                for (int j = 0; j < m_Height; j++)
+                {
+                    m_Colors[j * m_Width + i] = color;
+                }
+            }
+        }
+
         public static Texture Create(string path)
         {
             if (!System.IO.File.Exists(path))

@@ -41,7 +41,7 @@ namespace ASL.PathTracer
             double minZ = Math.Min(v0.z, Math.Min(v1.z, v2.z));
 
             Vector3 si = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
-            Vector3 ct = new Vector3(minX, minY, minZ) + si / 2;
+            Vector3 ct = new Vector3(minX, minY, minZ) + si * 0.5;
 
             if (si.x <= 0)
                 si.x = 0.1;
@@ -104,7 +104,7 @@ namespace ASL.PathTracer
 
             double finvdet = 1.0 / det;
             rt *= finvdet;
-            if (rt < 0.0001)
+            if (rt < 0.001)
                 return false;
             if (rt > hit.distance)
                 return false;

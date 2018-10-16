@@ -131,5 +131,26 @@ namespace ASL.PathTracer
 
             return result;
         }
+
+        public Texture RenderSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, int width, int height, int numSets = 83)
+        {
+            Texture result = new Texture(width, height);
+            result.Fill(Color.black);
+            m_Tracer = new PathTracer(tracingTimes, 0.000001);
+            m_Tracer.sceneData = m_SceneData;
+            //m_Camera.SetSampler(samplerType, numSamples, numSets);
+            var sampler = SamplerFactory.Create(samplerType, numSamples, numSets);
+            m_Camera.SetRenderTarget(result);
+            try
+            {
+                m_Camera.RenderPixel(x, y, sampler, this);
+            }
+            catch (System.Exception e)
+            {
+                Log.Err(e.Message);
+            }
+
+            return result;
+        }
     }
 }

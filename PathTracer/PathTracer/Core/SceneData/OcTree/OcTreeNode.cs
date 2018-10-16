@@ -67,52 +67,52 @@ namespace ASL.PathTracer
 
         private OcTreeNode GetContainerNode(Geometry geometry)
         {
-            Vector3 halfSize = bounds.size / 2;
+            Vector3 halfSize = bounds.size * 0.5;
             OcTreeNode result = null;
             result = GetContainerNode(ref m_ForwardLeftBottom,
-                bounds.center + new Vector3(-halfSize.x / 2, halfSize.y / 2, halfSize.z / 2),
+                bounds.center + new Vector3(-halfSize.x * 0.5, halfSize.y * 0.5, halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_ForwardLeftTop,
-                bounds.center + new Vector3(-halfSize.x / 2, halfSize.y / 2, -halfSize.z / 2),
+                bounds.center + new Vector3(-halfSize.x * 0.5, halfSize.y * 0.5, -halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_ForwardRightBottom,
-                bounds.center + new Vector3(halfSize.x / 2, halfSize.y / 2, halfSize.z / 2),
+                bounds.center + new Vector3(halfSize.x * 0.5, halfSize.y * 0.5, halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_ForwardRightTop,
-                bounds.center + new Vector3(halfSize.x / 2, halfSize.y / 2, -halfSize.z / 2),
+                bounds.center + new Vector3(halfSize.x * 0.5, halfSize.y * 0.5, -halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_BackLeftBottom,
-                bounds.center + new Vector3(-halfSize.x / 2, -halfSize.y / 2, halfSize.z / 2),
+                bounds.center + new Vector3(-halfSize.x * 0.5, -halfSize.y * 0.5, halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_BackLeftTop,
-                bounds.center + new Vector3(-halfSize.x / 2, -halfSize.y / 2, -halfSize.z / 2),
+                bounds.center + new Vector3(-halfSize.x * 0.5, -halfSize.y * 0.5, -halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_BackRightBottom,
-                bounds.center + new Vector3(halfSize.x / 2, -halfSize.y / 2, halfSize.z / 2),
+                bounds.center + new Vector3(halfSize.x * 0.5, -halfSize.y * 0.5, halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;
 
             result = GetContainerNode(ref m_BackRightTop,
-                bounds.center + new Vector3(halfSize.x / 2, -halfSize.y / 2, -halfSize.z / 2),
+                bounds.center + new Vector3(halfSize.x * 0.5, -halfSize.y * 0.5, -halfSize.z * 0.5),
                 halfSize, geometry);
             if (result != null)
                 return result;

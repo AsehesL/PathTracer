@@ -63,6 +63,7 @@ namespace PathTracerForm
                 this.fastPreviewButton.Enabled = false;
                 this.renderButton.Enabled = false;
                 this.SaveToolStripMenuItem.Enabled = false;
+                this.pixelDebugCheckBox.Enabled = false;
 
                 this.fileNameLabel.Text = "当前场景（空）";
             }
@@ -78,6 +79,7 @@ namespace PathTracerForm
                 this.fastPreviewButton.Enabled = true;
                 this.renderButton.Enabled = true;
                 this.SaveToolStripMenuItem.Enabled = true;
+                this.pixelDebugCheckBox.Enabled = true;
 
                 var tpnames = System.Enum.GetNames(typeof(SamplerType));
                 this.samplerTypeCombo.Items.Clear();
@@ -208,6 +210,60 @@ namespace PathTracerForm
             }
             else
                 Log.Err("渲染失败!");
+        }
+
+        private void renderResultBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (this.pixelDebugCheckBox.Checked)
+            {
+                if (MessageBox.Show("开启单像素调试后点击画布将对单个像素渲染，这会清空之前的渲染结果，是否继续？", "警告", MessageBoxButtons.YesNo) ==
+                    DialogResult.Yes)
+                {
+                    int traceTimes = string.IsNullOrEmpty(this.bounceInputBox.Text) ? 0 : int.Parse(this.bounceInputBox.Text);
+                    int numSamples = string.IsNullOrEmpty(this.numSampleInputBox.Text) ? 0 : int.Parse(this.numSampleInputBox.Text);
+                    var sampleType = (SamplerType)this.samplerTypeCombo.SelectedIndex;
+                    int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
+                    int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
+                    if (traceTimes <= 0)
+                    {
+                        MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    if (numSamples <= 0)
+                    {
+                        MessageBox.Show("不允许采样次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    if (width <= 0 || height <= 0)
+                    {
+                        MessageBox.Show("请输入宽高合法的宽高!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    int w = ((PictureBox) sender).Width;
+                    int h = ((PictureBox) sender).Height;
+
+                    Log.Info($"点击了坐标:({w - 1 - e.Location.X},{h - 1 - e.Location.Y})，开始单像素渲染");
+
+                    int x = (int) (((float) (w - 1 -e.Location.X)) / w * width);
+                    int y = (int)(((float) (h - 1 - e.Location.Y)) / h * height);
+
+                    Log.Info($"渲染目标像素:({x},{y})");
+
+                    var result = m_Scene.RenderSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
+
+                    if (result != null)
+                    {
+                        Log.CompleteInfo("渲染完成");
+
+                        //this.renderResultBox.BackgroundImage = result.SaveToImage();
+                    }
+                    else
+                        Log.Err("渲染失败!");
+                }
+            }
+
         }
 
         private void ProgressCallBack(int progress, int total)
