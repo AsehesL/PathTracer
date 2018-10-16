@@ -16,32 +16,21 @@ namespace ASL.PathTracer
 
     public class ShaderBase
     {
-        public void SetParam(ShaderParamType type, string key, string value)
+        public void SetParam(ShaderParamType type, string key, System.Object value)
         {
             switch (type)
             {
                 case ShaderParamType.Color:
-                    string[] colSplit = value.Split(',');
-                    float r = colSplit.Length > 0 ? float.Parse(colSplit[0]) : 1.0f;
-                    float g = colSplit.Length > 1 ? float.Parse(colSplit[1]) : 1.0f;
-                    float b = colSplit.Length > 2 ? float.Parse(colSplit[2]) : 1.0f;
-                    float a = colSplit.Length > 3 ? float.Parse(colSplit[3]) : 1.0f;
-                    this.SetColor(key, new Color(r, g, b, a));
+                    this.SetColor(key, (Color)value);
                     break;
                 case ShaderParamType.Number:
-                    float floatval = float.Parse(value);
-                    this.SetFloat(key, floatval);
+                    this.SetFloat(key, (float)value);
                     break;
                 case ShaderParamType.Texture:
-                    Texture tex = Texture.Create(value);
-                    this.SetTexture(key, tex);
+                    this.SetTexture(key, (Texture)value);
                     break;
                 case ShaderParamType.Vector:
-                    string[] vecSplit = value.Split(',');
-                    double x = vecSplit.Length > 0 ? double.Parse(vecSplit[0]) : 0.0;
-                    double y = vecSplit.Length > 1 ? double.Parse(vecSplit[1]) : 0.0;
-                    double z = vecSplit.Length > 2 ? double.Parse(vecSplit[2]) : 0.0;
-                    this.SetVector(key, new Vector3(x, y, z));
+                    this.SetVector(key, (Vector3)value);
                     break;
             }
         }

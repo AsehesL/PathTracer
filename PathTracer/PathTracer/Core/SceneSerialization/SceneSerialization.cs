@@ -12,6 +12,9 @@ namespace ASL.PathTracer.SceneSerialization
     [XmlRoot("SceneRoot")]
     public class SceneDataRoot
     {
+        [XmlArray("Textures")]
+        [XmlArrayItem("Texture")]
+        public List<TextureData> textures;
 
         [XmlArray("Shaders")]
         [XmlArrayItem("Shader")]
@@ -103,10 +106,28 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlAttribute("FilterMode")]
         public string filterMode;
 
-        //public Texture CreateShader()
-        //{
-
-        //}
+        public Texture CreateTexture(string scenePath)
+        {
+            var fileInfo = new System.IO.FileInfo(scenePath);
+            string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
+            Texture tex = Texture.Create(p);
+            FilterMode filterMode = FilterMode.Point;
+            WrapMode wrapMode = WrapMode.Clamp;
+            if (tex != null)
+            {
+                if (this.wrapMode == "Clamp")
+                    wrapMode = WrapMode.Clamp;
+                else if (this.wrapMode == "Repeat")
+                    wrapMode = WrapMode.Repeat;
+                if (this.filterMode == "Point")
+                    filterMode = FilterMode.Point;
+                else if (this.filterMode == "Bilinear")
+                    filterMode = FilterMode.Bilinear;
+                tex.filterMode = filterMode;
+                tex.wrapMode = wrapMode;
+            }
+            return tex;
+        }
     }
 
     public class ShaderData
@@ -121,7 +142,7 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlArrayItem("Param")]
         public List<ShaderParamData> shaderParams;
 
-        public Shader CreateShader()
+        public Shader CreateShader(Dictionary<string, Texture> textures)
         {
             var assembly = typeof(Shader).Assembly;
             var tp = assembly.GetType(className);
@@ -133,11 +154,16 @@ namespace ASL.PathTracer.SceneSerialization
 
             Shader shader = System.Activator.CreateInstance(tp) as Shader;
 
+            if (shader == null)
+                return null;
             if (shaderParams != null)
             {
                 for (int i = 0; i < shaderParams.Count; i++)
                 {
-                    shader.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, shaderParams[i].paramValue);
+                    var paramObj = shaderParams[i].CreateParam(textures);
+                    if (paramObj == null)
+                        continue;
+                    shader.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
                 }
             }
 
@@ -156,6 +182,34 @@ namespace ASL.PathTracer.SceneSerialization
 
         [XmlAttribute("Type")]
         public ShaderParamType paramType;
+
+        public System.Object CreateParam(Dictionary<string, Texture> textures)
+        {
+            switch (paramType)
+            {
+                case ShaderParamType.Color:
+                    string[] colSplit = paramValue.Split(',');
+                    float r = colSplit.Length > 0 ? float.Parse(colSplit[0]) : 1.0f;
+                    float g = colSplit.Length > 1 ? float.Parse(colSplit[1]) : 1.0f;
+                    float b = colSplit.Length > 2 ? float.Parse(colSplit[2]) : 1.0f;
+                    float a = colSplit.Length > 3 ? float.Parse(colSplit[3]) : 1.0f;
+                    return new Color(r, g, b, a);
+                case ShaderParamType.Number:
+                    float floatval = float.Parse(paramValue);
+                    return floatval;
+                case ShaderParamType.Texture:
+                    if (textures.ContainsKey(paramValue))
+                        return textures[paramValue];
+                    return null;
+                case ShaderParamType.Vector:
+                    string[] vecSplit = paramValue.Split(',');
+                    double x = vecSplit.Length > 0 ? double.Parse(vecSplit[0]) : 0.0;
+                    double y = vecSplit.Length > 1 ? double.Parse(vecSplit[1]) : 0.0;
+                    double z = vecSplit.Length > 2 ? double.Parse(vecSplit[2]) : 0.0;
+                    return new Vector3(x, y, z);
+            }
+            return null;
+        }
     }
 
     public class SkyData
@@ -168,7 +222,7 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlArrayItem("Param")]
         public List<ShaderParamData> shaderParams;
 
-        public Sky CreateSky()
+        public Sky CreateSky(Dictionary<string, Texture> textures)
         {
             var assembly = typeof(Sky).Assembly;
             var tp = assembly.GetType(className);
@@ -176,12 +230,16 @@ namespace ASL.PathTracer.SceneSerialization
                 return null;
 
             Sky sky = System.Activator.CreateInstance(tp) as Sky;
-
+            if (sky == null)
+                return null;
             if (shaderParams != null)
             {
                 for (int i = 0; i < shaderParams.Count; i++)
                 {
-                    sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, shaderParams[i].paramValue);
+                    var paramObj = shaderParams[i].CreateParam(textures);
+                    if (paramObj == null)
+                        continue;
+                    sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
                 }
             }
             Log.Info($"天空盒创建成功:{tp}");

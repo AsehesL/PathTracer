@@ -41,14 +41,28 @@ namespace ASL.PathTracer
 
             Scene scene = new Scene();
             scene.m_Camera = sceneData.camera.CreateCamera();
-            scene.m_Sky = sceneData.sky != null ? sceneData.sky.CreateSky() : null;
+
+            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
+            if (sceneData.textures != null)
+            {
+                for (int i = 0; i < sceneData.textures.Count; i++)
+                {
+                    var t = sceneData.textures[i].CreateTexture(scenePath);
+                    if (t != null)
+                        textures.Add(sceneData.textures[i].name, t);
+                }
+            }
+
+            Log.Info($"纹理加载完毕：共{textures.Count}张纹理");
+
+            scene.m_Sky = sceneData.sky != null ? sceneData.sky.CreateSky(textures) : null;
             
             Dictionary<string ,Shader> shaders = new Dictionary<string, Shader>();
             if (sceneData.shaders != null)
             {
                 for (int i = 0; i < sceneData.shaders.Count; i++)
                 {
-                    var s = sceneData.shaders[i].CreateShader();
+                    var s = sceneData.shaders[i].CreateShader(textures);
                     if (shaders != null)
                         shaders.Add(sceneData.shaders[i].name, s);
                 }
