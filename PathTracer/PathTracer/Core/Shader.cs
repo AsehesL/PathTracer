@@ -78,7 +78,6 @@ namespace ASL.PathTracer
     public abstract class Shader : ShaderBase
     {
         public abstract Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon);
-
-        public abstract Color FastRender(Ray ray, RayCastHit hit);
+        
     }
 }
