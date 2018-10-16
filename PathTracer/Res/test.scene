@@ -2,6 +2,7 @@
 <SceneRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Textures>
   	<Texture Name="env1" Path="72278286.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
+  	<Texture Name="env1l" Path="72278286_l.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
   </Textures>
   <Shaders>
     <Shader Name="whiteshader" ClassName="ASL.PathTracer.TestShader" />
@@ -11,8 +12,13 @@
   		<Param Type="Texture" Key="environment" Value="env1" />
   	</Params>
   </Sky>
-  <Camera Position="-0.8759154,1.980812,2.493138" Euler="36.956,164.53,0.0" Near="0.3" FieldOfView="60" />
+  <Camera Position="-4.332852,6.072883,6.625079" Euler="23.412,144.385,0.0" Near="0.3" FieldOfView="60" />
   <Geometries>
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="-2.58,1.33,0.58" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj1.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj2.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj3.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
   </Geometries>
 </SceneRoot>
