@@ -296,12 +296,18 @@ namespace ASL.PathTracer
 
         internal void RenderPixel(int x, int y, SamplerBase sampler, Scene scene)
         {
+            Color col = Color.black;
             for (int k = 0; k < sampler.numSamples; k++)
             {
                 var sample = sampler.Sample();
                 Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
-                m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
+                col += scene.tracer.Tracing(ray, scene.sky, sampler);
+                //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
             }
+
+            col /= sampler.numSamples;
+            col.a = 1.0f;
+            m_RenderTarget.SetPixel(x, y, col);
         }
 
         internal void FastRenderPixel(int x, int y, Scene scene)

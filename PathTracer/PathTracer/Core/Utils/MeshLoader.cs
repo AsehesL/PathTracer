@@ -12,6 +12,7 @@ namespace ASL.PathTracer
         public static List<Triangle> LoadMesh(string path, Vector3 position, Vector3 euler, Vector3 scale, Shader shader)
         {
             Matrix matrix = Matrix.TRS(position, euler, scale);
+
             return LoadMesh(path, matrix, shader);
         }
 
@@ -39,7 +40,7 @@ namespace ASL.PathTracer
                         string[] sp = line.Substring(2).Trim().Split(' ');
                         if (df1 == 'n')
                         {
-                            double nx = double.Parse(sp[0]);
+                            double nx = -double.Parse(sp[0]);
                             double ny = double.Parse(sp[1]);
                             double nz = double.Parse(sp[2]);
                             nlist.Add(new Vector3(nx, ny, nz));
@@ -52,7 +53,7 @@ namespace ASL.PathTracer
                         }
                         else
                         {
-                            double px = double.Parse(sp[0]);
+                            double px = -double.Parse(sp[0]);
                             double py = double.Parse(sp[1]);
                             double pz = double.Parse(sp[2]);
                             vlist.Add(new Vector3(px, py, pz));
@@ -78,12 +79,12 @@ namespace ASL.PathTracer
                         int nindex2 = int.Parse(face2[2]) - 1;
 
                         Vector3 v0 = matrix.TransformPoint(vlist[vindex0]);
-                        Vector3 v1 = matrix.TransformPoint(vlist[vindex1]);
-                        Vector3 v2 = matrix.TransformPoint(vlist[vindex2]);
+                        Vector3 v1 = matrix.TransformPoint(vlist[vindex2]);
+                        Vector3 v2 = matrix.TransformPoint(vlist[vindex1]);
 
                         Vector3 n0 = matrix.TransformVector(nlist[nindex0]);
-                        Vector3 n1 = matrix.TransformVector(nlist[nindex1]);
-                        Vector3 n2 = matrix.TransformVector(nlist[nindex2]);
+                        Vector3 n1 = matrix.TransformVector(nlist[nindex2]);
+                        Vector3 n2 = matrix.TransformVector(nlist[nindex1]);
 
                         Vector2 uv0 = ulist[uindex0];
                         Vector2 uv1 = ulist[uindex1];
