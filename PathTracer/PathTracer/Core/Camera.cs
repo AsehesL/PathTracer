@@ -160,7 +160,7 @@ namespace ASL.PathTracer
         {
             if(m_RenderTarget == null)
                 throw new System.NullReferenceException();
-            x = x / m_RenderTarget.width * 2 - 1;
+            x = (m_RenderTarget.width - 1 - x) / m_RenderTarget.width * 2 - 1;
             y = y / m_RenderTarget.height * 2 - 1;
 
             Vector2 point = new Vector2(x * m_Width, y * m_Height);

@@ -12,13 +12,19 @@
   		<Param Type="Texture" Key="environment" Value="env1" />
   	</Params>
   </Sky>
-  <Camera Position="-4.332852,6.072883,6.625079" Euler="23.412,144.385,0.0" Near="0.3" FieldOfView="60" />
+  <Camera Position="-0.77,6.44,8.86" Euler="28.225,178.49,0.0" Near="0.3" FieldOfView="60" />
   <Geometries>
-    <Geometry Position="-2.58,1.33,0.58" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="-3.09,1.33,2.83" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
     <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj1.obj" Type="Mesh" />
     <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj2.obj" Type="Mesh" />
     <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj3.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
+    <Geometry Position="0.32,0,0.03" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
+    <Geometry Position="1.56,0,0.03" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
+    <Geometry Position="-0.56,0.93,1.01" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="logo1.obj" Type="Mesh" />
+    <Geometry Position="-3.48,0,-1.36" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
+    <Geometry Position="-0.19,1.33,3.05" Shader="whiteshader" Euler="0,139.68,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="-0.56,0.93,1.01" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="logo2.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj6.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj7.obj" Type="Mesh" />
   </Geometries>
 </SceneRoot>
