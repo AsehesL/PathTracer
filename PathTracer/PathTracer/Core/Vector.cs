@@ -379,7 +379,7 @@ namespace ASL.PathTracer
 
         public static Vector3 Reflect(Vector3 i, Vector3 n)
         {
-            return i - 2.0 * Vector3.Dot(n, i) * n;
+            return 2.0 * Vector3.Dot(n, i) * n - i;
         }
 
         public static Vector3 Refract(Vector3 i, Vector3 n, double eta)
