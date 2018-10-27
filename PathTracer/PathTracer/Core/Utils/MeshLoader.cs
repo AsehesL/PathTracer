@@ -87,8 +87,8 @@ namespace ASL.PathTracer
                         Vector3 n2 = matrix.TransformVector(nlist[nindex1]);
 
                         Vector2 uv0 = ulist[uindex0];
-                        Vector2 uv1 = ulist[uindex1];
-                        Vector2 uv2 = ulist[uindex2];
+                        Vector2 uv1 = ulist[uindex2];
+                        Vector2 uv2 = ulist[uindex1];
 
                         Triangle triangle = new Triangle(v0, v1, v2, n0, n1, n2, uv0, uv1, uv2, shader);
 

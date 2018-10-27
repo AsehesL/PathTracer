@@ -48,7 +48,13 @@ namespace ASL.PathTracer
 
         public bool Raycast(Ray ray)
         {
-            double lowt = 0.0;
+            double dis = 0.0;
+            return Raycast(ray, out dis);
+        }
+
+        public bool Raycast(Ray ray, out double distance)
+        {
+            distance = 0.0;
             double t;
             bool hit = false;
             Vector3 hitpoint;
@@ -69,10 +75,10 @@ namespace ASL.PathTracer
                 if (t > 0)
                 {
                     hitpoint = rayorig + raydir * t;
-                    if (hitpoint.y >= min.y && hitpoint.y <= max.y && hitpoint.z >= min.z && hitpoint.z <= max.z && (!hit || t < lowt))
+                    if (hitpoint.y >= min.y && hitpoint.y <= max.y && hitpoint.z >= min.z && hitpoint.z <= max.z && (!hit || t < distance))
                     {
                         hit = true;
-                        lowt = t;
+                        distance = t;
                     }
                 }
             }
@@ -85,10 +91,10 @@ namespace ASL.PathTracer
                     hitpoint = rayorig + raydir * t;
                     if (hitpoint.y > min.y && hitpoint.y <= max.y &&
                      hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < lowt))
+                     (!hit || t < distance))
                     {
                         hit = true;
-                        lowt = t;
+                        distance = t;
                     }
                 }
             }
@@ -101,10 +107,10 @@ namespace ASL.PathTracer
                     hitpoint = rayorig + raydir * t;
                     if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
                      hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < lowt))
+                     (!hit || t < distance))
                     {
                         hit = true;
-                        lowt = t;
+                        distance = t;
                     }
                 }
             }
@@ -117,10 +123,10 @@ namespace ASL.PathTracer
                     hitpoint = rayorig + raydir * t;
                     if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
                      hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < lowt))
+                     (!hit || t < distance))
                     {
                         hit = true;
-                        lowt = t;
+                        distance = t;
                     }
                 }
             }
@@ -133,10 +139,10 @@ namespace ASL.PathTracer
                     hitpoint = rayorig + raydir * t;
                     if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
                      hitpoint.y >= min.y && hitpoint.y <= max.y &&
-                     (!hit || t < lowt))
+                     (!hit || t < distance))
                     {
                         hit = true;
-                        lowt = t;
+                        distance = t;
                     }
                 }
             }
@@ -149,10 +155,10 @@ namespace ASL.PathTracer
                     hitpoint = rayorig + raydir * t;
                     if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
                      hitpoint.y >= min.y && hitpoint.y <= max.y &&
-                     (!hit || t < lowt))
+                     (!hit || t < distance))
                     {
                         hit = true;
-                        //lowt = t;
+                        distance = t;
                     }
                 }
             }

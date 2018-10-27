@@ -3,28 +3,103 @@
   <Textures>
   	<Texture Name="env1" Path="72278286.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
   	<Texture Name="env1l" Path="72278286_l.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
+  	<Texture Name="brick" Path="brick16.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
+  	<Texture Name="stone" Path="stone_03.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
+  	<Texture Name="mask" Path="floormask.jpg" WrapMode="Repeat" FilterMode="Bilinear" />
   </Textures>
   <Shaders>
-    <Shader Name="whiteshader" ClassName="ASL.PathTracer.TestShader" />
+    <Shader Name="diffuseShader" ClassName="ASL.PathTracer.DiffuseShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="1,1,1,1" />
+    	</Params>
+    </Shader>
+    <Shader Name="floorShader" ClassName="ASL.PathTracer.DiffuseShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="1,1,1,1" />
+    		<Param Type="Texture" Key="diffuse" Value="stone" />
+    		<Param Type="Vector2" Key="tile" Value="5,5" />
+    	</Params>
+    </Shader>
+    <Shader Name="wallShader" ClassName="ASL.PathTracer.DiffuseShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="1,1,1,1" />
+    		<Param Type="Texture" Key="diffuse" Value="brick" />
+    		<Param Type="Vector2" Key="tile" Value="8,10" />
+    	</Params>
+    </Shader>
+    <Shader Name="light" ClassName="ASL.PathTracer.LightShader" >
+    	<Params>
+    		<Param Type="Color" Key="baseColor" Value="0.553,0.459,0.08,1" />
+    		<Param Type="Color" Key="color" Value="1,0.95,0.847,1" />
+    		<Param Type="Number" Key="pow" Value="0.88" />
+    		<Param Type="Number" Key="indensity" Value="10.13" />
+    	</Params>
+    </Shader>
+    <Shader Name="light2" ClassName="ASL.PathTracer.LightShader" >
+    	<Params>
+    		<Param Type="Color" Key="baseColor" Value="0.38,0.659,0.68,1" />
+    		<Param Type="Color" Key="color" Value="0.84,0.99,1,1" />
+    		<Param Type="Number" Key="pow" Value="0.88" />
+    		<Param Type="Number" Key="indensity" Value="12" />
+    	</Params>
+    </Shader>
+    <Shader Name="black" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.3,0.3,0.3,1" />
+    		<Param Type="Number" Key="e" Value="1700" />
+    	</Params>
+    </Shader>
+    <Shader Name="gray1" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.5,0.5,0.5,1" />
+    		<Param Type="Number" Key="e" Value="70" />
+    	</Params>
+    </Shader>
+    <Shader Name="gray2" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.5,0.5,0.5,1" />
+    		<Param Type="Number" Key="e" Value="160" />
+    	</Params>
+    </Shader>
+    <Shader Name="gray3" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.5,0.5,0.5,1" />
+    		<Param Type="Number" Key="e" Value="500" />
+    	</Params>
+    </Shader>
+    <Shader Name="gray4" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.5,0.5,0.5,1" />
+    		<Param Type="Number" Key="e" Value="300" />
+    	</Params>
+    </Shader>
+    <Shader Name="gray6" ClassName="ASL.PathTracer.SpecularShader" >
+    	<Params>
+    		<Param Type="Color" Key="color" Value="0.5,0.5,0.5,1" />
+    		<Param Type="Number" Key="e" Value="20" />
+    	</Params>
+    </Shader>
   </Shaders>
   <Sky ClassName="ASL.PathTracer.AmbientSphere" >
   	<Params>
   		<Param Type="Texture" Key="environment" Value="env1" />
+  		<Param Type="Number" Key="intensity" Value="5" />
   	</Params>
   </Sky>
   <Camera Position="-0.77,6.44,8.86" Euler="28.225,178.49,0.0" Near="0.3" FieldOfView="60" />
   <Geometries>
-    <Geometry Position="-3.09,1.33,2.83" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj1.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj2.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj3.obj" Type="Mesh" />
-    <Geometry Position="0.32,0,0.03" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
-    <Geometry Position="1.56,0,0.03" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
-    <Geometry Position="-0.56,0.93,1.01" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="logo1.obj" Type="Mesh" />
-    <Geometry Position="-3.48,0,-1.36" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
-    <Geometry Position="-0.19,1.33,3.05" Shader="whiteshader" Euler="0,139.68,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
-    <Geometry Position="-0.56,0.93,1.01" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="logo2.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj6.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="whiteshader" Euler="0,0,0" Scale="1,1,1" Path="obj7.obj" Type="Mesh" />
+    <Geometry Position="-3.09,1.33,2.83" Shader="gray2" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="wallShader" Euler="0,0,0" Scale="1,1,1" Path="obj1.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="gray3" Euler="0,0,0" Scale="1,1,1" Path="obj2.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="gray2" Euler="0,0,0" Scale="1,1,1" Path="obj3.obj" Type="Mesh" />
+    <Geometry Position="0.32,0,0.03" Shader="gray1" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
+    <Geometry Position="1.56,0,0.03" Shader="gray4" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
+    <Geometry Position="-0.56,0.93,1.01" Shader="black" Euler="0,0,0" Scale="1,1,1" Path="logo1.obj" Type="Mesh" />
+    <Geometry Position="-3.48,0,-1.36" Shader="gray6" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
+    <Geometry Position="-0.19,1.33,3.05" Shader="gray4" Euler="0,139.68,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
+    <Geometry Position="-0.56,0.93,1.01" Shader="light" Euler="0,0,0" Scale="1,1,1" Path="logo2.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="floorShader" Euler="0,0,0" Scale="1,1,1" Path="obj6.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="diffuseShader" Euler="0,0,0" Scale="1,1,1" Path="obj7.obj" Type="Mesh" />
+    <Geometry Position="0,0,0" Shader="light2" Euler="0,0,0" Scale="1,1,1" Path="light.obj" Type="Mesh" />
   </Geometries>
 </SceneRoot>

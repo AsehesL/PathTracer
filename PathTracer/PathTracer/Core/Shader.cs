@@ -9,7 +9,8 @@ namespace ASL.PathTracer
     public enum ShaderParamType
     {
         Number,
-        Vector,
+        Vector2,
+        Vector3,
         Color,
         Texture,
     }
@@ -29,8 +30,11 @@ namespace ASL.PathTracer
                 case ShaderParamType.Texture:
                     this.SetTexture(key, (Texture)value);
                     break;
-                case ShaderParamType.Vector:
-                    this.SetVector(key, (Vector3)value);
+                case ShaderParamType.Vector2:
+                    this.SetVector2(key, (Vector2)value);
+                    break;
+                case ShaderParamType.Vector3:
+                    this.SetVector3(key, (Vector3)value);
                     break;
             }
         }
@@ -42,7 +46,14 @@ namespace ASL.PathTracer
                 field.SetValue(this, value);
         }
 
-        public void SetVector(string key, Vector3 value)
+        public void SetVector2(string key, Vector2 value)
+        {
+            var field = GetType().GetField(key);
+            if (field != null && field.FieldType == typeof(Vector2))
+                field.SetValue(this, value);
+        }
+
+        public void SetVector3(string key, Vector3 value)
         {
             var field = GetType().GetField(key);
             if (field != null && field.FieldType == typeof(Vector3))
@@ -67,6 +78,7 @@ namespace ASL.PathTracer
     public abstract class Shader : ShaderBase
     {
         public abstract Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon);
-        
+
+        public abstract Color FastRender(Ray ray, RayCastHit hit);
     }
 }

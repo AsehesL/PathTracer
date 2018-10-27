@@ -36,5 +36,11 @@ namespace ASL.PathTracer
             //    return sky.RenderColor(refl);
             //return Color.white;
         }
+
+        public override Color FastRender(Ray ray, RayCastHit hit)
+        {
+            float vdn = (float)Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
+            return new Color(vdn, vdn, vdn, 1.0f);
+        }
     }
 }

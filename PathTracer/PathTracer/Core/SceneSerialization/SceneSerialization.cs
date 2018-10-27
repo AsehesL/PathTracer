@@ -201,12 +201,17 @@ namespace ASL.PathTracer.SceneSerialization
                     if (textures.ContainsKey(paramValue))
                         return textures[paramValue];
                     return null;
-                case ShaderParamType.Vector:
-                    string[] vecSplit = paramValue.Split(',');
-                    double x = vecSplit.Length > 0 ? double.Parse(vecSplit[0]) : 0.0;
-                    double y = vecSplit.Length > 1 ? double.Parse(vecSplit[1]) : 0.0;
-                    double z = vecSplit.Length > 2 ? double.Parse(vecSplit[2]) : 0.0;
-                    return new Vector3(x, y, z);
+                case ShaderParamType.Vector2:
+                    string[] vec2Split = paramValue.Split(',');
+                    double vec2x = vec2Split.Length > 0 ? double.Parse(vec2Split[0]) : 0.0;
+                    double vec2y = vec2Split.Length > 1 ? double.Parse(vec2Split[1]) : 0.0;
+                    return new Vector2(vec2x, vec2y);
+                case ShaderParamType.Vector3:
+                    string[] vec3Split = paramValue.Split(',');
+                    double vec3x = vec3Split.Length > 0 ? double.Parse(vec3Split[0]) : 0.0;
+                    double vec3y = vec3Split.Length > 1 ? double.Parse(vec3Split[1]) : 0.0;
+                    double vec3z = vec3Split.Length > 2 ? double.Parse(vec3Split[2]) : 0.0;
+                    return new Vector3(vec3x, vec3y, vec3z);
             }
             return null;
         }

@@ -33,21 +33,7 @@ namespace ASL.PathTracer
 
         public abstract Color Tracing(Ray ray, Sky sky, SamplerBase sampler, int depth = 0);
 
-        public Color FastTracing(Ray ray)
-        {
-            RayCastHit hit;
-            hit.distance = double.MaxValue;
-
-            if (sceneData.Raycast(ray, m_Epsilon, out hit))
-            {
-                float vdn = (float)Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
-                return new Color(vdn, vdn, vdn, 1.0f);
-            }
-            else
-            {
-                return new Color(0.192f, 0.3f, 0.4745f, 1.0f);
-            }
-        }
+        public abstract Color FastTracing(Ray ray);
     }
 
     public class PathTracer : Tracer
@@ -74,6 +60,30 @@ namespace ASL.PathTracer
                 if (sky != null)
                     return sky.RenderColor(ray.direction);
                 return Color.black;
+            }
+        }
+
+        public override Color FastTracing(Ray ray)
+        {
+
+            RayCastHit hit;
+            hit.distance = double.MaxValue;
+
+            if (sceneData.Raycast(ray, m_Epsilon, out hit))
+            {
+                if (hit.shader == null)
+                {
+                    float vdn = (float) Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
+                    return new Color(vdn, vdn, vdn, 1.0f);
+                }
+                else
+                {
+                    return hit.shader.FastRender(ray, hit);
+                }
+            }
+            else
+            {
+                return new Color(0.192f, 0.3f, 0.4745f, 1.0f);
             }
         }
     }

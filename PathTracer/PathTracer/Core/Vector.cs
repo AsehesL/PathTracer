@@ -236,7 +236,8 @@ namespace ASL.PathTracer
                     y = value;
                 else if (index == 2)
                     z = value;
-                throw new System.IndexOutOfRangeException();
+                else
+                    throw new System.IndexOutOfRangeException();
             }
         }
 

@@ -78,7 +78,7 @@ namespace ASL.PathTracer
                     var c = img.GetPixel(i, j);
                     Color col = new Color(((float) c.R) / 255.0f, ((float) c.G) / 255.0f, ((float) c.B) / 255.0f,
                         ((float) c.A) / 255.0f);
-                    tex.SetPixel(img.Width-1-i,img.Height-1-j, col);
+                    tex.SetPixel(i, img.Height - 1 - j, col);
                 }
             }
 
@@ -122,6 +122,7 @@ namespace ASL.PathTracer
 
         public Color Sample(float u, float v)
         {
+            //v = 1.0f - v;
             if (filterMode == FilterMode.Bilinear)
             {
                 int cellx = (int) Math.Floor(u / m_UDelta);

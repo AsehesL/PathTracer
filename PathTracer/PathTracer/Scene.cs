@@ -114,6 +114,11 @@ namespace ASL.PathTracer
         {
             //对图片按原始比例压缩到宽高不超过512
             int w, h;
+
+#if DEBUG
+            w = width;
+            h = height;
+#else
             if (width < 256 && height < 256)
             {
                 w = width;
@@ -129,6 +134,7 @@ namespace ASL.PathTracer
                 h = 256;
                 w = (int)(((float)width) / height * h);
             }
+#endif
 
             Texture result = new Texture(w, h);
             m_Tracer = new PathTracer(0, 0.000001);
