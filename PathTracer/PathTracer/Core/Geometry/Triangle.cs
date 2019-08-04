@@ -29,37 +29,39 @@ namespace ASL.PathTracer
         public Vertex vertex1;
         public Vertex vertex2;
 
+        public Bounds bounds;
+
         public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Shader shader) : base(shader)
         {
 			this.vertex0 = vertex0;
 			this.vertex1 = vertex1;
 			this.vertex2 = vertex2;
 
-            //double maxX = Math.Max(v0.x, Math.Max(v1.x, v2.x));
-            //double maxY = Math.Max(v0.y, Math.Max(v1.y, v2.y));
-            //double maxZ = Math.Max(v0.z, Math.Max(v1.z, v2.z));
+            double maxX = Math.Max(vertex0.position.x, Math.Max(vertex1.position.x, vertex2.position.x));
+            double maxY = Math.Max(vertex0.position.y, Math.Max(vertex1.position.y, vertex2.position.y));
+            double maxZ = Math.Max(vertex0.position.z, Math.Max(vertex1.position.z, vertex2.position.z));
 
-            //double minX = Math.Min(v0.x, Math.Min(v1.x, v2.x));
-            //double minY = Math.Min(v0.y, Math.Min(v1.y, v2.y));
-            //double minZ = Math.Min(v0.z, Math.Min(v1.z, v2.z));
+            double minX = Math.Min(vertex0.position.x, Math.Min(vertex1.position.x, vertex2.position.x));
+            double minY = Math.Min(vertex0.position.y, Math.Min(vertex1.position.y, vertex2.position.y));
+            double minZ = Math.Min(vertex0.position.z, Math.Min(vertex1.position.z, vertex2.position.z));
 
-            //Vector3 si = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
-            //Vector3 ct = new Vector3(minX, minY, minZ) + si * 0.5;
+            Vector3 si = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
+            Vector3 ct = new Vector3(minX, minY, minZ) + si * 0.5;
 
-            //if (si.x <= 0)
-            //    si.x = 0.1;
-            //if (si.y <= 0)
-            //    si.y = 0.1;
-            //if (si.z <= 0)
-            //    si.z = 0.1;
+            if (si.x <= 0)
+                si.x = 0.1;
+            if (si.y <= 0)
+                si.y = 0.1;
+            if (si.z <= 0)
+                si.z = 0.1;
 
-            //this.bounds = new Bounds(ct, si);
+            this.bounds = new Bounds(ct, si);
         }
 
         public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
         {
-            //if (bounds.Raycast(ray) == false)
-            //    return false;
+            if (bounds.Raycast(ray) == false)
+                return false;
             double rt = 0.0;
 
             Vector3 e1 = this.vertex1.position - this.vertex0.position;

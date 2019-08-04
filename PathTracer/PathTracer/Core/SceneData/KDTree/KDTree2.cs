@@ -217,40 +217,35 @@ namespace ASL.PathTracer
 
 		public virtual bool Raycast(Ray ray, double epsilon, ref RayCastHit hit)
 		{
-			//double or = 0;
-			//double d = 0;
-			//if (plane.axis == KDTreeAxis.X)
-			//{
-			//	or = ray.origin.x;
-			//	d = ray.direction.x;
-			//}
-			//else if (plane.axis == KDTreeAxis.Y)
-			//{
-			//	or = ray.origin.y;
-			//	d = ray.direction.y;
-			//}
-			//else if (plane.axis == KDTreeAxis.Z)
-			//{
-			//	or = ray.origin.z;
-			//	d = ray.direction.z;
-			//}
+            double or = 0;
+            double d = 0;
+            if (plane.axis == KDTreeAxis.X)
+            {
+                or = ray.origin.x;
+                d = ray.direction.x;
+            }
+            else if (plane.axis == KDTreeAxis.Y)
+            {
+                or = ray.origin.y;
+                d = ray.direction.y;
+            }
+            else if (plane.axis == KDTreeAxis.Z)
+            {
+                or = ray.origin.z;
+                d = ray.direction.z;
+            }
 
-			//if (or <= plane.value && d <= 0)
-			//	return left.Raycast(ray, epsilon, ref hit);
-			//if (or > plane.value && d >= 0)
-			//	return right.Raycast(ray, epsilon, ref hit);
+            if (or <= plane.value && d <= 0)
+                return left.Raycast(ray, epsilon, ref hit);
+            if (or > plane.value && d >= 0)
+                return right.Raycast(ray, epsilon, ref hit);
 
-			//bool ishit = false;
+            bool ishit = false;
 
-			//Ray leftray, rightray;
-			//GetPlaneHitPos(ray, out leftray, out rightray);
+		    //GetPlaneHitPos(ray, out var leftray, out var rightray);
 
-			//ishit = left.Raycast(leftray, epsilon, ref hit);
-			//ishit = ishit || right.Raycast(rightray, epsilon, ref hit);
-
-			bool ishit = false;
-			ishit = left.Raycast(ray, epsilon, ref hit);
-			ishit = right.Raycast(ray, epsilon, ref hit) || ishit;
+            ishit = left.Raycast(ray, epsilon, ref hit);
+            ishit = right.Raycast(ray, epsilon, ref hit) || ishit;
 
 			return ishit;
 		}
@@ -259,8 +254,8 @@ namespace ASL.PathTracer
 		{
 			if (plane.axis == KDTreeAxis.X)
 			{
-				double t = (plane.value - ray.origin.x * plane.value) / (ray.direction.x * plane.value);
-				Vector3 hitpoint = ray.origin + ray.direction * t;
+				double t = (plane.value - ray.origin.x) / ray.direction.x;
+				Vector3 hitpoint = ray.origin + ray.direction * t - ray.direction.normalized * 0.01;
 				if (ray.origin.x <= plane.value)
 				{
 					leftray = ray;
@@ -276,8 +271,8 @@ namespace ASL.PathTracer
 			}
 			if (plane.axis == KDTreeAxis.Y)
 			{
-				double t = (plane.value - ray.origin.y * plane.value) / (ray.direction.y * plane.value);
-				Vector3 hitpoint = ray.origin + ray.direction * t;
+				double t = (plane.value - ray.origin.y) / ray.direction.y;
+				Vector3 hitpoint = ray.origin + ray.direction * t - ray.direction.normalized * 0.01;
 				if (ray.origin.y <= plane.value)
 				{
 					leftray = ray;
@@ -293,8 +288,8 @@ namespace ASL.PathTracer
 			}
 			if (plane.axis == KDTreeAxis.Z)
 			{
-				double t = (plane.value - ray.origin.z * plane.value) / (ray.direction.z * plane.value);
-				Vector3 hitpoint = ray.origin + ray.direction * t;
+				double t = (plane.value - ray.origin.z) / ray.direction.z;
+				Vector3 hitpoint = ray.origin + ray.direction * t - ray.direction.normalized * 0.01;
 				if (ray.origin.z <= plane.value)
 				{
 					leftray = ray;
@@ -328,7 +323,7 @@ namespace ASL.PathTracer
 			bool ishit = false;
 			for (int i = 0; i < triangles.Count; i++)
 			{
-				ishit = ishit || triangles[i].RayCast(ray, epsilon, ref hit);
+				ishit = triangles[i].RayCast(ray, epsilon, ref hit) || ishit;
 			}
 			if (ishit)
 				return true;
