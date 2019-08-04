@@ -14,8 +14,6 @@ namespace ASL.PathTracer
             set;
         }
 
-        public Bounds bounds;
-
         public Geometry(Shader shader)
         {
             this.shader = shader;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
-    class Sphere : Geometry
+    public class Sphere : Geometry
     {
         public Vector3 position { get; set; }
         public double radius { get; set; }
@@ -16,7 +16,7 @@ namespace ASL.PathTracer
             this.position = position;
             this.radius = radius;
 
-            this.bounds = new Bounds(position, Vector3.one * (radius * 2.0));
+            //this.bounds = new Bounds(position, Vector3.one * (radius * 2.0));
         }
 
         public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)

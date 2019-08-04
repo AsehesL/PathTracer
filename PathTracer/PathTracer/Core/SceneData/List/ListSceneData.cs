@@ -8,32 +8,30 @@ namespace ASL.PathTracer
 {
     class ListSceneData : SceneData
     {
-        private List<Geometry> m_Geometrys;
+        private List<Triangle> m_Triangles;
 
         public ListSceneData() : base()
         {
-            m_Geometrys = new List<Geometry>();
+	        m_Triangles = new List<Triangle>();
         }
 
-        public override void Build(List<Geometry> geometries)
-        {
-            m_Geometrys = geometries;
-        }
+		protected override void BuildForTriangles(List<Triangle> triangles)
+		{
+			m_Triangles = triangles;
+		}
 
-        public override bool Raycast(Ray ray, double epsilon, out RayCastHit hit)
-        {
-            hit = default(RayCastHit);
-            hit.distance = double.MaxValue;
-            bool result = false;
-            for (int i = 0; i < m_Geometrys.Count; i++)
-            {
-                if (m_Geometrys[i].RayCast(ray, epsilon, ref hit))
-                {
-                    result = true;
-                }
-            }
+		protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
+		{
+			bool result = false;
+			for (int i = 0; i < m_Triangles.Count; i++)
+			{
+				if (m_Triangles[i].RayCast(ray, epsilon, ref hit))
+				{
+					result = true;
+				}
+			}
 
-            return result;
-        }
+			return result;
+		}
     }
 }

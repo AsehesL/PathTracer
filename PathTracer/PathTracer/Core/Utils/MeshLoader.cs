@@ -90,7 +90,11 @@ namespace ASL.PathTracer
                         Vector2 uv1 = ulist[uindex2];
                         Vector2 uv2 = ulist[uindex1];
 
-                        Triangle triangle = new Triangle(v0, v1, v2, n0, n1, n2, uv0, uv1, uv2, shader);
+	                    Vertex vertex0 = new Vertex {position = v0, uv = uv0, normal = n0};
+	                    Vertex vertex1 = new Vertex {position = v1, uv = uv1, normal = n1};
+	                    Vertex vertex2 = new Vertex {position = v2, uv = uv2, normal = n2};
+
+                        Triangle triangle = new Triangle(vertex0, vertex1, vertex2, shader);
 
                         triangles.Add(triangle);
                     }

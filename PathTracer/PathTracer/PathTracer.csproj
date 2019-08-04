@@ -72,7 +72,10 @@
     <Compile Include="Core\Matrix.cs" />
     <Compile Include="Core\Ray.cs" />
     <Compile Include="Core\Sampler\SamplerBase.cs" />
+    <Compile Include="Core\SceneData\BSP\BSPNode.cs" />
+    <Compile Include="Core\SceneData\BSP\BSPTree.cs" />
     <Compile Include="Core\SceneData\KDTree\KDTree.cs" />
+    <Compile Include="Core\SceneData\KDTree\KDTree2.cs" />
     <Compile Include="Core\SceneData\KDTree\KDTreeNode.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
     <Compile Include="Core\SceneData\OcTree\OcTree.cs" />

@@ -6,61 +6,64 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
-    class Triangle : Geometry
+	public struct Vertex
+	{
+		public Vector3 position;
+		public Vector3 normal;
+		public Vector2 uv;
+
+		public static Vertex Lerp(Vertex begin, Vertex end, double t)
+		{
+			return new Vertex
+			{
+				position = Vector3.Lerp(begin.position, end.position, t),
+				normal = Vector3.Lerp(begin.normal, end.normal, t),
+				uv = Vector2.Lerp(begin.uv, end.uv, t),
+			};
+		}
+	}
+
+	public class Triangle : Geometry
     {
-        public Vector3 v0;
-        public Vector3 v1;
-        public Vector3 v2;
+        public Vertex vertex0;
+        public Vertex vertex1;
+        public Vertex vertex2;
 
-        public Vector3 n0;
-        public Vector3 n1;
-        public Vector3 n2;
-
-        public Vector2 uv0;
-        public Vector2 uv1;
-        public Vector2 uv2;
-
-        public Triangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 n0, Vector3 n1, Vector3 n2, Vector2 uv0, Vector2 uv1, Vector2 uv2, Shader shader) : base(shader)
+        public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Shader shader) : base(shader)
         {
-            this.v0 = v0;
-            this.v1 = v1;
-            this.v2 = v2;
-            this.n0 = n0;
-            this.n1 = n1;
-            this.n2 = n2;
-            this.uv0 = uv0;
-            this.uv1 = uv1;
-            this.uv2 = uv2;
+			this.vertex0 = vertex0;
+			this.vertex1 = vertex1;
+			this.vertex2 = vertex2;
 
-            double maxX = Math.Max(v0.x, Math.Max(v1.x, v2.x));
-            double maxY = Math.Max(v0.y, Math.Max(v1.y, v2.y));
-            double maxZ = Math.Max(v0.z, Math.Max(v1.z, v2.z));
+            //double maxX = Math.Max(v0.x, Math.Max(v1.x, v2.x));
+            //double maxY = Math.Max(v0.y, Math.Max(v1.y, v2.y));
+            //double maxZ = Math.Max(v0.z, Math.Max(v1.z, v2.z));
 
-            double minX = Math.Min(v0.x, Math.Min(v1.x, v2.x));
-            double minY = Math.Min(v0.y, Math.Min(v1.y, v2.y));
-            double minZ = Math.Min(v0.z, Math.Min(v1.z, v2.z));
+            //double minX = Math.Min(v0.x, Math.Min(v1.x, v2.x));
+            //double minY = Math.Min(v0.y, Math.Min(v1.y, v2.y));
+            //double minZ = Math.Min(v0.z, Math.Min(v1.z, v2.z));
 
-            Vector3 si = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
-            Vector3 ct = new Vector3(minX, minY, minZ) + si * 0.5;
+            //Vector3 si = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
+            //Vector3 ct = new Vector3(minX, minY, minZ) + si * 0.5;
 
-            if (si.x <= 0)
-                si.x = 0.1;
-            if (si.y <= 0)
-                si.y = 0.1;
-            if (si.z <= 0)
-                si.z = 0.1;
+            //if (si.x <= 0)
+            //    si.x = 0.1;
+            //if (si.y <= 0)
+            //    si.y = 0.1;
+            //if (si.z <= 0)
+            //    si.z = 0.1;
 
-            this.bounds = new Bounds(ct, si);
+            //this.bounds = new Bounds(ct, si);
         }
 
         public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
         {
-            if (bounds.Raycast(ray) == false)
-                return false;
+            //if (bounds.Raycast(ray) == false)
+            //    return false;
             double rt = 0.0;
 
-            Vector3 e1 = this.v1 - this.v0;
-            Vector3 e2 = this.v2 - this.v0;
+            Vector3 e1 = this.vertex1.position - this.vertex0.position;
+            Vector3 e2 = this.vertex2.position - this.vertex0.position;
 
             double v = 0;
             double u = 0;
@@ -78,11 +81,11 @@ namespace ASL.PathTracer
             Vector3 t = default(Vector3);
             if (det > 0)
             {
-                t = ray.origin - this.v0;
+                t = ray.origin - this.vertex0.position;
             }
             else
             {
-                t = this.v0 - ray.origin;
+                t = this.vertex0.position - ray.origin;
                 det = -det;
             }
             if (det < epsilon)
@@ -112,8 +115,8 @@ namespace ASL.PathTracer
             v *= finvdet;
 
             hit.hit = ray.origin + ray.direction * rt;
-            hit.texcoord = (1.0 - u - v) * uv0 + u * uv1 + v * uv2; ;
-            hit.normal = (1.0 - u - v) * n0 + u * n1 + v * n2;
+            hit.texcoord = (1.0 - u - v) * vertex0.uv + u * vertex1.uv + v * vertex2.uv; ;
+            hit.normal = (1.0 - u - v) * vertex0.normal + u * vertex1.normal + v * vertex2.normal;
             hit.shader = shader;
             hit.distance = rt;
             return true;

@@ -31,6 +31,8 @@ namespace ASL.PathTracer
 
         public static float SaturateF(float value)
         {
+	        if (float.IsNaN(value))
+		        value = 0.0f;
             value = value < 0.0f ? 0.0f : value;
             value = value > 1.0f ? 1.0f : value;
             return value;
