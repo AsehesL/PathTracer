@@ -8,28 +8,84 @@ namespace ASL.PathTracer
 {
 	//class BSPTree : SceneData
 	//{
-	//	private const int kMaxDepth = 6;
-	//	private const int kMinLeafSize = 10;
+	//	private int m_MaxDepth;
 
-
-	//	public override void Build(List<Geometry> geometries)
+	//	private struct Plane
 	//	{
-	//		BuildBSPTree(geometries, 0);
+	//		public Vector3 position;
+	//		public Vector3 normal;
 	//	}
 
-	//	private BSPNode BuildBSPTree(List<Geometry> geometries, int depth)
+	//	private enum TriangleType
 	//	{
-	//		if (geometries == null || geometries.Count == 0)
-	//			return null;
-	//		if (depth >= kMaxDepth || geometries.Count <= kMinLeafSize)
-	//			return null;
-	//		return null;
-	//		//return new BSPNode(geometries);
+	//		CoplanarWithPlane,
+	//		InFrontOfPlane,
+	//		BehindPlane,
+	//		StraddlingPlane,
 	//	}
 
-	//	public override bool Raycast(Ray ray, double epsilon, out RayCastHit hit)
+	//	public BSPTree(int depth = 7)
+	//	{
+	//		m_MaxDepth = depth;
+	//	}
+
+
+	//	protected override void BuildForTriangles(List<Triangle> triangles)
 	//	{
 	//		throw new NotImplementedException();
 	//	}
+
+	//	protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
+	//	{
+	//		throw new NotImplementedException();
+	//	}
+
+	//	private BSPTreeNode BuildTree(List<Triangle> triangles, int depth)
+	//	{
+	//		if (triangles == null || triangles.Count == 0)
+	//			return null;
+	//		if (depth >= m_MaxDepth)
+	//			return new BSPTreeNode(triangles);
+
+	//		Plane plane = PickSplittingPlane(triangles);
+
+	//		List<Triangle> frontTriangles = new List<Triangle>();
+	//		List<Triangle> backTriangles = new List<Triangle>();
+
+	//		for (int i = 0; i < triangles.Count; i++)
+	//		{
+	//			TriangleType triangleType = ClassifyTriangleToPlane(triangles[i], plane);
+	//			switch (triangleType)
+	//			{
+	//				case TriangleType.CoplanarWithPlane:
+	//					break;
+	//				case TriangleType.InFrontOfPlane:
+	//					break;
+	//				case TriangleType.BehindPlane:
+	//					break;
+	//				case TriangleType.StraddlingPlane:
+	//					break;
+	//			}
+	//		}
+
+	//		BSPTreeNode front = BuildTree(frontTriangles, depth + 1);
+	//		BSPTreeNode back = BuildTree(backTriangles, depth + 1);
+
+	//		return new BSPTreeNode(front, back);
+	//	}
+
+	//	private Plane PickSplittingPlane(List<Triangle> triangles)
+	//	{
+
+	//	}
+
+	//	private TriangleType ClassifyTriangleToPlane(Triangle triangle, Plane plane)
+	//	{
+
+	//	}
+	//}
+
+	//class BSPTreeNode
+	//{
 	//}
 }
