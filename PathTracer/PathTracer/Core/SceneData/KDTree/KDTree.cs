@@ -41,15 +41,44 @@ namespace ASL.PathTracer
 
 		protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
 		{
-			return m_Root.Raycast(ray, epsilon, ref hit);
-		}
+            Stack<KDTreeNode> nodes = new Stack<KDTreeNode>();
+            nodes.Push(m_Root);
+
+            bool raycast = false;
+            while (nodes.Count > 0)
+            {
+                var node = nodes.Pop();
+                if (node.IsLeaf == false)
+                {
+                    if (node.Bounds.Raycast(ray))
+                    {
+                        if (node.LeftNode != null)
+                            nodes.Push(node.LeftNode);
+                        if (node.RightNode != null)
+                            nodes.Push(node.RightNode);
+                    }
+                }
+                else
+                {
+                    if (node.Triangles != null)
+                    {
+                        for (int i = 0; i < node.Triangles.Count; i++)
+                        {
+                            raycast = node.Triangles[i].RayCast(ray, epsilon, ref hit) || raycast;
+                        }
+                    }
+                }
+            }
+
+            return raycast;
+        }
 
 		private KDTreeNode BuildTree(List<Triangle> triangles, int depth)
 		{
 			if (triangles == null || triangles.Count == 0)
 				return null;
 			if (depth >= m_MaxDepth)
-				return new KDTreeLeaf(triangles);//达到指定深度直接结束递归并返回叶节点
+				return new KDTreeNode(triangles);//达到指定深度直接结束递归并返回叶节点
 
 			Plane plane = PickKDTreePlane(triangles);//计算分割面
 
@@ -61,7 +90,7 @@ namespace ASL.PathTracer
 				SplitTriangles(triangles[i], plane, left, right);//对三角面进行分组，如果位于分割面上，需要对三角形进行切割
 			}
 
-			KDTreeNode node = new KDTreeNode();
+			//KDTreeNode node = new KDTreeNode();
 			
 			//建立左右子树
 			KDTreeNode leftnode = BuildTree(left, depth + 1);
@@ -69,9 +98,9 @@ namespace ASL.PathTracer
 
 			if (leftnode == null && rightnode == null)
 				return null;
-			node.SetNode(leftnode, rightnode);
+			//node.SetNode(leftnode, rightnode);
 
-			return node;
+			return new KDTreeNode(leftnode, rightnode);
 		}
 
 		private Plane PickKDTreePlane(List<Triangle> triangles)
@@ -213,101 +242,80 @@ namespace ASL.PathTracer
 		}
 	}
 
-	class KDTreeNode
-	{
-		private KDTreeNode m_Left;
-		private KDTreeNode m_Right;
-		protected Bounds m_Bounds;
+    class KDTreeNode
+    {
 
-		public Bounds Bounds
-		{
-			get { return m_Bounds; }
-		}
+        public KDTreeNode LeftNode { get; private set; }
 
-		public void SetNode(KDTreeNode left, KDTreeNode right)
-		{
-			Vector3 min = default(Vector3), max = default(Vector3);
-			if (left != null)
-			{
-				min = left.m_Bounds.min;
-				max = left.m_Bounds.max;
-				if (right != null)
-				{
-					min = Vector3.Min(min, right.m_Bounds.min);
-					max = Vector3.Max(max, right.m_Bounds.max);
-				}
-			}
-			else if (right != null)
-			{
-				min = right.m_Bounds.min;
-				max = right.m_Bounds.max;
-			}
+        public KDTreeNode RightNode { get; private set; }
 
-			Vector3 si = max - min;
-			Vector3 ct = min + si * 0.5;
+        public Bounds Bounds { get; private set; }
 
-			if (si.x <= 0)
-				si.x = 0.1;
-			if (si.y <= 0)
-				si.y = 0.1;
-			if (si.z <= 0)
-				si.z = 0.1;
+        public bool IsLeaf { get; private set; }
 
-			m_Left = left;
-			m_Right = right;
+        public List<Triangle> Triangles { get; private set; }
 
-			this.m_Bounds = new Bounds(ct, si);
-		}
+        public KDTreeNode(KDTreeNode left, KDTreeNode right)
+        {
+            IsLeaf = false;
+            LeftNode = left;
+            RightNode = right;
 
-		public virtual bool Raycast(Ray ray, double epsilon, ref RayCastHit hit)
-		{
-			if (!m_Bounds.Raycast(ray))
-				return false;
-			bool ishitleft = m_Left != null ? m_Left.Raycast(ray, epsilon, ref hit) : false;
-			bool ishitright = m_Right != null ? m_Right.Raycast(ray, epsilon, ref hit) : false;
-			return ishitleft || ishitright;
-		}
-	}
+            Vector3 min = default(Vector3), max = default(Vector3);
+            if (left != null)
+            {
+                min = left.Bounds.min;
+                max = left.Bounds.max;
+                if (right != null)
+                {
+                    min = Vector3.Min(min, right.Bounds.min);
+                    max = Vector3.Max(max, right.Bounds.max);
+                }
+            }
+            else if (right != null)
+            {
+                min = right.Bounds.min;
+                max = right.Bounds.max;
+            }
 
-	class KDTreeLeaf : KDTreeNode
-	{
-		public List<Triangle> triangles;
+            Vector3 si = max - min;
+            Vector3 ct = min + si * 0.5;
 
-		public KDTreeLeaf(List<Triangle> triangles)
-		{
-			this.triangles = triangles;
-			Vector3 min = Vector3.one * double.MaxValue;
-			Vector3 max = Vector3.one * -double.MaxValue;
+            if (si.x <= 0)
+                si.x = 0.1;
+            if (si.y <= 0)
+                si.y = 0.1;
+            if (si.z <= 0)
+                si.z = 0.1;
 
-			for (int i = 0; i < triangles.Count; i++)
-			{
-				min = Vector3.Min(min, triangles[i].bounds.min);
-				max = Vector3.Max(max, triangles[i].bounds.max);
-			}
+            this.Bounds = new Bounds(ct, si);
+        }
 
-			Vector3 si = max - min;
-			Vector3 ct = min + si * 0.5;
+        public KDTreeNode(List<Triangle> triangles)
+        {
+            IsLeaf = true;
+            Triangles = triangles;
 
-			if (si.x <= 0)
-				si.x = 0.1;
-			if (si.y <= 0)
-				si.y = 0.1;
-			if (si.z <= 0)
-				si.z = 0.1;
+            Vector3 min = Vector3.one * double.MaxValue;
+            Vector3 max = Vector3.one * -double.MaxValue;
 
-			this.m_Bounds = new Bounds(ct, si);
-		}
+            for (int i = 0; i < triangles.Count; i++)
+            {
+                min = Vector3.Min(min, triangles[i].bounds.min);
+                max = Vector3.Max(max, triangles[i].bounds.max);
+            }
 
-		public override bool Raycast(Ray ray, double epsilon, ref RayCastHit hit)
-		{
-			bool ishit = false;
-			for (int i = 0; i < triangles.Count; i++)
-			{
-				ishit = triangles[i].RayCast(ray, epsilon, ref hit) || ishit;
-			}
-			if (ishit)
-				return true;
-			return false;
-		}
-	}
+            Vector3 si = max - min;
+            Vector3 ct = min + si * 0.5;
+
+            if (si.x <= 0)
+                si.x = 0.1;
+            if (si.y <= 0)
+                si.y = 0.1;
+            if (si.z <= 0)
+                si.z = 0.1;
+
+            this.Bounds = new Bounds(ct, si);
+        }
+    }
 }

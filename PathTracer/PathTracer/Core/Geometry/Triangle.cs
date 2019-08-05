@@ -29,6 +29,20 @@ namespace ASL.PathTracer
         public Vertex vertex1;
         public Vertex vertex2;
 
+        public Vertex this[int index]
+        {
+            get
+            {
+                if (index == 0)
+                    return vertex0;
+                if (index == 1)
+                    return vertex1;
+                if (index == 2)
+                    return vertex2;
+                throw new System.IndexOutOfRangeException();
+            }
+        }
+
         public Bounds bounds;
 
         public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Shader shader) : base(shader)
