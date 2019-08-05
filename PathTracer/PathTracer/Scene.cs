@@ -82,7 +82,7 @@ namespace ASL.PathTracer
 
             Log.Info($"几何体加载完毕：共{geometries.Count}个几何体");
 
-            scene.m_SceneData = new OcTree(6);
+            scene.m_SceneData = new KDTree(6);
 
             Log.Info($"开始构建场景数据，场景数据类型：{scene.m_SceneData.GetType()}");
             scene.m_SceneData.Build(geometries);

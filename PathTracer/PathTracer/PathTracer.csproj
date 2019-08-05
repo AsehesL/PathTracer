@@ -66,13 +66,15 @@
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Color.cs" />
     <Compile Include="Core\Geometry\Geometry.cs" />
+    <Compile Include="Core\Geometry\Plane.cs" />
+    <Compile Include="Core\Geometry\Quad.cs" />
     <Compile Include="Core\Geometry\Sphere.cs" />
     <Compile Include="Core\Geometry\Triangle.cs" />
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Matrix.cs" />
     <Compile Include="Core\Ray.cs" />
     <Compile Include="Core\Sampler\SamplerBase.cs" />
-    <Compile Include="Core\SceneData\BSP\BSPTree.cs" />
+    <Compile Include="Core\SceneData\BSPTree\BSPTree.cs" />
     <Compile Include="Core\SceneData\KDTree\KDTree.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
     <Compile Include="Core\SceneData\OcTree\OcTree.cs" />

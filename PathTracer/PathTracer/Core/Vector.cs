@@ -49,6 +49,36 @@ namespace ASL.PathTracer
             }
         }
 
+        public static Vector2 one
+        {
+            get { return new Vector2(1, 1); }
+        }
+
+        public static Vector2 zero
+        {
+            get { return new Vector2(0, 0); }
+        }
+
+        public static Vector2 right
+        {
+            get { return new Vector2(1, 0); }
+        }
+
+        public static Vector2 left
+        {
+            get { return new Vector2(-1, 0); }
+        }
+
+        public static Vector2 up
+        {
+            get { return new Vector2(0, 1); }
+        }
+
+        public static Vector2 down
+        {
+            get { return new Vector2(0, -1); }
+        }
+
         public Vector2(double x, double y)
         {
             this.x = x;
