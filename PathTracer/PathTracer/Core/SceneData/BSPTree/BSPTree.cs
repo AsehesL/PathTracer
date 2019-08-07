@@ -81,6 +81,62 @@ namespace ASL.PathTracer
             //        }
             //    }
             //}
+            return Raycast(m_Root, ray, epsilon, 0.0, double.MaxValue, ref hit);
+        }
+
+        private bool Raycast(BSPTreeNode node, Ray ray, double epsilon, double tMin, double tMax, ref RayCastHit hit)
+        {
+            if (node == null)
+                return false;
+
+            Stack<BSPTreeNode> nodeStack = new Stack<BSPTreeNode>();
+            Stack<double> timeStack = new Stack<double>();
+
+            while (true)
+            {
+                if (!node.IsLeaf)
+                {
+                    double denom = Vector3.Dot(node.plane.normal, ray.direction);
+                    double dist = node.plane.d - Vector3.Dot(node.plane.normal, ray.origin);
+                    int nearIndex = dist > 0.0 ? 1 : 0;
+
+                    if (Math.Abs(denom) > double.Epsilon)
+                    {
+                        double t = dist / denom;
+                        if (t >= epsilon && t <= tMax)
+                        {
+                            if (t >= tMin)
+                            {
+                                nodeStack.Push(node.childs[1 ^ nearIndex]);
+                                timeStack.Push(tMax);
+                                tMax = t;
+                            }
+                            else nearIndex = 1 ^ nearIndex;
+                        }
+                    }
+                    node = node.childs[nearIndex];
+                }
+                else
+                {
+                    if (node.triangles != null && node.triangles.Count > 0)
+                    {
+                        bool ishit = false;
+                        for (int i = 0; i < node.triangles.Count; i++)
+                        {
+                            ishit = node.triangles[i].RayCast(ray, epsilon, ref hit) || ishit;
+                        }
+
+                        if (ishit && hit.distance >= tMin && hit.distance <= tMax)
+                            return true;
+                    }
+
+                    if (nodeStack.Count == 0) break;
+                    tMin = tMax;
+                    node = nodeStack.Pop();
+                    tMax = timeStack.Pop();
+                }
+            }
+
             return false;
         }
 
@@ -271,8 +327,7 @@ namespace ASL.PathTracer
         class BSPTreeNode
         {
             public List<Triangle> triangles;
-            public BSPTreeNode front;
-            public BSPTreeNode back;
+            public BSPTreeNode[] childs;
             public Plane plane;
             public bool IsLeaf
             {
@@ -289,8 +344,7 @@ namespace ASL.PathTracer
 
             public BSPTreeNode(BSPTreeNode front, BSPTreeNode back, Plane plane)
             {
-                this.front = front;
-                this.back = back;
+                this.childs = new BSPTreeNode[] {front, back};
                 this.plane = plane;
                 m_IsLeaf = false;
             }
