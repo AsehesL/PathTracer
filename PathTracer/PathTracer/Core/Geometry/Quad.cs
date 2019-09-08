@@ -38,7 +38,12 @@ namespace ASL.PathTracer
                 return false;
             hit.distance = t;
             hit.normal = normal;
-            hit.texcoord = Vector2.zero;
+
+	        Vector3 lp = p - this.position;
+	        double texcoordx = Vector3.Dot(lp, this.right) / this.right.magnitude;
+	        double texcoordy = Vector3.Dot(lp, this.right) / this.right.magnitude;
+
+            hit.texcoord = new Vector2(texcoordx, texcoordy);
             hit.normal = this.normal;
             hit.shader = shader;
             hit.hit = p;

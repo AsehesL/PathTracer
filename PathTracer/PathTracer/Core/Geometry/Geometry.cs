@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+	/// <summary>
+	/// 几何体基类
+	/// </summary>
     public abstract class Geometry
     {
         public Shader shader
