@@ -15,7 +15,7 @@ namespace ASL.PathTracer
 	        m_Triangles = new List<Triangle>();
         }
 
-		protected override void BuildForTriangles(List<Triangle> triangles)
+		protected override void BuildForTriangles(List<Triangle> triangles, Bounds bounds)
 		{
 			m_Triangles = triangles;
 		}

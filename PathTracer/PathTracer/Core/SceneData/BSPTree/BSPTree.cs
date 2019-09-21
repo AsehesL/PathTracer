@@ -48,7 +48,7 @@ namespace ASL.PathTracer
 		}
 
 
-		protected override void BuildForTriangles(List<Triangle> triangles)
+		protected override void BuildForTriangles(List<Triangle> triangles, Bounds bounds)
 		{
 			m_Root = BuildTree(triangles, 0);
 		}

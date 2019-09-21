@@ -75,6 +75,7 @@
     <Compile Include="Core\Ray.cs" />
     <Compile Include="Core\Sampler\SamplerBase.cs" />
     <Compile Include="Core\SceneData\BSPTree\BSPTree.cs" />
+    <Compile Include="Core\SceneData\BVH\BVH.cs" />
     <Compile Include="Core\SceneData\KDTree\KDTree.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
     <Compile Include="Core\SceneData\OcTree\OcTree.cs" />

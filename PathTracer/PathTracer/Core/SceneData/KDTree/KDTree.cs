@@ -34,7 +34,7 @@ namespace ASL.PathTracer
 			m_MaxDepth = depth;
 		}
 
-		protected override void BuildForTriangles(List<Triangle> triangles)
+		protected override void BuildForTriangles(List<Triangle> triangles, Bounds bounds)
 		{
 			m_Root = BuildTree(triangles, 0);
 		}
@@ -266,82 +266,82 @@ namespace ASL.PathTracer
 				leftVertices.Add(Vertex.Lerp(begin, end, (plane.value - beginPos) / (endPos - beginPos)));
 			}
 		}
+
+		class KDTreeNode
+		{
+
+			public KDTreeNode LeftNode { get; private set; }
+
+			public KDTreeNode RightNode { get; private set; }
+
+			public Bounds Bounds { get; private set; }
+
+			public bool IsLeaf { get; private set; }
+
+			public List<Triangle> Triangles { get; private set; }
+
+			public KDTreeNode(KDTreeNode left, KDTreeNode right)
+			{
+				IsLeaf = false;
+				LeftNode = left;
+				RightNode = right;
+
+				Vector3 min = default(Vector3), max = default(Vector3);
+				if (left != null)
+				{
+					min = left.Bounds.min;
+					max = left.Bounds.max;
+					if (right != null)
+					{
+						min = Vector3.Min(min, right.Bounds.min);
+						max = Vector3.Max(max, right.Bounds.max);
+					}
+				}
+				else if (right != null)
+				{
+					min = right.Bounds.min;
+					max = right.Bounds.max;
+				}
+
+				Vector3 si = max - min;
+				Vector3 ct = min + si * 0.5;
+
+				if (si.x <= 0)
+					si.x = 0.1;
+				if (si.y <= 0)
+					si.y = 0.1;
+				if (si.z <= 0)
+					si.z = 0.1;
+
+				this.Bounds = new Bounds(ct, si);
+			}
+
+			public KDTreeNode(List<Triangle> triangles)
+			{
+				IsLeaf = true;
+				Triangles = triangles;
+
+				Vector3 min = Vector3.one * double.MaxValue;
+				Vector3 max = Vector3.one * -double.MaxValue;
+
+				for (int i = 0; i < triangles.Count; i++)
+				{
+					min = Vector3.Min(min, triangles[i].bounds.min);
+					max = Vector3.Max(max, triangles[i].bounds.max);
+				}
+
+				Vector3 si = max - min;
+				Vector3 ct = min + si * 0.5;
+
+				if (si.x <= 0)
+					si.x = 0.1;
+				if (si.y <= 0)
+					si.y = 0.1;
+				if (si.z <= 0)
+					si.z = 0.1;
+
+				this.Bounds = new Bounds(ct, si);
+			}
+		}
 	}
-
-    class KDTreeNode
-    {
-
-        public KDTreeNode LeftNode { get; private set; }
-
-        public KDTreeNode RightNode { get; private set; }
-
-        public Bounds Bounds { get; private set; }
-
-        public bool IsLeaf { get; private set; }
-
-        public List<Triangle> Triangles { get; private set; }
-
-        public KDTreeNode(KDTreeNode left, KDTreeNode right)
-        {
-            IsLeaf = false;
-            LeftNode = left;
-            RightNode = right;
-
-            Vector3 min = default(Vector3), max = default(Vector3);
-            if (left != null)
-            {
-                min = left.Bounds.min;
-                max = left.Bounds.max;
-                if (right != null)
-                {
-                    min = Vector3.Min(min, right.Bounds.min);
-                    max = Vector3.Max(max, right.Bounds.max);
-                }
-            }
-            else if (right != null)
-            {
-                min = right.Bounds.min;
-                max = right.Bounds.max;
-            }
-
-            Vector3 si = max - min;
-            Vector3 ct = min + si * 0.5;
-
-            if (si.x <= 0)
-                si.x = 0.1;
-            if (si.y <= 0)
-                si.y = 0.1;
-            if (si.z <= 0)
-                si.z = 0.1;
-
-            this.Bounds = new Bounds(ct, si);
-        }
-
-        public KDTreeNode(List<Triangle> triangles)
-        {
-            IsLeaf = true;
-            Triangles = triangles;
-
-            Vector3 min = Vector3.one * double.MaxValue;
-            Vector3 max = Vector3.one * -double.MaxValue;
-
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                min = Vector3.Min(min, triangles[i].bounds.min);
-                max = Vector3.Max(max, triangles[i].bounds.max);
-            }
-
-            Vector3 si = max - min;
-            Vector3 ct = min + si * 0.5;
-
-            if (si.x <= 0)
-                si.x = 0.1;
-            if (si.y <= 0)
-                si.y = 0.1;
-            if (si.z <= 0)
-                si.z = 0.1;
-
-            this.Bounds = new Bounds(ct, si);
-        }
-    }
 }
