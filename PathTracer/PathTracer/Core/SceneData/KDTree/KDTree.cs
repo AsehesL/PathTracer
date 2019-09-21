@@ -41,24 +41,50 @@ namespace ASL.PathTracer
 
 		protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
 		{
-            Stack<KDTreeNode> nodes = new Stack<KDTreeNode>();
-            nodes.Push(m_Root);
+			bool raycast = false;
+			if (m_Root.IsLeaf)
+			{
+				for (int i = 0; i < m_Root.Triangles.Count; i++)
+				{
+					raycast = m_Root.Triangles[i].RayCast(ray, epsilon, ref hit) || raycast;
+				}
 
-            bool raycast = false;
-            while (nodes.Count > 0)
+				return raycast;
+			}
+
+            Stack<KDTreeNode> nodes = new Stack<KDTreeNode>();
+			if (m_Root.Bounds.Raycast(ray))
+			{
+				nodes.Push(m_Root);
+			}
+
+			while (nodes.Count > 0)
             {
                 var node = nodes.Pop();
-                if (node.IsLeaf == false)
-                {
-                    if (node.Bounds.Raycast(ray))
-                    {
-                        if (node.LeftNode != null)
-                            nodes.Push(node.LeftNode);
-                        if (node.RightNode != null)
-                            nodes.Push(node.RightNode);
-                    }
-                }
-                else
+	            if (node.IsLeaf == false)
+	            {
+		            double hitleftdistance = 0.0, hitrightdistance = 0.0;
+		            bool hitleft = node.LeftNode != null ? node.LeftNode.Bounds.Raycast(ray, out hitleftdistance) : false;
+		            bool hitright = node.RightNode != null ? node.RightNode.Bounds.Raycast(ray, out hitrightdistance) : false;
+		            if (hitleft && hitright)
+		            {
+			            if (hitleftdistance < hitrightdistance)
+			            {
+				            nodes.Push(node.RightNode);
+				            nodes.Push(node.LeftNode);
+						}
+			            else
+			            {
+				            nodes.Push(node.LeftNode);
+				            nodes.Push(node.RightNode);
+						}
+		            }
+		            else if (hitleft)
+			            nodes.Push(node.LeftNode);
+					else if (hitright)
+			            nodes.Push(node.RightNode);
+	            }
+	            else
                 {
                     if (node.Triangles != null)
                     {
@@ -70,8 +96,8 @@ namespace ASL.PathTracer
                 }
             }
 
-            return raycast;
-        }
+			return raycast;
+		}
 
 		private KDTreeNode BuildTree(List<Triangle> triangles, int depth)
 		{
