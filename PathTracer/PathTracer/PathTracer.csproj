@@ -65,6 +65,7 @@
     <Compile Include="Core\Bounds.cs" />
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Color.cs" />
+    <Compile Include="Core\Geometry\BoundsGeometry.cs" />
     <Compile Include="Core\Geometry\Geometry.cs" />
     <Compile Include="Core\Geometry\Plane.cs" />
     <Compile Include="Core\Geometry\Quad.cs" />

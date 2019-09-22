@@ -54,6 +54,41 @@ namespace ASL.PathTracer
 
         public bool Raycast(Ray ray, out double distance)
         {
+            //distance = 0;
+            //double tmax = double.MaxValue;
+
+            ////if (ray.origin.x > min.x && ray.origin.y > min.y && ray.origin.z > min.z && ray.origin.x < max.x && ray.origin.y < max.y && ray.origin.z < max.z)
+            ////{
+            ////    return true;
+            ////}
+
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    if (ray.direction[i] < double.Epsilon && ray.direction[i] > -double.Epsilon)
+            //    {
+            //        if (ray.origin[i] < min[i] || ray.origin[i] > max[i]) return false;
+            //    }
+            //    else
+            //    {
+            //        double ood = 1.0 / ray.direction[i];
+            //        double t1 = (min[i] - ray.origin[i]) * ood;
+            //        double t2 = (max[i] - ray.origin[i]) * ood;
+            //        if (t1 > t2)
+            //        {
+            //            double t = t1;
+            //            t1 = t2;
+            //            t2 = t;
+            //        }
+
+            //        if (t1 > distance) distance = t1;
+            //        if (t2 < tmax) tmax = t2; 
+            //        if (distance > tmax) return false;
+            //    }
+            //}
+
+            //return true;
+
+
             distance = 0.0;
             double t;
             bool hit = false;

@@ -7,30 +7,30 @@ namespace ASL.PathTracer
 	{
 		private BVHNode m_Root;
 
-		protected override void BuildForTriangles(List<Triangle> triangles, Bounds bounds)
-		{
-			List<uint> sortedMortons = new List<uint>();
-			for (int i = 0; i < triangles.Count; i++)
-			{
-				Vector3 center = triangles[i].bounds.center;
-				double x = (center.x - bounds.min.x) / bounds.size.x;
-				double y = (center.y - bounds.min.y) / bounds.size.y;
-				double z = (center.z - bounds.min.z) / bounds.size.z;
-				uint morton = Morton3D(x, y, z);
-				sortedMortons.Add(morton);
-			}
-			Sort(triangles, sortedMortons);
+	    protected override void BuildForBoundsGeometries(List<BoundsGeometry> boundsGeometries, Bounds bounds)
+	    {
+	        List<uint> sortedMortons = new List<uint>();
+	        for (int i = 0; i < boundsGeometries.Count; i++)
+	        {
+	            Vector3 center = boundsGeometries[i].bounds.center;
+	            double x = (center.x - bounds.min.x) / bounds.size.x;
+	            double y = (center.y - bounds.min.y) / bounds.size.y;
+	            double z = (center.z - bounds.min.z) / bounds.size.z;
+	            uint morton = Morton3D(x, y, z);
+	            sortedMortons.Add(morton);
+	        }
+	        Sort(boundsGeometries, sortedMortons);
 
-			m_Root = GenerateHierarchy(triangles, sortedMortons, 0, sortedMortons.Count - 1);
-		}
+	        m_Root = GenerateHierarchy(boundsGeometries, sortedMortons, 0, sortedMortons.Count - 1);
+        }
 
-		protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
+	    protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
 		{
 			bool raycast = false;
 			if (m_Root.IsLeaf)
 			{
-				if (m_Root.Triangle != null)
-					return m_Root.Triangle.RayCast(ray, epsilon, ref hit);
+				if (m_Root.Geometry != null)
+					return m_Root.Geometry.RayCast(ray, epsilon, ref hit);
 
 				return raycast;
 			}
@@ -69,24 +69,24 @@ namespace ASL.PathTracer
 				}
 				else
 				{
-					if (node.Triangle != null)
+					if (node.Geometry != null)
 					{
-						raycast = node.Triangle.RayCast(ray, epsilon, ref hit) || raycast;
+						raycast = node.Geometry.RayCast(ray, epsilon, ref hit) || raycast;
 					}
 				}
 			}
 			return raycast;
 		}
 
-		private BVHNode GenerateHierarchy(List<Triangle> sortedTriangles, List<uint> sortedMortons, int first, int last)
+		private BVHNode GenerateHierarchy(List<BoundsGeometry> boundsGeometries, List<uint> sortedMortons, int first, int last)
 		{
 			if (first == last)
-				return new BVHNode(sortedTriangles[first]);
+				return new BVHNode(boundsGeometries[first]);
 
 			int split = FindSplit(sortedMortons, first, last);
 
-			BVHNode child1 = GenerateHierarchy(sortedTriangles, sortedMortons, first, split);
-			BVHNode child2 = GenerateHierarchy(sortedTriangles, sortedMortons, split + 1, last);
+			BVHNode child1 = GenerateHierarchy(boundsGeometries, sortedMortons, first, split);
+			BVHNode child2 = GenerateHierarchy(boundsGeometries, sortedMortons, split + 1, last);
 
 			return new BVHNode(child1, child2);
 		}
@@ -135,12 +135,12 @@ namespace ASL.PathTracer
 			return ret;
 		}
 
-		private void Sort(List<Triangle> sortedDatas, List<uint> sortedMortons)
+		private void Sort(List<BoundsGeometry> sortedDatas, List<uint> sortedMortons)
 		{
 			QuickSort(sortedDatas, sortedMortons, 0, sortedMortons.Count - 1);
 		}
 
-		private void QuickSort(List<Triangle> sortedDatas, List<uint> sortedMortons, int low, int high)
+		private void QuickSort(List<BoundsGeometry> sortedDatas, List<uint> sortedMortons, int low, int high)
 		{
 			int pivot;
 			if (low < high)
@@ -152,7 +152,7 @@ namespace ASL.PathTracer
 			}
 		}
 
-		private int Partition(List<Triangle> sortedDatas, List<uint> sortedMortons, int low, int high)
+		private int Partition(List<BoundsGeometry> sortedDatas, List<uint> sortedMortons, int low, int high)
 		{
 			uint pivotkey = sortedMortons[low];
 			while (low < high)
@@ -167,7 +167,7 @@ namespace ASL.PathTracer
 			return low;
 		}
 
-		private void Swap(List<Triangle> sortedDatas, List<uint> sortedMortons, int a, int b)
+		private void Swap(List<BoundsGeometry> sortedDatas, List<uint> sortedMortons, int a, int b)
 		{
 			var tempData = sortedDatas[a];
 			uint tempMorton = sortedMortons[a];
@@ -214,13 +214,13 @@ namespace ASL.PathTracer
 
 			public Bounds Bounds { get; private set; }
 
-			public Triangle Triangle { get; private set; }
+			public BoundsGeometry Geometry { get; private set; }
 
-			public BVHNode(Triangle triangle)
+			public BVHNode(BoundsGeometry geometry)
 			{
-				this.Triangle = triangle;
+				this.Geometry = geometry;
 				this.IsLeaf = true;
-				this.Bounds = triangle.bounds;
+				this.Bounds = geometry.bounds;
 			}
 
 			public BVHNode(BVHNode leftChild, BVHNode rightChild)

@@ -23,7 +23,7 @@ namespace ASL.PathTracer
 		}
 	}
 
-	public class Triangle : Geometry
+	public class Triangle : BoundsGeometry
     {
         public Vertex vertex0;
         public Vertex vertex1;
@@ -42,8 +42,6 @@ namespace ASL.PathTracer
                 throw new System.IndexOutOfRangeException();
             }
         }
-
-        public Bounds bounds;
 
         public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Shader shader) : base(shader)
         {
@@ -136,6 +134,16 @@ namespace ASL.PathTracer
             hit.shader = shader;
             hit.distance = rt;
             return true;
+        }
+
+        public override void Expand(ref Vector3 min, ref Vector3 max)
+        {
+            max = Vector3.Max(this.vertex0.position, max);
+            max = Vector3.Max(this.vertex1.position, max);
+            max = Vector3.Max(this.vertex2.position, max);
+            min = Vector3.Min(this.vertex0.position, min);
+            min = Vector3.Min(this.vertex1.position, min);
+            min = Vector3.Min(this.vertex2.position, min);
         }
     }
 }

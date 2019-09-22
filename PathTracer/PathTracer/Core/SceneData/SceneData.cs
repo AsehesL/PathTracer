@@ -13,21 +13,16 @@ namespace ASL.PathTracer
 	    public void Build(List<Geometry> geometries)
 	    {
 		    m_NormalGeometries = new List<Geometry>();
-		    List<Triangle> triangles = new List<Triangle>();
+		    List<BoundsGeometry> boundsGeometries = new List<BoundsGeometry>();
 		    Vector3 min = Vector3.one * double.MaxValue;
 		    Vector3 max = Vector3.one * double.MinValue;
 			for (int i = 0; i < geometries.Count; i++)
 		    {
-			    var triangle = geometries[i] as Triangle;
-			    if (triangle != null)
+			    var boundsGeometry = geometries[i] as BoundsGeometry;
+			    if (boundsGeometry != null)
 			    {
-				    max = Vector3.Max(triangle.vertex0.position, max);
-				    max = Vector3.Max(triangle.vertex1.position, max);
-				    max = Vector3.Max(triangle.vertex2.position, max);
-				    min = Vector3.Min(triangle.vertex0.position, min);
-				    min = Vector3.Min(triangle.vertex1.position, min);
-				    min = Vector3.Min(triangle.vertex2.position, min);
-					triangles.Add(triangle);
+			        boundsGeometry.Expand(ref min, ref max);
+			        boundsGeometries.Add(boundsGeometry);
 			    }
 			    else
 			    {
@@ -35,10 +30,10 @@ namespace ASL.PathTracer
 			    }
 		    }
 
-		    if (triangles.Count > 0)
+		    if (boundsGeometries.Count > 0)
 		    {
 			    Bounds bounds = new Bounds((min + max) * 0.5, max - min);
-			    BuildForTriangles(triangles, bounds);
+			    BuildForBoundsGeometries(boundsGeometries, bounds);
 
 		    }
 	    }
@@ -61,7 +56,7 @@ namespace ASL.PathTracer
 			return result;
 		}
 
-	    protected abstract void BuildForTriangles(List<Triangle> triangles, Bounds bounds);
+	    protected abstract void BuildForBoundsGeometries(List<BoundsGeometry> boundsGeometries, Bounds bounds);
 
 	    protected abstract bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit);
     }
