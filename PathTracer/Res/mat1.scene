@@ -37,6 +37,6 @@
     <Geometry Position="-0.094945,2.134328,0" Shader="diffuseShader" Euler="0,0,42.589" Scale="1,1,1" Path="mat0.obj" Type="Mesh" />
     <Geometry Position="-0.09464648,2.134602,0" Shader="sphereShader" Euler="42.411,-93.495,-2.359" Scale="1,1,1" Path="mat1.obj" Type="Mesh" />
     <Geometry Position="0,0,0" Shader="diffuseShader" Euler="0,0,0" Scale="1,1,1" Path="mat2.obj" Type="Mesh" />
-    <Geometry Position="12.4,0,-5" Shader="floorShader" Euler="0,0,0" Scale="1,1,1" Path="mat3.obj" Type="Mesh" />
+    <Geometry Position="12.4,0,-5" Shader="floorShader" Euler="0,0,0" Scale="1,1,1" Path="mat3.obj" AOS="xa" Type="Mesh" />
   </Geometries>
 </SceneRoot>

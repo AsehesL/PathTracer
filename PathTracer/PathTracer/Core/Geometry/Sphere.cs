@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
-    public class Sphere : Geometry
-    {
+    public class Sphere : BoundsGeometry
+	{
         public Vector3 position { get; set; }
         public double radius { get; set; }
 
@@ -16,10 +16,16 @@ namespace ASL.PathTracer
             this.position = position;
             this.radius = radius;
 
-            //this.bounds = new Bounds(position, Vector3.one * (radius * 2.0));
+            this.bounds = new Bounds(position, Vector3.one * (radius * 2.0));
         }
 
-        public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
+		public override void Expand(ref Vector3 min, ref Vector3 max)
+		{
+			min = Vector3.Min(min, new Vector3(position.x - radius, position.y - radius, position.z - radius));
+			max = Vector3.Max(max, new Vector3(position.x + radius, position.y + radius, position.z + radius));
+		}
+
+		public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
         {
             Vector3 tocenter = ray.origin - this.position;
 

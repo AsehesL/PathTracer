@@ -50,49 +50,80 @@ namespace ASL.PathTracer.SceneSerialization
         }
     }
 
+	public class TestData : GeometryData
+	{
+		[XmlAttribute("AOS")] public string aos;
+	}
+
     public class GeometryData
     {
-        [XmlAttribute("Position")] public string position;
         [XmlAttribute("Shader")] public string shader;
-        [XmlAttribute("Radius")] public float radius;
-        [XmlAttribute("Euler")] public string euler;
-        [XmlAttribute("Scale")] public string scale;
-        [XmlAttribute("Path")] public string path;
         [XmlAttribute("Type")] public string type;
 
-        public void CreateGeometry(string scenePath, List<Geometry> output, Dictionary<string, Shader> shaders)
-        {
-            Vector3 pos = StringUtils.StringToVector3(position);
+	    [XmlArray("Params")]
+	    [XmlArrayItem("Param")]
+	    public List<GeometryParamData> geoParams;
+
+		public void CreateGeometry(string scenePath, List<Geometry> output, Dictionary<string, Shader> shaders)
+		{
+			Dictionary<string, GeometryParamData> geoParamDic = new Dictionary<string, GeometryParamData>();
+			for (int i = 0; i < geoParams.Count; i++)
+			{
+				geoParamDic[geoParams[i].paramName] = geoParams[i];
+			}
+
             Shader s = null;
             if (shaders.ContainsKey(shader))
                 s = shaders[shader];
 
-            if (type == "Sphere")
-            {
-                output.Add(new Sphere(pos, radius, s));
-                return;
-            }
-            else if (type == "Mesh")
-            {
-                var fileInfo = new System.IO.FileInfo(scenePath);
-                string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
-                
-                Vector3 rot = StringUtils.StringToVector3(euler);
-                Vector3 sca = StringUtils.StringToVector3(scale);
+	        System.Type[] types = typeof(Geometry).Assembly.GetTypes();
+	        System.Type geoSerializationType = typeof(GeometrySerialization);
+	        GeometrySerialization geoSerialization = null;
+			for (int i = 0; i < types.Length; i++)
+	        {
+		        if (types[i].IsAbstract)
+			        continue;
+		        if (types[i].IsSubclassOf(geoSerializationType))
+		        {
+			        var attributes = types[i].GetCustomAttributes(typeof(GeometryAnalyseAttribute), false);
+			        if (attributes == null || attributes.Length == 0)
+				        continue;
+			        var geoattribute = attributes[0] as GeometryAnalyseAttribute;
+			        if (geoattribute == null)
+				        continue;
+			        if (geoattribute.type == type)
+			        {
+				        geoSerialization = System.Activator.CreateInstance(types[i]) as GeometrySerialization;
+						break;
+			        }
+		        }
+	        }
 
-                var triangles = MeshLoader.LoadMesh(p, pos, rot, sca, s);
+	        if (geoSerialization == null)
+	        {
+		        Log.Warn($"几何体创建失败！不确定的几何体类型：{type}");
+				return;
+	        }
 
-                foreach (var tri in triangles)
-                {
-                    output.Add(tri);
-                }
-                return;
-            }
-            Log.Warn($"几何体创建失败！不确定的几何体类型：{type}");
-        }
+			geoSerialization.GenerateGeometry(s, scenePath, output, geoParamDic);
+			//      var geo = geoSerialization.GenerateGeometry(s, geoParams);
+			//      if (geo != null)
+			//       output.Add(geo);
+			//else
+			//       Log.Warn($"几何体创建失败！");
+		}
     }
 
-    public class TextureData
+	public class GeometryParamData
+	{
+
+		[XmlAttribute("Key")] public string paramName;
+
+		[XmlAttribute("Value")] public string paramValue;
+
+	}
+
+	public class TextureData
     {
         [XmlAttribute("Name")]
         public string name;

@@ -14,6 +14,13 @@
   </Shaders>
   <Camera Position="-3.844263,2.90609,5.413555" Euler="18.22,152.773,0.0" Near="0.3" FieldOfView="60" />
   <Geometries>
-    <Geometry Position="0,0,0" Shader="body" Euler="0,0,0" Scale="1,1,1" Path="eboy.obj" Type="Mesh" />
+    <Geometry Shader="body" Type="Mesh" >
+	<Params>
+		<Param Key="Position" Value="0,0,0" />
+		<Param Key="Euler" Value="0,0,0" />
+		<Param Key="Scale" Value="1,1,1" />
+		<Param Key="Path" Value="eboy.obj" />
+	</Params>
+    </Geometry>
   </Geometries>
 </SceneRoot>
