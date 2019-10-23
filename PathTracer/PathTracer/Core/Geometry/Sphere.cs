@@ -43,8 +43,8 @@ namespace ASL.PathTracer
                     // if (hit.depth == 0 && m_Material.isLight && LScene.ignoreLight)
                     //     return false;
                     hit.distance = t;
-                    hit.normal = (tocenter + ray.direction * t) / radius;
-                    hit.hit = ray.origin + ray.direction * t;
+                    hit.normal = (tocenter + ray.direction * hit.distance) / radius;
+                    hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
                     hit.texcoord = default(Vector2);
                     return true;
@@ -58,8 +58,8 @@ namespace ASL.PathTracer
                     // if (hit.depth == 0 && m_Material.isLight && LScene.ignoreLight)
                     //     return false;
                     hit.distance = t;
-                    hit.normal = (tocenter + ray.direction * t) / radius;
-                    hit.hit = ray.origin + ray.direction * t;
+                    hit.normal = (tocenter + ray.direction * hit.distance) / radius;
+                    hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
                     hit.texcoord = default(Vector2);
                     return true;

@@ -90,7 +90,7 @@ namespace ASL.PathTracer
             return scene;
         }
 
-        public Texture Render(int tracingTimes, bool multiThread, SamplerType samplerType, int numSamples, int width, int height, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
+        public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, int width, int height, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
         {
             Texture result = new Texture(width, height);
             m_Tracer = new PathTracer(tracingTimes, 0.000001);
@@ -99,7 +99,7 @@ namespace ASL.PathTracer
             m_Camera.SetRenderTarget(result);
             try
             {
-                m_Camera.Render(this, multiThread, progressCallBackAction);
+                m_Camera.Render(this, false, progressCallBackAction);
             }
             catch (System.Exception e)
             {
@@ -110,7 +110,7 @@ namespace ASL.PathTracer
             return result;
         }
 
-        public Texture FastRender(bool multiThread, int width, int height, System.Action<int, int> progressCallBackAction = null)
+        public Texture FastRender(int width, int height, System.Action<int, int> progressCallBackAction = null)
         {
             //对图片按原始比例压缩到宽高不超过512
             int w, h;
@@ -142,7 +142,7 @@ namespace ASL.PathTracer
             m_Camera.SetRenderTarget(result);
             try
             {
-                m_Camera.FastRender(this, multiThread, progressCallBackAction);
+                m_Camera.Render(this, true, progressCallBackAction);
             }
             catch (System.Exception e)
             {

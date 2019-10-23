@@ -15,6 +15,17 @@ namespace ASL.PathTracer
         Texture,
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public class ShaderTypeAttribute : System.Attribute
+    {
+        public string shaderType;
+
+        public ShaderTypeAttribute(string shaderType)
+        {
+            this.shaderType = shaderType;
+        }
+    }
+
     public class ShaderBase
     {
         public void SetParam(ShaderParamType type, string key, System.Object value)

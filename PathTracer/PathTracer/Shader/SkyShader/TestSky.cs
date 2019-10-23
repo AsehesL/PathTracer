@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+    [ShaderType("TestSky")]
     class TestSky : Sky
     {
         private Vector3 m_SunDir = new Vector3(-1.0f, -0.8f, -1.0f);

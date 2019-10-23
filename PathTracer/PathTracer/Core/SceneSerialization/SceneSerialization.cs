@@ -50,11 +50,6 @@ namespace ASL.PathTracer.SceneSerialization
         }
     }
 
-	public class TestData : GeometryData
-	{
-		[XmlAttribute("AOS")] public string aos;
-	}
-
     public class GeometryData
     {
         [XmlAttribute("Shader")] public string shader;
@@ -166,8 +161,8 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlAttribute("Name")]
         public string name;
 
-        [XmlAttribute("ClassName")]
-        public string className;
+        [XmlAttribute("ShaderType")]
+        public string shaderType;
 
         [XmlArray("Params")]
         [XmlArrayItem("Param")]
@@ -176,14 +171,30 @@ namespace ASL.PathTracer.SceneSerialization
         public Shader CreateShader(Dictionary<string, Texture> textures)
         {
             var assembly = typeof(Shader).Assembly;
-            var tp = assembly.GetType(className);
-            if (tp == null)
+            var types = assembly.GetTypes();
+            Type type = null;
+            for (int i = 0; i < types.Length; i++)
             {
-                Log.Warn($"Shader初时化失败！未找到该类型的Shader:{className}");
+                if(types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Shader)))
+                    continue;
+                var attributes = types[i].GetCustomAttributes(typeof(ShaderTypeAttribute), true);
+                if (attributes != null && attributes.Length > 0)
+                {
+                    var shaderAttribute = attributes[0] as ShaderTypeAttribute;
+                    if (shaderAttribute != null && shaderAttribute.shaderType == shaderType)
+                    {
+                        type = types[i];
+                        break;
+                    }
+                }
+            }
+            if (type == null)
+            {
+                Log.Warn($"Shader初时化失败！未找到该类型的Shader:{shaderType}");
                 return null;
             }
 
-            Shader shader = System.Activator.CreateInstance(tp) as Shader;
+            Shader shader = System.Activator.CreateInstance(type) as Shader;
 
             if (shader == null)
                 return null;
@@ -251,8 +262,8 @@ namespace ASL.PathTracer.SceneSerialization
     public class SkyData
     {
 
-        [XmlAttribute("ClassName")]
-        public string className;
+        [XmlAttribute("ShaderType")]
+        public string shaderType;
 
         [XmlArray("Params")]
         [XmlArrayItem("Param")]
@@ -261,11 +272,25 @@ namespace ASL.PathTracer.SceneSerialization
         public Sky CreateSky(Dictionary<string, Texture> textures)
         {
             var assembly = typeof(Sky).Assembly;
-            var tp = assembly.GetType(className);
-            if (tp == null)
-                return null;
+            var types = assembly.GetTypes();
+            Type type = null;
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Sky)))
+                    continue;
+                var attributes = types[i].GetCustomAttributes(typeof(ShaderTypeAttribute), true);
+                if (attributes != null && attributes.Length > 0)
+                {
+                    var shaderAttribute = attributes[0] as ShaderTypeAttribute;
+                    if (shaderAttribute != null && shaderAttribute.shaderType == shaderType)
+                    {
+                        type = types[i];
+                        break;
+                    }
+                }
+            }
 
-            Sky sky = System.Activator.CreateInstance(tp) as Sky;
+            Sky sky = System.Activator.CreateInstance(type) as Sky;
             if (sky == null)
                 return null;
             if (shaderParams != null)
@@ -278,7 +303,7 @@ namespace ASL.PathTracer.SceneSerialization
                     sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
                 }
             }
-            Log.Info($"天空盒创建成功:{tp}");
+            Log.Info($"天空盒创建成功:{type}");
             return sky;
         }
     }

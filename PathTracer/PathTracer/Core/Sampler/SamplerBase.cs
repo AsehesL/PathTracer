@@ -61,8 +61,6 @@ namespace ASL.PathTracer
 
         protected static System.Random sRandom = new System.Random();
 
-        private System.Object m_Lock;
-
 
         public SamplerBase(int numSamples, int numSets = 83)
         {
@@ -71,8 +69,6 @@ namespace ASL.PathTracer
             m_ShuffledIndices = new int[m_NumSets * m_NumSamples];
 
             SetupShuffledIndices();
-
-            m_Lock = new object();
         }
 
         public Vector3 SampleHemiSphere(float e)
@@ -94,17 +90,14 @@ namespace ASL.PathTracer
 
         public Vector2 Sample()
         {
-            lock (m_Lock)
+            if ((int) (m_Index % m_NumSamples) == 0)
             {
-                if ((int)(m_Index % m_NumSamples) == 0)
-                {
-                    m_Jump = sRandom.Next(0, m_NumSets) * m_NumSamples;
-                }
-
-                Vector2 sp = m_Samples[m_Jump + m_ShuffledIndices[m_Jump + m_Index % m_NumSamples]];
-                m_Index += 1;
-                return sp;
+                m_Jump = sRandom.Next(0, m_NumSets) * m_NumSamples;
             }
+
+            Vector2 sp = m_Samples[m_Jump + m_ShuffledIndices[m_Jump + m_Index % m_NumSamples]];
+            m_Index += 1;
+            return sp;
         }
 
         private void SetupShuffledIndices()

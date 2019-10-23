@@ -88,18 +88,109 @@
   </Sky>
   <Camera Position="-0.77,6.44,8.86" Euler="28.225,178.49,0.0" Near="0.3" FieldOfView="60" />
   <Geometries>
-    <Geometry Position="-3.09,1.33,2.83" Shader="gray2" Euler="0,0,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="wallShader" Euler="0,0,0" Scale="1,1,1" Path="obj1.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="gray3" Euler="0,0,0" Scale="1,1,1" Path="obj2.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="gray2" Euler="0,0,0" Scale="1,1,1" Path="obj3.obj" Type="Mesh" />
-    <Geometry Position="0.32,0,0.03" Shader="gray1" Euler="0,0,0" Scale="1,1,1" Path="obj4.obj" Type="Mesh" />
-    <Geometry Position="1.56,0,0.03" Shader="gray4" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
-    <Geometry Position="-0.56,0.93,1.01" Shader="black" Euler="0,0,0" Scale="1,1,1" Path="logo1.obj" Type="Mesh" />
-    <Geometry Position="-3.48,0,-1.36" Shader="gray6" Euler="0,0,0" Scale="1,1,1" Path="obj5.obj" Type="Mesh" />
-    <Geometry Position="-0.19,1.33,3.05" Shader="gray4" Euler="0,139.68,0" Scale="1,1,1" Path="teapoat.obj" Type="Mesh" />
-    <Geometry Position="-0.56,0.93,1.01" Shader="light" Euler="0,0,0" Scale="1,1,1" Path="logo2.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="floorShader" Euler="0,0,0" Scale="1,1,1" Path="obj6.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="diffuseShader" Euler="0,0,0" Scale="1,1,1" Path="obj7.obj" Type="Mesh" />
-    <Geometry Position="0,0,0" Shader="light2" Euler="0,0,0" Scale="1,1,1" Path="light.obj" Type="Mesh" />
+    <Geometry Shader="gray2" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="-3.09,1.33,2.83" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="teapoat.obj" />
+		</Params>	
+    </Geometry>
+    <Geometry Shader="wallShader" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj1.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray3" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj2.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray2" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj3.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray1" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0.32,0,0.03" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj4.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray4" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="1.56,0,0.03" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj5.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="black" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="-0.56,0.93,1.01" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="logo1.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray6" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="-3.48,0,-1.36" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj5.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="gray4" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="-0.19,1.33,3.05" />
+			<Param Key="Euler" Value="0,139.68,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="teapoat.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="light" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="-0.56,0.93,1.01" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="logo2.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="floorShader" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj6.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="diffuseShader" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="obj7.obj" />
+		</Params>
+    </Geometry>
+    <Geometry Shader="light2" Type="Mesh" >
+    	<Params>
+			<Param Key="Position" Value="0,0,0" />
+			<Param Key="Euler" Value="0,0,0" />
+			<Param Key="Scale" Value="1,1,1" />
+			<Param Key="Path" Value="light.obj" />
+		</Params>
+    </Geometry>
   </Geometries>
 </SceneRoot>

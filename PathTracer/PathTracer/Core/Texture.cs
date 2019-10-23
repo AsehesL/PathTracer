@@ -36,8 +36,6 @@ namespace ASL.PathTracer
         public WrapMode wrapMode;
         public FilterMode filterMode;
 
-        private System.Object m_Lock;
-
         private Color[] m_Colors;
 
         public Texture(int width, int height)
@@ -49,8 +47,6 @@ namespace ASL.PathTracer
             m_VDelta = 1.0f / height;
 
             m_Colors = new Color[width * height];
-
-            m_Lock = new object();
         }
 
         public void Fill(Color color)
@@ -87,10 +83,7 @@ namespace ASL.PathTracer
 
         public void SetPixel(int x, int y, Color color)
         {
-            lock (m_Lock)
-            {
-                m_Colors[y * m_Width + x] = color;
-            }
+            m_Colors[y * m_Width + x] = color;
         }
 
         public Color GetPixel(int x, int y)

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ASL.PathTracer
 {
 
-
+    [ShaderType("Emissive")]
     class LightShader : Shader
     {
         public Color baseColor;
@@ -17,9 +17,9 @@ namespace ASL.PathTracer
 
         public override Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon)
         {
-            float ndv = (float)Math.Max(0, Vector3.Dot(-1*ray.direction, hit.normal));
+            //float ndv = (float)Math.Max(0, Vector3.Dot(-1*ray.direction, hit.normal));
 
-            Color col = baseColor + color * (float)Math.Pow(ndv, pow) * indensity;
+            Color col = baseColor + color * indensity;
 
             return col;
         }

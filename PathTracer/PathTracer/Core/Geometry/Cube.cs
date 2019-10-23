@@ -21,8 +21,8 @@ namespace ASL.PathTracer
 
 		public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
 		{
-			double tmin = hit.distance;
-			double tmax = double.MaxValue;
+			double tmin = 0.0;
+			double tmax = hit.distance;
 
 			Vector3 min = position - scale * 0.5;
 			Vector3 max = position + scale * 0.5;
@@ -30,7 +30,8 @@ namespace ASL.PathTracer
 
 			for (int i = 0; i < 3; i++)
 			{
-				if (Math.Abs(ray.direction[i]) < double.Epsilon)
+			    Vector3 n = new Vector3(i == 0 ? -1 : 0, i == 1 ? -1 : 0, i == 2 ? -1 : 0);
+                if (Math.Abs(ray.direction[i]) < epsilon)
 				{
 					if (ray.origin[i] < min[i] || ray.origin[i] > max[i])
 						return false;
@@ -40,7 +41,7 @@ namespace ASL.PathTracer
 					double ood = 1.0 / ray.direction[i];
 					double t1 = (min[i] - ray.origin[i]) * ood;
 					double t2 = (max[i] - ray.origin[i]) * ood;
-					Vector3 n = new Vector3(i == 0 ? -1 : 0, i == 1 ? -1 : 0, i == 2 ? -1 : 0);
+					
 					if (t1 > t2)
 					{
 						double t = t2;
@@ -64,9 +65,12 @@ namespace ASL.PathTracer
 						return false;
 				}
 			}
+
+		    if (tmin > -double.Epsilon && tmin < double.Epsilon)
+		        return false;
 			hit.distance = tmin;
 			hit.shader = shader;
-			hit.hit = ray.origin + ray.direction * tmin;
+		    hit.hit = ray.origin + ray.direction * hit.distance;
 			hit.texcoord = default(Vector2); //Cube射线检测uv，懒得实现 o(*￣3￣)o 
 			hit.normal = normal;
 			return true;

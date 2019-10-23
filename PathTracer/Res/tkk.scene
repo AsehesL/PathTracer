@@ -4,7 +4,7 @@
   	<Texture Name="body" Path="eboy.jpg" WrapMode="Clamp" FilterMode="Bilinear" />
   </Textures>
   <Shaders>
-    <Shader Name="body" ClassName="ASL.PathTracer.DiffuseShader" >
+    <Shader Name="body" ShaderType="Diffuse" >
     	<Params>
     		<Param Type="Color" Key="color" Value="1,1,1,1" />
     		<Param Type="Texture" Key="diffuse" Value="body" />

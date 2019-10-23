@@ -30,11 +30,11 @@ namespace PathTracerForm
             this.fileNameLabel.Parent = this.renderResultBox;
             this.infoLabel.Parent = this.renderResultBox;
 
-	        var args = System.Environment.GetCommandLineArgs();
-	        if (args != null && args.Length >= 2)
-	        {
-		        GenerateScene(args[1]);
-	        }
+            var args = System.Environment.GetCommandLineArgs();
+            if (args != null && args.Length >= 2)
+            {
+                GenerateScene(args[1]);
+            }
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -153,7 +153,7 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            var result = m_Scene.FastRender(multiThread, width, height, this.ProgressCallBack);
+            var result = m_Scene.FastRender(width, height, this.ProgressCallBack);
             stopWatch.Stop();
 
             if (result != null)
@@ -203,7 +203,7 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            var result = m_Scene.Render(traceTimes, multiThread, sampleType, numSamples, width, height, 83, this.ProgressCallBack);
+            var result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, 83, this.ProgressCallBack);
             stopWatch.Stop();
 
             if (result != null)
