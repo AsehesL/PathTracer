@@ -29,6 +29,12 @@ namespace PathTracerForm
         {
             this.fileNameLabel.Parent = this.renderResultBox;
             this.infoLabel.Parent = this.renderResultBox;
+
+	        var args = System.Environment.GetCommandLineArgs();
+	        if (args != null && args.Length >= 2)
+	        {
+		        GenerateScene(args[1]);
+	        }
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)

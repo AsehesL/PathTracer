@@ -19,12 +19,6 @@ namespace ASL.PathTracer
             this.bounds = new Bounds(position, Vector3.one * (radius * 2.0));
         }
 
-		public override void Expand(ref Vector3 min, ref Vector3 max)
-		{
-			min = Vector3.Min(min, new Vector3(position.x - radius, position.y - radius, position.z - radius));
-			max = Vector3.Max(max, new Vector3(position.x + radius, position.y + radius, position.z + radius));
-		}
-
 		public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
         {
             Vector3 tocenter = ray.origin - this.position;

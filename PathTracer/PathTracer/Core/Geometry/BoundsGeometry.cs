@@ -14,8 +14,5 @@ namespace ASL.PathTracer
         public BoundsGeometry(Shader shader) : base(shader)
         {
         }
-
-        public abstract void Expand(ref Vector3 min, ref Vector3 max);
-        
     }
 }

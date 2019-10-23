@@ -135,15 +135,5 @@ namespace ASL.PathTracer
             hit.distance = rt;
             return true;
         }
-
-        public override void Expand(ref Vector3 min, ref Vector3 max)
-        {
-            max = Vector3.Max(this.vertex0.position, max);
-            max = Vector3.Max(this.vertex1.position, max);
-            max = Vector3.Max(this.vertex2.position, max);
-            min = Vector3.Min(this.vertex0.position, min);
-            min = Vector3.Min(this.vertex1.position, min);
-            min = Vector3.Min(this.vertex2.position, min);
-        }
     }
 }

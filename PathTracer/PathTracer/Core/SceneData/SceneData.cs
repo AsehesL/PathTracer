@@ -21,7 +21,9 @@ namespace ASL.PathTracer
 			    var boundsGeometry = geometries[i] as BoundsGeometry;
 			    if (boundsGeometry != null)
 			    {
-			        boundsGeometry.Expand(ref min, ref max);
+				    min = Vector3.Min(min, boundsGeometry.bounds.min);
+				    max = Vector3.Max(max, boundsGeometry.bounds.max);
+
 			        boundsGeometries.Add(boundsGeometry);
 			    }
 			    else

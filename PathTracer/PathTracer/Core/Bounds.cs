@@ -54,152 +54,44 @@ namespace ASL.PathTracer
 
         public bool Raycast(Ray ray, out double distance)
         {
-            //distance = 0;
-            //double tmax = double.MaxValue;
+	        distance = 0.0;
+	        double tmax = double.MaxValue;
 
-            ////if (ray.origin.x > min.x && ray.origin.y > min.y && ray.origin.z > min.z && ray.origin.x < max.x && ray.origin.y < max.y && ray.origin.z < max.z)
-            ////{
-            ////    return true;
-            ////}
+	        for (int i = 0; i < 3; i++)
+	        {
+		        if (Math.Abs(ray.direction[i]) < double.Epsilon)
+		        {
+			        if (ray.origin[i] < min[i] || ray.origin[i] > max[i])
+				        return false;
+		        }
+		        else
+		        {
+			        double ood = 1.0 / ray.direction[i];
+			        double t1 = (min[i] - ray.origin[i]) * ood;
+			        double t2 = (max[i] - ray.origin[i]) * ood;
+			        if (t1 > t2)
+			        {
+				        double t = t2;
+				        t2 = t1;
+				        t1 = t;
+			        }
 
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    if (ray.direction[i] < double.Epsilon && ray.direction[i] > -double.Epsilon)
-            //    {
-            //        if (ray.origin[i] < min[i] || ray.origin[i] > max[i]) return false;
-            //    }
-            //    else
-            //    {
-            //        double ood = 1.0 / ray.direction[i];
-            //        double t1 = (min[i] - ray.origin[i]) * ood;
-            //        double t2 = (max[i] - ray.origin[i]) * ood;
-            //        if (t1 > t2)
-            //        {
-            //            double t = t1;
-            //            t1 = t2;
-            //            t2 = t;
-            //        }
+			        if (t1 > distance)
+			        {
+				        distance = t1;
+			        }
 
-            //        if (t1 > distance) distance = t1;
-            //        if (t2 < tmax) tmax = t2; 
-            //        if (distance > tmax) return false;
-            //    }
-            //}
+			        if (t2 < tmax)
+			        {
+				        tmax = t2;
+			        }
 
-            //return true;
-
-
-            distance = 0.0;
-            double t;
-            bool hit = false;
-            Vector3 hitpoint;
-            Vector3 min = this.min;
-            Vector3 max = this.max;
-            Vector3 rayorig = ray.origin;
-            Vector3 raydir = ray.direction;
-
-            if (rayorig.x > min.x && rayorig.y > min.y && rayorig.z > min.z && rayorig.x < max.x && rayorig.y < max.y && rayorig.z < max.z)
-            {
-                return true;
-            }
-
-            if (rayorig.x < min.x && raydir.x > 0)
-            {
-                t = (min.x - rayorig.x) / raydir.x;
-
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.y >= min.y && hitpoint.y <= max.y && hitpoint.z >= min.z && hitpoint.z <= max.z && (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            if (rayorig.x > max.x && raydir.x < 0)
-            {
-                t = (max.x - rayorig.x) / raydir.x;
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.y > min.y && hitpoint.y <= max.y &&
-                     hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            if (rayorig.y < min.y && raydir.y > 0)
-            {
-                t = (min.y - rayorig.y) / raydir.y;
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
-                     hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            if (rayorig.y > max.y && raydir.y < 0)
-            {
-                t = (max.y - rayorig.y) / raydir.y;
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
-                     hitpoint.z >= min.z && hitpoint.z <= max.z &&
-                     (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            if (rayorig.z < min.z && raydir.z > 0)
-            {
-                t = (min.z - rayorig.z) / raydir.z;
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
-                     hitpoint.y >= min.y && hitpoint.y <= max.y &&
-                     (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            if (rayorig.z > max.z && raydir.z < 0)
-            {
-                t = (max.z - rayorig.z) / raydir.z;
-                if (t > 0)
-                {
-                    hitpoint = rayorig + raydir * t;
-                    if (hitpoint.x >= min.x && hitpoint.x <= max.x &&
-                     hitpoint.y >= min.y && hitpoint.y <= max.y &&
-                     (!hit || t < distance))
-                    {
-                        hit = true;
-                        distance = t;
-                    }
-                }
-            }
-
-            return hit;
-        }
+			        if (distance > tmax)
+				        return false;
+		        }
+	        }
+	        return true;
+		}
 
         public bool Contains(Vector3 point)
         {
