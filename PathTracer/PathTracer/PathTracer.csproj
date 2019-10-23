@@ -79,6 +79,7 @@
     <Compile Include="Core\SceneData\BVH\BVH.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
     <Compile Include="Core\SceneData\SceneData.cs" />
+    <Compile Include="Core\SceneSerialization\CubeSerialization.cs" />
     <Compile Include="Core\SceneSerialization\GeometrySerialization.cs" />
     <Compile Include="Core\SceneSerialization\MeshSerialization.cs" />
     <Compile Include="Core\SceneSerialization\PlaneSerialization.cs" />
