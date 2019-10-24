@@ -60,7 +60,6 @@ namespace PathTracerForm
             if (m_Scene == null)
             {
                 Log.Err("载入场景异常");
-                this.multiThreadCheckBox.Enabled = false;
                 this.bounceInputBox.Enabled = false;
                 this.samplerTypeCombo.Enabled = false;
                 this.numSampleInputBox.Enabled = false;
@@ -76,7 +75,6 @@ namespace PathTracerForm
             else
             {
                 Log.Info("场景载入成功");
-                this.multiThreadCheckBox.Enabled = true;
                 this.bounceInputBox.Enabled = true;
                 this.samplerTypeCombo.Enabled = true;
                 this.numSampleInputBox.Enabled = true;
@@ -139,7 +137,6 @@ namespace PathTracerForm
         {
             if (m_Scene == null)
                 return;
-            bool multiThread = this.multiThreadCheckBox.Checked;
             int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
             int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
             if (width <= 0 || height <= 0)
@@ -173,7 +170,6 @@ namespace PathTracerForm
             if (m_Scene == null)
                 return;
             int traceTimes = string.IsNullOrEmpty(this.bounceInputBox.Text)?0: int.Parse(this.bounceInputBox.Text);
-            bool multiThread = this.multiThreadCheckBox.Checked;
             int numSamples = string.IsNullOrEmpty(this.numSampleInputBox.Text) ? 0 : int.Parse(this.numSampleInputBox.Text);
             var sampleType = (SamplerType) this.samplerTypeCombo.SelectedIndex;
             int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
