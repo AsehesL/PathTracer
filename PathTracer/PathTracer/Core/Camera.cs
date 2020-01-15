@@ -418,10 +418,6 @@ namespace ASL.PathTracer
                 var sample = sampler.Sample();
                 Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
                 var pix = scene.tracer.Tracing(ray, scene.sky, sampler);
-	            pix.r = Math.Min(pix.r, 1.0f);
-	            pix.g = Math.Min(pix.g, 1.0f);
-	            pix.b = Math.Min(pix.b, 1.0f);
-	            pix.a = Math.Min(pix.a, 1.0f);
 				col += pix;
 	            //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
             }

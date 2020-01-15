@@ -136,7 +136,7 @@ namespace ASL.PathTracer.SceneSerialization
         {
             var fileInfo = new System.IO.FileInfo(scenePath);
             string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
-            Texture tex = Texture.Create(p);
+            Texture tex = Texture.Create(p, 2.2f);
             FilterMode filterMode = FilterMode.Point;
             WrapMode wrapMode = WrapMode.Clamp;
             if (tex != null)

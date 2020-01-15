@@ -60,7 +60,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public static Texture Create(string path)
+        public static Texture Create(string path, float gamma)
         {
             if (!System.IO.File.Exists(path))
                 return null;
@@ -72,8 +72,11 @@ namespace ASL.PathTracer
                 for (int j = 0; j < img.Height; j++)
                 {
                     var c = img.GetPixel(i, j);
-                    Color col = new Color(((float) c.R) / 255.0f, ((float) c.G) / 255.0f, ((float) c.B) / 255.0f,
-                        ((float) c.A) / 255.0f);
+                    float r = (float) Math.Pow(((float) c.R) / 255.0f, gamma);
+                    float g = (float) Math.Pow(((float) c.G) / 255.0f, gamma);
+                    float b = (float) Math.Pow(((float) c.B) / 255.0f, gamma);
+                    float a = (float) Math.Pow(((float) c.A) / 255.0f, gamma);
+                    Color col = new Color(r, g, b, a);
                     tex.SetPixel(i, img.Height - 1 - j, col);
                 }
             }
@@ -142,7 +145,7 @@ namespace ASL.PathTracer
             return default(Color);
         }
 
-        public System.Drawing.Bitmap SaveToImage()
+        public System.Drawing.Bitmap SaveToImage(float gamma)
         {
             var img = new System.Drawing.Bitmap(m_Width, m_Height);
             for (int i = 0; i < m_Width; i++)
@@ -150,7 +153,7 @@ namespace ASL.PathTracer
                 for (int j = 0; j < m_Height; j++)
                 {
                     Color col = m_Colors[j * m_Width + i];
-                    col.FixColor();
+                    col.FixColor(gamma);
                     System.Drawing.Color c = System.Drawing.Color.FromArgb((int) (col.r * 255.0f),
                         (int) (col.g * 255.0f), (int) (col.b * 255.0f));
                     img.SetPixel(m_Width - 1 - i, m_Height - 1 - j, c);

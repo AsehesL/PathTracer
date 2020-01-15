@@ -157,7 +157,7 @@ namespace PathTracerForm
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                this.renderResultBox.BackgroundImage = result.SaveToImage();
+                this.renderResultBox.BackgroundImage = result.SaveToImage(0.45f);
 
                 this.progressBar.Value = 0;
             }
@@ -206,7 +206,7 @@ namespace PathTracerForm
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                this.renderResultBox.BackgroundImage = result.SaveToImage();
+                this.renderResultBox.BackgroundImage = result.SaveToImage(0.45f);
 
                 this.progressBar.Value = 0;
             }

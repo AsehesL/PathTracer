@@ -74,12 +74,12 @@ namespace ASL.PathTracer
             Color.RGBToHSV(this, ref h, ref s, ref v);
         }
 
-        public void FixColor()
+        public void FixColor(float gamma)
         {
-            this.r = MathUtils.SaturateF(r);
-            this.g = MathUtils.SaturateF(g);
-            this.b = MathUtils.SaturateF(b);
-            this.a = MathUtils.SaturateF(a);
+            this.r = (float)Math.Pow(MathUtils.SaturateF(r), gamma);
+            this.g = (float)Math.Pow(MathUtils.SaturateF(g), gamma);
+            this.b = (float)Math.Pow(MathUtils.SaturateF(b), gamma);
+            this.a = (float)Math.Pow(MathUtils.SaturateF(a), gamma);
         }
 
         public static Color operator +(Color a, Color b)

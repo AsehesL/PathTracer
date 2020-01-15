@@ -66,9 +66,9 @@ namespace ASL.PathTracer
 				}
 			}
 
-		    if (tmin > -double.Epsilon && tmin < double.Epsilon)
-		        return false;
-			hit.distance = tmin;
+		    //if (tmin > -double.Epsilon && tmin < double.Epsilon)
+		    //    return false;
+			hit.distance = tmin - epsilon * 2;
 			hit.shader = shader;
 		    hit.hit = ray.origin + ray.direction * hit.distance;
 			hit.texcoord = default(Vector2); //Cube射线检测uv，懒得实现 o(*￣3￣)o 
