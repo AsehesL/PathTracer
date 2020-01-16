@@ -1,6 +1,7 @@
 ﻿#define USE_MULTI_THREAD
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,57 +14,6 @@ namespace ASL.PathTracer
 {
     public class Camera
     {
-
-        //private class RenderJob
-        //{
-        //    public int x;
-        //    public int y;
-        //    public Camera camera;
-        //    public Scene scene;
-        //    public SamplerBase sampler;
-        //    public ManualResetEvent resetEvent;
-
-        //    public RenderJob(int x, int y, SamplerBase sampler, Scene scene, Camera camera)
-        //    {
-        //        this.x = x;
-        //        this.y = y;
-        //        this.sampler = sampler;
-        //        this.scene = scene;
-        //        this.camera = camera;
-        //        this.resetEvent = new ManualResetEvent(false);
-        //    }
-
-        //    public void Render(System.Object stateObject)
-        //    {
-        //        camera.RenderPixel(x, y, sampler, scene);
-        //        resetEvent.Set();
-        //    }
-        //}
-
-        //private class FastRenderJob
-        //{
-        //    public int x;
-        //    public int y;
-        //    public Camera camera;
-        //    public Scene scene;
-        //    public ManualResetEvent resetEvent;
-
-        //    public FastRenderJob(int x, int y, Scene scene, Camera camera)
-        //    {
-        //        this.x = x;
-        //        this.y = y;
-        //        this.scene = scene;
-        //        this.camera = camera;
-        //        this.resetEvent = new ManualResetEvent(false);
-        //    }
-
-        //    public void Render(System.Object stateObject)
-        //    {
-        //        camera.FastRenderPixel(x, y, scene);
-        //        resetEvent.Set();
-        //    }
-        //}
-
         public Vector3 position { get; private set; }
 
         public Vector3 right
@@ -200,9 +150,8 @@ namespace ASL.PathTracer
             if (m_RenderTarget == null)
                 throw new System.NullReferenceException("未设置RenderTarget");
 
-            //RenderMultiThread(scene, progressCallBackAction);
+            RenderTask task = new RenderTask(m_SamplerType, m_NumSamples, m_NumSets, scene, this, fastRender);
 
-            List<RenderTile> tiles = new List<RenderTile>();
             for (int j = 0; j < m_RenderTarget.height; j += 32)
             {
                 for (int i = 0; i < m_RenderTarget.width; i += 32)
@@ -213,186 +162,64 @@ namespace ASL.PathTracer
                         w = 32;
                     if (h > 32)
                         h = 32;
-                    var renderTile = new RenderTile(i, j, w, h, scene, this,
-                        SamplerFactory.Create(m_SamplerType, m_NumSamples, m_NumSets), fastRender);
-                    tiles.Add(renderTile);
-#if !USE_MULTI_THREAD
-                    renderTile.Render(null);
-#endif
+                    task.AddTile(i, j, w, h);
                 }
             }
+            task.Render();
+            task.CopyToTexture(m_RenderTarget);
 
-#if USE_MULTI_THREAD
-            List<ManualResetEvent> eventList = new List<ManualResetEvent>();
-            int total = tiles.Count;
-            int finished = 0;
-            for (int i = 0; i < tiles.Count; i++)
-            {
-                eventList.Add(tiles[i].resetEvent);
-                ThreadPool.QueueUserWorkItem(tiles[i].Render);
-                if (eventList.Count >= Environment.ProcessorCount)
-                {
-                    WaitRender(eventList);
-                    progressCallBackAction?.Invoke(finished, total);
-                    finished++;
-                }
-            }
 
-            while (eventList.Count > 0)
-            {
-                WaitRender(eventList);
-                progressCallBackAction?.Invoke(finished, total);
-                finished++;
-            }
-#endif
+            //            //RenderMultiThread(scene, progressCallBackAction);
 
-            for (int i = 0; i < tiles.Count; i++)
-            {
-                tiles[i].CopyToTexture(m_RenderTarget);
-            }
+            //            List<RenderTile> tiles = new List<RenderTile>();
+            //            for (int j = 0; j < m_RenderTarget.height; j += 32)
+            //            {
+            //                for (int i = 0; i < m_RenderTarget.width; i += 32)
+            //                {
+            //                    int w = m_RenderTarget.width - i;
+            //                    int h = m_RenderTarget.height - j;
+            //                    if (w > 32)
+            //                        w = 32;
+            //                    if (h > 32)
+            //                        h = 32;
+            //                    var renderTile = new RenderTile(i, j, w, h, scene, this,
+            //                        SamplerFactory.Create(m_SamplerType, m_NumSamples, m_NumSets), fastRender);
+            //                    tiles.Add(renderTile);
+            //#if !USE_MULTI_THREAD
+            //                                renderTile.Render(null);
+            //#endif
+            //                }
+            //            }
+
+            //#if USE_MULTI_THREAD
+            //            List<ManualResetEvent> eventList = new List<ManualResetEvent>();
+            //            int total = tiles.Count;
+            //            int finished = 0;
+            //            for (int i = 0; i < tiles.Count; i++)
+            //            {
+            //                eventList.Add(tiles[i].resetEvent);
+            //                ThreadPool.QueueUserWorkItem(tiles[i].Render);
+            //                if (eventList.Count >= Environment.ProcessorCount)
+            //                {
+            //                    WaitRender(eventList);
+            //                    progressCallBackAction?.Invoke(finished, total);
+            //                    finished++;
+            //                }
+            //            }
+
+            //            while (eventList.Count > 0)
+            //            {
+            //                WaitRender(eventList);
+            //                progressCallBackAction?.Invoke(finished, total);
+            //                finished++;
+            //            }
+            //#endif
+
+            //            for (int i = 0; i < tiles.Count; i++)
+            //            {
+            //                tiles[i].CopyToTexture(m_RenderTarget);
+            //            }
         }
-
-        //public void FastRender(Scene scene, System.Action<int, int> progressCallBackAction = null)
-        //{
-        //    if (scene == null)
-        //        throw new System.ArgumentNullException();
-        //    if (m_RenderTarget == null)
-        //        throw new System.NullReferenceException("未设置RenderTarget");
-
-        //        FastRenderMultiThread(scene, progressCallBackAction);
-        //}
-
-        //private void RenderSingleThread(Scene scene, System.Action<int, int> progressCallBackAction)
-        //{
-        //    var sampler = m_Samplers[0];
-        //    int total = m_RenderTarget.width * m_RenderTarget.height;
-        //    for (int j = 0; j < m_RenderTarget.height; j++)
-        //    {
-        //        for (int i = 0; i < m_RenderTarget.width; i++)
-        //        {
-        //            RenderPixel(i, j, sampler, scene);
-        //            progressCallBackAction?.Invoke(j * m_RenderTarget.width + i, total);
-        //        }
-        //    }
-        //}
-
-        //private void FastRenderSingleThread(Scene scene, System.Action<int, int> progressCallBackAction)
-        //{
-        //    int total = m_RenderTarget.width * m_RenderTarget.height;
-        //    for (int j = 0; j < m_RenderTarget.height; j++)
-        //    {
-        //        for (int i = 0; i < m_RenderTarget.width; i++)
-        //        {
-        //            FastRenderPixel(i, j, scene);
-        //            progressCallBackAction?.Invoke(j * m_RenderTarget.width + i, total);
-        //        }
-        //    }
-        //}
-
-        //private void RenderMultiThread(Scene scene, System.Action<int, int> progressCallBackAction)
-        //{
-        //    List<RenderTile> tiles = new List<RenderTile>();
-        //    for (int j = 0; j < m_RenderTarget.height; j += 32)
-        //    {
-        //        for (int i = 0; i < m_RenderTarget.width; i += 32)
-        //        {
-        //            int w = m_RenderTarget.width - i;
-        //            int h = m_RenderTarget.height - j;
-        //            if (w > 32)
-        //                w = 32;
-        //            if (h > 32)
-        //                h = 32;
-        //            var renderTile = new RenderTile(i, j, w, h, scene, this,
-        //                SamplerFactory.Create(m_SamplerType, m_NumSamples, m_NumSets));
-        //            tiles.Add(renderTile);
-        //        }
-        //    }
-
-        //    List<ManualResetEvent> eventList = new List<ManualResetEvent>();
-        //    int total = m_RenderTarget.width * m_RenderTarget.height;
-        //    int finished = 0;
-        //    for (int i = 0; i < tiles.Count; i++)
-        //    {
-        //        eventList.Add(tiles[i].resetEvent);
-        //        ThreadPool.QueueUserWorkItem(tiles[i].Render);
-        //        if (eventList.Count >= Environment.ProcessorCount)
-        //        {
-        //            WaitRender(eventList);
-        //            progressCallBackAction?.Invoke(finished, total);
-        //            finished++;
-        //        }
-        //    }
-
-        //    while (eventList.Count > 0)
-        //    {
-        //        WaitRender(eventList);
-        //        progressCallBackAction?.Invoke(finished, total);
-        //        finished++;
-        //    }
-
-        //    //List<ManualResetEvent> eventList = new List<ManualResetEvent>();
-
-        //    //int samplerIndex = 0;
-        //    //int total = m_RenderTarget.width * m_RenderTarget.height;
-        //    //int finished = 0;
-        //    //for (int j = 0; j < m_RenderTarget.height; j++)
-        //    //{
-        //    //    for (int i = 0; i < m_RenderTarget.width; i++)
-        //    //    {
-        //    //        var job = new RenderJob(i, j, m_Samplers[samplerIndex], scene, this);
-        //    //        samplerIndex += 1;
-        //    //        if (samplerIndex >= m_Samplers.Length)
-        //    //            samplerIndex = 0;
-        //    //        eventList.Add(job.resetEvent);
-        //    //        ThreadPool.QueueUserWorkItem(job.Render);
-
-        //    //        if (eventList.Count >= Environment.ProcessorCount)
-        //    //        {
-        //    //            WaitRender(eventList);
-        //    //            progressCallBackAction?.Invoke(finished, total);
-        //    //            finished++;
-        //    //        }
-        //    //    }
-        //    //}
-
-        //    //while (eventList.Count > 0)
-        //    //{
-        //    //    WaitRender(eventList);
-        //    //    progressCallBackAction?.Invoke(finished, total);
-        //    //    finished++;
-        //    //}
-        //}
-
-        //private void FastRenderMultiThread(Scene scene, System.Action<int, int> progressCallBackAction)
-        //{
-        //    List<ManualResetEvent> eventList = new List<ManualResetEvent>();
-
-        //    int total = m_RenderTarget.width * m_RenderTarget.height;
-        //    int finished = 0;
-        //    for (int j = 0; j < m_RenderTarget.height; j++)
-        //    {
-        //        for (int i = 0; i < m_RenderTarget.width; i++)
-        //        {
-        //            var job = new FastRenderJob(i, j, scene, this);
-        //            eventList.Add(job.resetEvent);
-        //            ThreadPool.QueueUserWorkItem(job.Render);
-
-        //            if (eventList.Count >= Environment.ProcessorCount)
-        //            {
-        //                WaitRender(eventList);
-        //                progressCallBackAction?.Invoke(finished, total);
-        //                finished++;
-        //            }
-        //        }
-        //    }
-
-        //    while (eventList.Count > 0)
-        //    {
-        //        WaitRender(eventList);
-        //        progressCallBackAction?.Invoke(finished, total);
-        //        finished++;
-        //    }
-        //}
 
         internal void RenderPixel(int x, int y, SamplerBase sampler, Scene scene)
         {
@@ -418,20 +245,14 @@ namespace ASL.PathTracer
                 var sample = sampler.Sample();
                 Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
                 var pix = scene.tracer.Tracing(ray, scene.sky, sampler);
-				col += pix;
-	            //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
+                col += pix;
+                //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
             }
 
             col /= sampler.numSamples;
             col.a = 1.0f;
             return col;
         }
-
-        //internal void FastRenderPixel(int x, int y, Scene scene)
-        //{
-        //    Ray ray = GetRayFromPixel(x + 0.5f, y + 0.5f);
-        //    m_RenderTarget.SetPixel(x, y, scene.tracer.FastTracing(ray));
-        //}
 
         internal Color FastRenderPixelToColor(int x, int y, Scene scene)
         {
@@ -441,12 +262,132 @@ namespace ASL.PathTracer
 
         private void WaitRender(List<ManualResetEvent> events)
         {
+
             int finished = WaitHandle.WaitAny(events.ToArray());
             if (finished == WaitHandle.WaitTimeout)
             {
             }
 
             events.RemoveAt(finished);
+        }
+    }
+
+    class RenderTask
+    {
+        private struct Tile
+        {
+            public int x;
+            public int y;
+            public int w;
+            public int h;
+        }
+
+        private struct Result
+        {
+            public int x;
+            public int y;
+            public Color color;
+        }
+
+        private class Job
+        {
+            public List<Result> results;
+
+            private SamplerBase m_Sampler;
+            private Camera m_Camera;
+            private Scene m_Scene;
+
+            private bool m_IsFastRender;
+
+            private ConcurrentQueue<Tile> m_Tiles;
+            private ConcurrentQueue<Result> m_Results;
+
+            public Job(ConcurrentQueue<Tile> tiles, ConcurrentQueue<Result> results, Scene scene, Camera camera,
+                SamplerBase sampler, bool fastRender)
+            {
+                this.m_Scene = scene;
+                this.m_Camera = camera;
+                this.m_IsFastRender = fastRender;
+                m_Sampler = sampler;
+                m_Tiles = tiles;
+                m_Results = results;
+            }
+
+            public void Render()
+            {
+                while (m_Tiles.Count > 0)
+                {
+                    Tile tile;
+                    if (!m_Tiles.TryDequeue(out tile))
+                        break;
+                    for (int j = 0; j < tile.h; j++)
+                    {
+                        for (int i = 0; i < tile.w; i++)
+                        {
+                            Color col;
+                            if (m_IsFastRender)
+                            {
+                                col = m_Camera.FastRenderPixelToColor(i + tile.x, j + tile.y, m_Scene);
+                            }
+                            else
+                            {
+                                col = m_Camera.RenderPixelToColor(i + tile.x, j + tile.y, m_Sampler, m_Scene);
+                            }
+
+                            m_Results.Enqueue(new Result() {color = col, x = i + tile.x, y = j + tile.y});
+                            //m_Results[j * tile.w + i] = col;
+                        }
+                    }
+                }
+            }
+        }
+
+        private ConcurrentQueue<Tile> m_Tiles;
+        private ConcurrentQueue<Result> m_Results;
+        private Job[] m_Jobs;
+
+        public RenderTask(SamplerType samplerType, int numSamples, int numSets, Scene scene, Camera camera,
+            bool fastRender = false)
+        {
+            m_Tiles = new ConcurrentQueue<Tile>();
+            m_Results = new ConcurrentQueue<Result>();
+            m_Jobs = new Job[Environment.ProcessorCount];
+
+            for (int i = 0; i < m_Jobs.Length; i++)
+            {
+                m_Jobs[i] = new Job(m_Tiles, m_Results, scene, camera,
+                    SamplerFactory.Create(samplerType, numSamples, numSets), fastRender);
+            }
+        }
+
+        public void AddTile(int x, int y, int w, int h)
+        {
+            m_Tiles.Enqueue(new Tile {x = x, y = y, w = w, h = h});
+        }
+
+        public void Render()
+        {
+            Task[] tasks = new Task[m_Jobs.Length];
+            for (int i = 0; i < m_Jobs.Length; i++)
+            {
+                tasks[i] = Task.Run(new Action(m_Jobs[i].Render));
+            }
+
+            //WaitHandle.WaitAll(m_Events);
+            Task.WaitAll(tasks);
+        }
+
+        public void CopyToTexture(Texture texture)
+        {
+            if (texture == null)
+                return;
+            while (m_Results.Count > 0)
+            {
+                Result result;
+                if (!m_Results.TryDequeue(out result))
+                    return;
+                texture.SetPixel(result.x, result.y, result.color);
+            }
         }
     }
 
@@ -489,7 +430,7 @@ namespace ASL.PathTracer
             {
                 for (int i = 0; i < m_Width; i++)
                 {
-                    texture.SetPixel(i+m_X,j+m_Y, m_Results[j * m_Width + i]);
+                    texture.SetPixel(i + m_X, j + m_Y, m_Results[j * m_Width + i]);
                 }
             }
         }
