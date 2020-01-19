@@ -252,7 +252,6 @@ namespace ASL.PathTracer
 
         public Vector3 TransformVector(Vector3 vector)
         {
-            Vector3 result = default(Vector3);
             double x = vector.x * m00 + vector.y * m10 + vector.z * m20;
             double y = vector.x * m01 + vector.y * m11 + vector.z * m21;
             double z = vector.x * m02 + vector.y * m12 + vector.z * m22;

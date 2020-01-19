@@ -82,6 +82,14 @@ namespace ASL.PathTracer
             this.a = (float)Math.Pow(MathUtils.SaturateF(a), gamma);
         }
 
+        public void Gamma(float gamma)
+        {
+            this.r = (float)Math.Pow(r, gamma);
+            this.g = (float)Math.Pow(g, gamma);
+            this.b = (float)Math.Pow(b, gamma);
+            this.a = (float)Math.Pow(a, gamma);
+        }
+
         public static Color operator +(Color a, Color b)
         {
             return new Color(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a);

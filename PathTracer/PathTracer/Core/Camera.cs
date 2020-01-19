@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -150,75 +151,17 @@ namespace ASL.PathTracer
             if (m_RenderTarget == null)
                 throw new System.NullReferenceException("未设置RenderTarget");
 
-            RenderTask task = new RenderTask(m_SamplerType, m_NumSamples, m_NumSets, scene, this, fastRender);
+            RenderJob job = new RenderJob(m_SamplerType, m_NumSamples, m_NumSets, m_RenderTarget.width, m_RenderTarget.height, scene, this, fastRender);
 
             for (int j = 0; j < m_RenderTarget.height; j += 32)
             {
                 for (int i = 0; i < m_RenderTarget.width; i += 32)
                 {
-                    int w = m_RenderTarget.width - i;
-                    int h = m_RenderTarget.height - j;
-                    if (w > 32)
-                        w = 32;
-                    if (h > 32)
-                        h = 32;
-                    task.AddTile(i, j, w, h);
+                    job.AddTile(i, j);
                 }
             }
-            task.Render();
-            task.CopyToTexture(m_RenderTarget);
+            job.Render(m_RenderTarget, progressCallBackAction);
 
-
-            //            //RenderMultiThread(scene, progressCallBackAction);
-
-            //            List<RenderTile> tiles = new List<RenderTile>();
-            //            for (int j = 0; j < m_RenderTarget.height; j += 32)
-            //            {
-            //                for (int i = 0; i < m_RenderTarget.width; i += 32)
-            //                {
-            //                    int w = m_RenderTarget.width - i;
-            //                    int h = m_RenderTarget.height - j;
-            //                    if (w > 32)
-            //                        w = 32;
-            //                    if (h > 32)
-            //                        h = 32;
-            //                    var renderTile = new RenderTile(i, j, w, h, scene, this,
-            //                        SamplerFactory.Create(m_SamplerType, m_NumSamples, m_NumSets), fastRender);
-            //                    tiles.Add(renderTile);
-            //#if !USE_MULTI_THREAD
-            //                                renderTile.Render(null);
-            //#endif
-            //                }
-            //            }
-
-            //#if USE_MULTI_THREAD
-            //            List<ManualResetEvent> eventList = new List<ManualResetEvent>();
-            //            int total = tiles.Count;
-            //            int finished = 0;
-            //            for (int i = 0; i < tiles.Count; i++)
-            //            {
-            //                eventList.Add(tiles[i].resetEvent);
-            //                ThreadPool.QueueUserWorkItem(tiles[i].Render);
-            //                if (eventList.Count >= Environment.ProcessorCount)
-            //                {
-            //                    WaitRender(eventList);
-            //                    progressCallBackAction?.Invoke(finished, total);
-            //                    finished++;
-            //                }
-            //            }
-
-            //            while (eventList.Count > 0)
-            //            {
-            //                WaitRender(eventList);
-            //                progressCallBackAction?.Invoke(finished, total);
-            //                finished++;
-            //            }
-            //#endif
-
-            //            for (int i = 0; i < tiles.Count; i++)
-            //            {
-            //                tiles[i].CopyToTexture(m_RenderTarget);
-            //            }
         }
 
         internal void RenderPixel(int x, int y, SamplerBase sampler, Scene scene)
@@ -229,7 +172,6 @@ namespace ASL.PathTracer
                 var sample = sampler.Sample();
                 Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
                 col += scene.tracer.Tracing(ray, scene.sky, sampler);
-                //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
             }
 
             col /= sampler.numSamples;
@@ -270,192 +212,139 @@ namespace ASL.PathTracer
 
             events.RemoveAt(finished);
         }
-    }
 
-    class RenderTask
-    {
-        private struct Tile
+        class RenderJob
         {
-            public int x;
-            public int y;
-            public int w;
-            public int h;
-        }
+            private struct Tile
+            {
+                public int x;
+                public int y;
+            }
 
-        private struct Result
-        {
-            public int x;
-            public int y;
-            public Color color;
-        }
+            private struct Result
+            {
+                public int x;
+                public int y;
+                public Color color;
+            }
 
-        private class Job
-        {
-            public List<Result> results;
+            private class Job
+            {
+                public SamplerBase sampler;
+                public Camera camera;
+                public Scene scene;
 
-            private SamplerBase m_Sampler;
-            private Camera m_Camera;
-            private Scene m_Scene;
+                public bool isFastRender;
 
-            private bool m_IsFastRender;
+                private ConcurrentQueue<Tile> m_Tiles;
+                private ConcurrentQueue<Result> m_Results;
+                private ManualResetEvent m_ResetEvent;
+
+                public uint renderWidth;
+                public uint renderHeight;
+
+                public Job(ConcurrentQueue<Tile> tiles, ConcurrentQueue<Result> results, ManualResetEvent resetEvent)
+                {
+                    m_Tiles = tiles;
+                    m_Results = results;
+                    m_ResetEvent = resetEvent;
+                }
+
+                public void Render()
+                {
+                    while (m_Tiles.Count > 0)
+                    {
+                        Tile tile;
+                        if (!m_Tiles.TryDequeue(out tile))
+                            break;
+                        for (int j = tile.y; j < renderHeight && j - tile.y < 32; j++)
+                        {
+                            for (int i = tile.x; i < renderWidth && i - tile.x < 32; i++)
+                            {
+                                Color col;
+                                if (isFastRender)
+                                {
+                                    col = camera.FastRenderPixelToColor(i, j, scene);
+                                }
+                                else
+                                {
+                                    col = camera.RenderPixelToColor(i, j, sampler, scene);
+                                }
+
+                                m_Results.Enqueue(new Result() { color = col, x = i, y = j });
+
+                            }
+                        }
+
+                        m_ResetEvent.Set();
+                    }
+                }
+            }
 
             private ConcurrentQueue<Tile> m_Tiles;
             private ConcurrentQueue<Result> m_Results;
+            private ManualResetEvent m_ResetEvent;
+            private Job[] m_Jobs;
+            //private TempTexture m_TempTexture;
 
-            public Job(ConcurrentQueue<Tile> tiles, ConcurrentQueue<Result> results, Scene scene, Camera camera,
-                SamplerBase sampler, bool fastRender)
+            public RenderJob(SamplerType samplerType, int numSamples, int numSets, uint renderWidth, uint renderHeight, Scene scene, Camera camera, bool fastRender = false)
             {
-                this.m_Scene = scene;
-                this.m_Camera = camera;
-                this.m_IsFastRender = fastRender;
-                m_Sampler = sampler;
-                m_Tiles = tiles;
-                m_Results = results;
+                m_Tiles = new ConcurrentQueue<Tile>();
+                m_Results = new ConcurrentQueue<Result>();
+                m_Jobs = new Job[Environment.ProcessorCount];
+                m_ResetEvent = new ManualResetEvent(false);
+
+                for (int i = 0; i < m_Jobs.Length; i++)
+                {
+                    m_Jobs[i] = new Job(m_Tiles, m_Results, m_ResetEvent);
+                    m_Jobs[i].camera = camera;
+                    m_Jobs[i].scene = scene;
+                    m_Jobs[i].sampler = SamplerFactory.Create(samplerType, numSamples, numSets);
+                    m_Jobs[i].isFastRender = fastRender;
+                    m_Jobs[i].renderWidth = renderWidth;
+                    m_Jobs[i].renderHeight = renderHeight;
+                }
             }
 
-            public void Render()
+            public void AddTile(int x, int y)
             {
+                m_Tiles.Enqueue(new Tile { x = x, y = y });
+            }
+
+            public void Render(Texture texture, System.Action<int, int> progressCallBackAction = null)
+            {
+                int total = m_Tiles.Count;
+
+                Task[] tasks = new Task[m_Jobs.Length];
+                for (int i = 0; i < m_Jobs.Length; i++)
+                {
+                    tasks[i] = Task.Run(new Action(m_Jobs[i].Render));
+                }
+
                 while (m_Tiles.Count > 0)
                 {
-                    Tile tile;
-                    if (!m_Tiles.TryDequeue(out tile))
-                        break;
-                    for (int j = 0; j < tile.h; j++)
-                    {
-                        for (int i = 0; i < tile.w; i++)
-                        {
-                            Color col;
-                            if (m_IsFastRender)
-                            {
-                                col = m_Camera.FastRenderPixelToColor(i + tile.x, j + tile.y, m_Scene);
-                            }
-                            else
-                            {
-                                col = m_Camera.RenderPixelToColor(i + tile.x, j + tile.y, m_Sampler, m_Scene);
-                            }
-
-                            m_Results.Enqueue(new Result() {color = col, x = i + tile.x, y = j + tile.y});
-                            //m_Results[j * tile.w + i] = col;
-                        }
-                    }
+                    m_ResetEvent.WaitOne();
+                    m_ResetEvent.Reset();
+                    progressCallBackAction?.Invoke(total - m_Tiles.Count, total);
                 }
-            }
-        }
 
-        private ConcurrentQueue<Tile> m_Tiles;
-        private ConcurrentQueue<Result> m_Results;
-        private Job[] m_Jobs;
+                Task.WaitAll(tasks);
 
-        public RenderTask(SamplerType samplerType, int numSamples, int numSets, Scene scene, Camera camera,
-            bool fastRender = false)
-        {
-            m_Tiles = new ConcurrentQueue<Tile>();
-            m_Results = new ConcurrentQueue<Result>();
-            m_Jobs = new Job[Environment.ProcessorCount];
-
-            for (int i = 0; i < m_Jobs.Length; i++)
-            {
-                m_Jobs[i] = new Job(m_Tiles, m_Results, scene, camera,
-                    SamplerFactory.Create(samplerType, numSamples, numSets), fastRender);
-            }
-        }
-
-        public void AddTile(int x, int y, int w, int h)
-        {
-            m_Tiles.Enqueue(new Tile {x = x, y = y, w = w, h = h});
-        }
-
-        public void Render()
-        {
-            Task[] tasks = new Task[m_Jobs.Length];
-            for (int i = 0; i < m_Jobs.Length; i++)
-            {
-                tasks[i] = Task.Run(new Action(m_Jobs[i].Render));
+                ResultToTexture(texture);
             }
 
-            //WaitHandle.WaitAll(m_Events);
-            Task.WaitAll(tasks);
-        }
-
-        public void CopyToTexture(Texture texture)
-        {
-            if (texture == null)
-                return;
-            while (m_Results.Count > 0)
+            private void ResultToTexture(Texture texture)
             {
-                Result result;
-                if (!m_Results.TryDequeue(out result))
+                if (texture == null)
                     return;
-                texture.SetPixel(result.x, result.y, result.color);
-            }
-        }
-    }
-
-    class RenderTile
-    {
-        private SamplerBase m_Sampler;
-        private int m_X;
-        private int m_Y;
-        private int m_Width;
-        private int m_Height;
-
-        private Camera m_Camera;
-        private Scene m_Scene;
-        public ManualResetEvent resetEvent;
-
-        private bool m_IsFastRender;
-
-        private Color[] m_Results;
-
-        public RenderTile(int x, int y, int width, int height, Scene scene, Camera camera, SamplerBase sampler,
-            bool fastRender = false)
-        {
-            this.m_X = x;
-            this.m_Y = y;
-            this.m_Width = width;
-            this.m_Height = height;
-            this.m_Scene = scene;
-            this.m_Camera = camera;
-            this.resetEvent = new ManualResetEvent(false);
-            this.m_IsFastRender = fastRender;
-            m_Sampler = sampler;
-            m_Results = new Color[width * height];
-        }
-
-        public void CopyToTexture(Texture texture)
-        {
-            if (texture == null)
-                return;
-            for (int j = 0; j < m_Height; j++)
-            {
-                for (int i = 0; i < m_Width; i++)
+                while (m_Results.Count > 0)
                 {
-                    texture.SetPixel(i + m_X, j + m_Y, m_Results[j * m_Width + i]);
+                    Result result;
+                    if (!m_Results.TryDequeue(out result))
+                        return;
+                    texture.SetPixel(result.x, result.y, result.color);
                 }
             }
-        }
-
-        public void Render(System.Object stateObject)
-        {
-            for (int j = 0; j < m_Height; j++)
-            {
-                for (int i = 0; i < m_Width; i++)
-                {
-                    Color col;
-                    if (m_IsFastRender)
-                    {
-                        col = m_Camera.FastRenderPixelToColor(i + m_X, j + m_Y, m_Scene);
-                    }
-                    else
-                    {
-                        col = m_Camera.RenderPixelToColor(i + m_X, j + m_Y, m_Sampler, m_Scene);
-                    }
-
-                    m_Results[j * m_Width + i] = col;
-                }
-            }
-
-            resetEvent.Set();
         }
     }
 }

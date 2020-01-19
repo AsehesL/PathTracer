@@ -413,13 +413,18 @@ namespace ASL.PathTracer
             return 2.0 * Vector3.Dot(n, i) * n - i;
         }
 
-        public static Vector3 Refract(Vector3 i, Vector3 n, double eta)
+        public static bool Refract(Vector3 i, Vector3 n, double eta, out Vector3 result)
         {
-            double cosi = Vector3.Dot(-1.0 * i, n);
+            double cosi = Vector3.Dot(i, n);
             double cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
-            Vector3 t = eta * i + ((eta * cosi - Math.Sqrt(Math.Abs(cost2))) * n);
-            double v = cost2 > 0 ? 1.0 : 0.0;
-            return new Vector3(v * t.x, v * t.y, v * t.z);
+            if (cost2 > 0)
+            {
+                result = eta * i + ((eta * cosi - Math.Sqrt(Math.Abs(cost2))) * n);
+                return true;
+            }
+
+            result = default(Vector3);
+            return false;
         }
 
         public static double Angle(Vector3 from, Vector3 to)

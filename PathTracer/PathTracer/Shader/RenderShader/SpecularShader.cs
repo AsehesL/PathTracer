@@ -10,10 +10,11 @@ namespace ASL.PathTracer
     class SpecularShader : Shader 
     {
         public Color color;
+        public float roughness;
 
         //public Texture diffuse;
         //public Texture specular;
-        //public Vector2 tile;
+        public Vector2 tile;
 
         //public float e;
 
@@ -21,9 +22,9 @@ namespace ASL.PathTracer
         public override Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon)
         {
             Vector3 w = Vector3.Reflect(ray.direction.normalized * -1, hit.normal);
-            //Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
-            //u.Normalize();
-            //Vector3 v = Vector3.Cross(u, w);
+            Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
+            u.Normalize();
+            Vector3 v = Vector3.Cross(u, w);
 
             //float sampleE = e;
             //if (specular != null)
@@ -31,14 +32,14 @@ namespace ASL.PathTracer
             //    sampleE *= specular.Sample((float)hit.texcoord.x , (float)hit.texcoord.y ).r;
             //}
 
-            //Vector3 sp = sampler.SampleHemiSphere(sampleE);
+            Vector3 sp = sampler.SampleHemiSphere(roughness);
 
-            //Vector3 wi = sp.x * u + sp.y * v + sp.z * w;
-            //if (Vector3.Dot(wi, hit.normal) < 0.0)
-            //    wi = -sp.x * u - sp.y * v - sp.z * w;
-            //wi.Normalize();
+            Vector3 wi = sp.x * u + sp.y * v + sp.z * w;
+            if (Vector3.Dot(wi, hit.normal) < 0.0)
+                wi = -sp.x * u - sp.y * v - sp.z * w;
+            wi.Normalize();
 
-            float ndl = (float)Vector3.Dot(hit.normal, w);
+            //float ndl = (float)Vector3.Dot(hit.normal, w);
 
             Color difcol = color;
             //if (diffuse != null)
@@ -47,7 +48,7 @@ namespace ASL.PathTracer
             //}
 
             Ray lray = new Ray(hit.hit, w);
-            Color realCol = ndl * difcol * tracer.Tracing(lray, sky, sampler, hit.depth + 1);
+            Color realCol = difcol * tracer.Tracing(lray, sky, sampler, hit.depth + 1);
 
             return realCol;
         }

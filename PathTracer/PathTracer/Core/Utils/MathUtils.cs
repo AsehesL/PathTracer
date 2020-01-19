@@ -8,6 +8,8 @@ namespace ASL.PathTracer
 {
     static class MathUtils
     {
+        public const double InvPi = 1.0 / Math.PI;
+
         public static double Clamp(double value, double min, double max)
         {
             value = value < min ? min : value;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -90,7 +91,7 @@ namespace ASL.PathTracer
             return scene;
         }
 
-        public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, int width, int height, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
+        public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
         {
             Texture result = new Texture(width, height);
             m_Tracer = new PathTracer(tracingTimes, 0.000001);
@@ -110,10 +111,10 @@ namespace ASL.PathTracer
             return result;
         }
 
-        public Texture FastRender(int width, int height, System.Action<int, int> progressCallBackAction = null)
+        public Texture FastRender(uint width, uint height, System.Action<int, int> progressCallBackAction = null)
         {
             //对图片按原始比例压缩到宽高不超过512
-            int w, h;
+            uint w, h;
 
 #if DEBUG
             w = width;
@@ -127,12 +128,12 @@ namespace ASL.PathTracer
             else if (width > height)
             {
                 w = 256;
-                h = (int) (((float) height) / width * w);
+                h = (uint) (((float) height) / width * w);
             }
             else
             {
                 h = 256;
-                w = (int)(((float)width) / height * h);
+                w = (uint)(((float)width) / height * h);
             }
 #endif
 
@@ -152,7 +153,7 @@ namespace ASL.PathTracer
             return result;
         }
 
-        public Texture RenderSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, int width, int height, int numSets = 83)
+        public Texture RenderSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83)
         {
             Texture result = new Texture(width, height);
             result.Fill(Color.black);

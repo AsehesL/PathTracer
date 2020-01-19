@@ -50,6 +50,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FreeImageNET">
+      <HintPath>..\Libs\FreeImageNET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -79,15 +82,16 @@
     <Compile Include="Core\SceneData\BVH\BVH.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
     <Compile Include="Core\SceneData\SceneData.cs" />
-    <Compile Include="Core\SceneSerialization\CubeSerialization.cs" />
-    <Compile Include="Core\SceneSerialization\GeometrySerialization.cs" />
-    <Compile Include="Core\SceneSerialization\MeshSerialization.cs" />
-    <Compile Include="Core\SceneSerialization\PlaneSerialization.cs" />
-    <Compile Include="Core\SceneSerialization\QuadSerialization.cs" />
-    <Compile Include="Core\SceneSerialization\SceneSerialization.cs" />
-    <Compile Include="Core\SceneSerialization\SphereSerialization.cs" />
+    <Compile Include="Core\Serialization\CubeSerialization.cs" />
+    <Compile Include="Core\Serialization\GeometrySerialization.cs" />
+    <Compile Include="Core\Serialization\MeshSerialization.cs" />
+    <Compile Include="Core\Serialization\PlaneSerialization.cs" />
+    <Compile Include="Core\Serialization\QuadSerialization.cs" />
+    <Compile Include="Core\Serialization\SceneSerialization.cs" />
+    <Compile Include="Core\Serialization\SphereSerialization.cs" />
     <Compile Include="Core\Shader.cs" />
     <Compile Include="Core\Sky.cs" />
+    <Compile Include="Core\TaskQueue.cs" />
     <Compile Include="Core\Texture.cs" />
     <Compile Include="Core\Tracer\Tracer.cs" />
     <Compile Include="Core\Utils\MathUtils.cs" />
@@ -98,8 +102,10 @@
     <Compile Include="Scene.cs" />
     <Compile Include="Shader\RenderShader\DiffuseShader.cs" />
     <Compile Include="Shader\RenderShader\LightShader.cs" />
+    <Compile Include="Shader\RenderShader\PBRShader.cs" />
     <Compile Include="Shader\RenderShader\SpecularShader.cs" />
     <Compile Include="Shader\RenderShader\TestShader.cs" />
+    <Compile Include="Shader\RenderShader\TransparencyShader.cs" />
     <Compile Include="Shader\SkyShader\AmbientSphere.cs" />
     <Compile Include="Shader\SkyShader\TestSky.cs" />
   </ItemGroup>

@@ -46,7 +46,14 @@ namespace ASL.PathTracer
                     hit.normal = (tocenter + ray.direction * hit.distance) / radius;
                     hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
-                    hit.texcoord = default(Vector2);
+
+                    float fi = (float)Math.Atan2(hit.hit.x - position.x, hit.hit.z - position.z);
+                    float u = fi * 0.5f * (float)MathUtils.InvPi;
+                    float theta = (float)Math.Acos(hit.hit.y - position.y);
+
+                    float v = 1.0f - theta * (float)MathUtils.InvPi;
+
+                    hit.texcoord = new Vector2(u, v);
                     return true;
                 }
 
@@ -61,7 +68,13 @@ namespace ASL.PathTracer
                     hit.normal = (tocenter + ray.direction * hit.distance) / radius;
                     hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
-                    hit.texcoord = default(Vector2);
+                    float fi = (float)Math.Atan2(hit.hit.x - position.x, hit.hit.z - position.z);
+                    float u = fi * 0.5f * (float)MathUtils.InvPi;
+                    float theta = (float)Math.Acos(hit.hit.y - position.y);
+
+                    float v = 1.0f - theta * (float)MathUtils.InvPi;
+
+                    hit.texcoord = new Vector2(u, v);
                     return true;
                 }
             }

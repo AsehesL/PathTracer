@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreeImageAPI;
 
 namespace ASL.PathTracer
 {
@@ -24,11 +25,11 @@ namespace ASL.PathTracer
     }
     public class Texture
     {
-        public int width { get { return m_Width; } }
-        public int height { get { return m_Height; } }
+        public uint width { get { return m_Width; } }
+        public uint height { get { return m_Height; } }
 
-        private int m_Width;
-        private int m_Height;
+        private uint m_Width;
+        private uint m_Height;
 
         private float m_UDelta;
         private float m_VDelta;
@@ -38,7 +39,7 @@ namespace ASL.PathTracer
 
         private Color[] m_Colors;
 
-        public Texture(int width, int height)
+        public Texture(uint width, uint height)
         {
             m_Width = width;
             m_Height = height;
@@ -64,20 +65,71 @@ namespace ASL.PathTracer
         {
             if (!System.IO.File.Exists(path))
                 return null;
-            var img = new System.Drawing.Bitmap(Image.FromFile(path));
+            if (!FreeImage.IsAvailable())
+                return null;
 
-            Texture tex = new Texture(img.Width, img.Height);
-            for (int i = 0; i < img.Width; i++)
+            FIBITMAP dib = new FIBITMAP();
+            dib = FreeImage.LoadEx(path);
+            if (dib.IsNull)
+                return null;
+            var bpp = FreeImage.GetBPP(dib);
+            if (bpp != 24 && bpp != 32 && bpp != 96)
             {
-                for (int j = 0; j < img.Height; j++)
+                FreeImage.UnloadEx(ref dib);
+                return null;
+            }
+            uint w = FreeImage.GetWidth(dib);
+            uint h = FreeImage.GetHeight(dib);
+
+            Texture tex = new Texture(w, h);
+            for (int i = 0; i < h; i++)
+            {
+                if (bpp == 24)
                 {
-                    var c = img.GetPixel(i, j);
-                    float r = (float) Math.Pow(((float) c.R) / 255.0f, gamma);
-                    float g = (float) Math.Pow(((float) c.G) / 255.0f, gamma);
-                    float b = (float) Math.Pow(((float) c.B) / 255.0f, gamma);
-                    float a = (float) Math.Pow(((float) c.A) / 255.0f, gamma);
-                    Color col = new Color(r, g, b, a);
-                    tex.SetPixel(i, img.Height - 1 - j, col);
+                    Scanline<RGBTRIPLE> scanline = new Scanline<RGBTRIPLE>(dib, i);
+
+                    RGBTRIPLE[] data = scanline.Data;
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        var red = data[j].rgbtRed;
+                        var green = data[j].rgbtGreen;
+                        var blue = data[j].rgbtBlue;
+                        Color color = Color.Color32(red, green, blue);
+                        color.Gamma(gamma);
+                        tex.SetPixel(j, i, color);
+                    }
+                }
+                else if (bpp == 32)
+                {
+                    Scanline<RGBQUAD> scanline = new Scanline<RGBQUAD>(dib, i);
+
+                    RGBQUAD[] data = scanline.Data;
+
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        var red = data[j].rgbRed;
+                        var green = data[j].rgbGreen;
+                        var blue = data[j].rgbBlue;
+                        var alpha = data[j].rgbReserved;
+                        Color color = Color.Color32(red, green, blue, alpha);
+                        color.Gamma(gamma);
+                        tex.SetPixel(j, i, color);
+                    }
+                }
+                else if (bpp == 96)
+                {
+                    Scanline<FIRGBF> scanline = new Scanline<FIRGBF>(dib, i);
+
+                    FIRGBF[] data = scanline.Data;
+
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        var red = data[j].red;
+                        var green = data[j].green;
+                        var blue = data[j].blue;
+                        Color color = new Color(red, green, blue);
+                        tex.SetPixel(j, i, color);
+                    }
                 }
             }
 
@@ -96,22 +148,24 @@ namespace ASL.PathTracer
                 if (x < 0)
                     x = 0;
                 else if (x >= m_Width)
-                    x = m_Width - 1;
+                    x = (int) m_Width - 1;
                 if (y < 0)
                     y = 0;
                 else if (y >= m_Height)
-                    y = m_Height - 1;
+                    y = (int) m_Height - 1;
             }
             else if (wrapMode == WrapMode.Repeat)
             {
+                int w = (int) m_Width;
+                int h = (int) m_Height;
                 if (x < 0)
-                    x = m_Width + x % m_Width;
-                else if (x >= m_Width)
-                    x = x % m_Width;
+                    x = w - 1 + x % w;
+                else if (x >= w)
+                    x = x % w;
                 if (y < 0)
-                    y = m_Height + y % m_Height;
-                else if (y >= m_Height)
-                    y = y % m_Height;
+                    y = h - 1 + y % h;
+                else if (y >= h)
+                    y = y % h;
             }
             return m_Colors[y * m_Width + x];
         }
@@ -145,9 +199,10 @@ namespace ASL.PathTracer
             return default(Color);
         }
 
-        public System.Drawing.Bitmap SaveToImage(float gamma)
+        public System.Drawing.Bitmap SaveToImage(Bitmap bitmap, float gamma)
         {
-            var img = new System.Drawing.Bitmap(m_Width, m_Height);
+            if(bitmap == null)
+                bitmap = new System.Drawing.Bitmap((int)m_Width, (int)m_Height);
             for (int i = 0; i < m_Width; i++)
             {
                 for (int j = 0; j < m_Height; j++)
@@ -156,11 +211,11 @@ namespace ASL.PathTracer
                     col.FixColor(gamma);
                     System.Drawing.Color c = System.Drawing.Color.FromArgb((int) (col.r * 255.0f),
                         (int) (col.g * 255.0f), (int) (col.b * 255.0f));
-                    img.SetPixel(m_Width - 1 - i, m_Height - 1 - j, c);
+                    bitmap.SetPixel((int)m_Width - 1 - i, (int)m_Height - 1 - j, c);
                 }
             }
 
-            return img;
+            return bitmap;
         }
     }
 }

@@ -17,6 +17,7 @@ namespace PathTracerForm
     public partial class MainForm : Form
     {
         private Scene m_Scene;
+        private Bitmap m_Bitmap;
 
         public MainForm()
         {
@@ -39,6 +40,7 @@ namespace PathTracerForm
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            this.openFileDialog.Filter = "场景文件|*.scene";
             DialogResult result = this.openFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -137,8 +139,8 @@ namespace PathTracerForm
         {
             if (m_Scene == null)
                 return;
-            int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
-            int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
+            uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
+            uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
             if (width <= 0 || height <= 0)
             {
                 MessageBox.Show("请输入宽高合法的宽高!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -157,7 +159,14 @@ namespace PathTracerForm
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                this.renderResultBox.BackgroundImage = result.SaveToImage(0.45f);
+                if (m_Bitmap != null)
+                {
+                    m_Bitmap.Dispose();
+                    m_Bitmap = null;
+                }
+
+                m_Bitmap = result.SaveToImage(m_Bitmap, 0.45f);
+                this.renderResultBox.BackgroundImage = m_Bitmap;
 
                 this.progressBar.Value = 0;
             }
@@ -172,8 +181,8 @@ namespace PathTracerForm
             int traceTimes = string.IsNullOrEmpty(this.bounceInputBox.Text)?0: int.Parse(this.bounceInputBox.Text);
             int numSamples = string.IsNullOrEmpty(this.numSampleInputBox.Text) ? 0 : int.Parse(this.numSampleInputBox.Text);
             var sampleType = (SamplerType) this.samplerTypeCombo.SelectedIndex;
-            int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
-            int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
+            uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
+            uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
 
             if (traceTimes <= 0)
             {
@@ -206,7 +215,14 @@ namespace PathTracerForm
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                this.renderResultBox.BackgroundImage = result.SaveToImage(0.45f);
+                if (m_Bitmap != null)
+                {
+                    m_Bitmap.Dispose();
+                    m_Bitmap = null;
+                }
+
+                m_Bitmap = result.SaveToImage(m_Bitmap, 0.45f);
+                this.renderResultBox.BackgroundImage = m_Bitmap;
 
                 this.progressBar.Value = 0;
             }
@@ -224,8 +240,8 @@ namespace PathTracerForm
                     int traceTimes = string.IsNullOrEmpty(this.bounceInputBox.Text) ? 0 : int.Parse(this.bounceInputBox.Text);
                     int numSamples = string.IsNullOrEmpty(this.numSampleInputBox.Text) ? 0 : int.Parse(this.numSampleInputBox.Text);
                     var sampleType = (SamplerType)this.samplerTypeCombo.SelectedIndex;
-                    int width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : int.Parse(this.widthInputBox.Text);
-                    int height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : int.Parse(this.heightInputBox.Text);
+                    uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
+                    uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
                     if (traceTimes <= 0)
                     {
                         MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -291,6 +307,22 @@ namespace PathTracerForm
                 this.renderResultBox.BackgroundImage.Save(stream, ImageFormat.Bmp);
 
                 stream.Close();
+            }
+        }
+
+        private void OpenTaskQueueMenuItem_Click(object sender, EventArgs e)
+        {
+            this.openFileDialog.Filter = "渲染队列文件|*.queue";
+            DialogResult result = this.openFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(this.openFileDialog.FileName))
+                {
+                    return;
+                }
+
+                var queue = ASL.PathTracer.TaskQueue.Load(this.openFileDialog.FileName);
+                queue?.Execute();
             }
         }
     }
