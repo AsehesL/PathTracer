@@ -33,6 +33,8 @@
             this.FileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.OpenTaskQueueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel = new System.Windows.Forms.Panel();
             this.infoLabel = new System.Windows.Forms.Label();
             this.fileNameLabel = new System.Windows.Forms.Label();
@@ -56,8 +58,7 @@
             this.bounceInputBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.OpenTaskQueueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SaveHDRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -89,6 +90,7 @@
             this.FileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.OpenToolStripMenuItem,
             this.SaveToolStripMenuItem,
+            this.SaveHDRToolStripMenuItem,
             this.toolStripSeparator1,
             this.OpenTaskQueueMenuItem});
             this.FileToolStripMenuItem.Name = "FileToolStripMenuItem";
@@ -109,6 +111,18 @@
             this.SaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SaveToolStripMenuItem.Text = "保存渲染结果";
             this.SaveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // OpenTaskQueueMenuItem
+            // 
+            this.OpenTaskQueueMenuItem.Name = "OpenTaskQueueMenuItem";
+            this.OpenTaskQueueMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.OpenTaskQueueMenuItem.Text = "运行渲染队列...";
+            this.OpenTaskQueueMenuItem.Click += new System.EventHandler(this.OpenTaskQueueMenuItem_Click);
             // 
             // panel
             // 
@@ -342,17 +356,13 @@
             // 
             this.saveFileDialog.Filter = "BMP文件|*.bmp";
             // 
-            // toolStripSeparator1
+            // SaveHDRToolStripMenuItem
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
-            // 
-            // OpenTaskQueueMenuItem
-            // 
-            this.OpenTaskQueueMenuItem.Name = "OpenTaskQueueMenuItem";
-            this.OpenTaskQueueMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.OpenTaskQueueMenuItem.Text = "运行渲染队列...";
-            this.OpenTaskQueueMenuItem.Click += new System.EventHandler(this.OpenTaskQueueMenuItem_Click);
+            this.SaveHDRToolStripMenuItem.Enabled = false;
+            this.SaveHDRToolStripMenuItem.Name = "SaveHDRToolStripMenuItem";
+            this.SaveHDRToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SaveHDRToolStripMenuItem.Text = "保存HDR渲染结果";
+            this.SaveHDRToolStripMenuItem.Click += new System.EventHandler(this.SaveHDRToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -413,6 +423,7 @@
         private System.Windows.Forms.CheckBox pixelDebugCheckBox;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem OpenTaskQueueMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SaveHDRToolStripMenuItem;
     }
 }
 

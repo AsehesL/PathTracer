@@ -199,7 +199,7 @@ namespace ASL.PathTracer
             return default(Color);
         }
 
-        public System.Drawing.Bitmap SaveToImage(Bitmap bitmap, float gamma)
+        public System.Drawing.Bitmap TransferToBMP(Bitmap bitmap, float gamma)
         {
             if(bitmap == null)
                 bitmap = new System.Drawing.Bitmap((int)m_Width, (int)m_Height);
@@ -216,6 +216,37 @@ namespace ASL.PathTracer
             }
 
             return bitmap;
+        }
+
+        public void SaveToHDR(string path)
+        {
+            FIBITMAP dib = new FIBITMAP();
+
+            dib = FreeImage.AllocateT(FREE_IMAGE_TYPE.FIT_RGBF, (int) width, (int) height, 96);
+            
+            uint h = FreeImage.GetHeight(dib);
+            
+            for (int i = 0; i < h; i++)
+            {
+                Scanline<FIRGBF> scanline = new Scanline<FIRGBF>(dib, i);
+
+                FIRGBF[] data = scanline.Data;
+
+                for (int j = 0; j < data.Length; j++)
+                {
+                    Color color = this.GetPixel(j, i);
+                    data[j].red = color.r;
+                    data[j].green = color.g;
+                    data[j].blue = color.b;
+                }
+
+                scanline.Data = data;
+            }
+
+            if (!FreeImage.SaveEx(ref dib, path, true))
+            {
+            }
+            FreeImage.UnloadEx(ref dib);
         }
     }
 }

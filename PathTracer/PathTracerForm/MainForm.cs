@@ -18,6 +18,7 @@ namespace PathTracerForm
     {
         private Scene m_Scene;
         private Bitmap m_Bitmap;
+        private Texture m_Result;
 
         public MainForm()
         {
@@ -70,6 +71,7 @@ namespace PathTracerForm
                 this.fastPreviewButton.Enabled = false;
                 this.renderButton.Enabled = false;
                 this.SaveToolStripMenuItem.Enabled = false;
+                this.SaveHDRToolStripMenuItem.Enabled = false;
                 this.pixelDebugCheckBox.Enabled = false;
 
                 this.fileNameLabel.Text = "当前场景（空）";
@@ -85,6 +87,7 @@ namespace PathTracerForm
                 this.fastPreviewButton.Enabled = true;
                 this.renderButton.Enabled = true;
                 this.SaveToolStripMenuItem.Enabled = true;
+                this.SaveHDRToolStripMenuItem.Enabled = true;
                 this.pixelDebugCheckBox.Enabled = true;
 
                 var tpnames = System.Enum.GetNames(typeof(SamplerType));
@@ -152,10 +155,10 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            var result = m_Scene.FastRender(width, height, this.ProgressCallBack);
+            m_Result = m_Scene.FastRender(width, height, this.ProgressCallBack);
             stopWatch.Stop();
 
-            if (result != null)
+            if (m_Result != null)
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
@@ -165,7 +168,7 @@ namespace PathTracerForm
                     m_Bitmap = null;
                 }
 
-                m_Bitmap = result.SaveToImage(m_Bitmap, 0.45f);
+                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f);
                 this.renderResultBox.BackgroundImage = m_Bitmap;
 
                 this.progressBar.Value = 0;
@@ -208,10 +211,10 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            var result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, 83, this.ProgressCallBack);
+            m_Result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, 83, this.ProgressCallBack);
             stopWatch.Stop();
 
-            if (result != null)
+            if (m_Result != null)
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
@@ -221,7 +224,7 @@ namespace PathTracerForm
                     m_Bitmap = null;
                 }
 
-                m_Bitmap = result.SaveToImage(m_Bitmap, 0.45f);
+                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f);
                 this.renderResultBox.BackgroundImage = m_Bitmap;
 
                 this.progressBar.Value = 0;
@@ -269,9 +272,9 @@ namespace PathTracerForm
 
                     Log.Info($"渲染目标像素:({x},{y})");
 
-                    var result = m_Scene.RenderSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
+                    m_Result = m_Scene.RenderSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
 
-                    if (result != null)
+                    if (m_Result != null)
                     {
                         Log.CompleteInfo("渲染完成");
 
@@ -295,6 +298,7 @@ namespace PathTracerForm
         {
             if(this.renderResultBox.BackgroundImage == null)
                 return;
+            this.saveFileDialog.Filter = "BMP文件|*.bmp";
             DialogResult result = this.saveFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -323,6 +327,23 @@ namespace PathTracerForm
 
                 var queue = ASL.PathTracer.TaskQueue.Load(this.openFileDialog.FileName);
                 queue?.Execute();
+            }
+        }
+
+        private void SaveHDRToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.renderResultBox.BackgroundImage == null)
+                return;
+            this.saveFileDialog.Filter = "HDR文件|*.hdr";
+            DialogResult result = this.saveFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(this.saveFileDialog.FileName))
+                {
+                    return;
+                }
+                
+                m_Result.SaveToHDR(this.saveFileDialog.FileName);
             }
         }
     }

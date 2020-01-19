@@ -86,6 +86,8 @@ namespace ASL.PathTracer
         public SamplerType samplerType;
         [XmlAttribute(AttributeName = "NumSamples")]
         public int numSamples;
+        [XmlAttribute(AttributeName = "HDR")]
+        public bool saveHDR;
         [XmlAttribute(AttributeName = "Width")]
         public int width;
         [XmlAttribute(AttributeName = "Height")]
@@ -114,13 +116,22 @@ namespace ASL.PathTracer
                 return false;
             var scene = Scene.Create(scenePath);
             var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height);
-            var bitmap = tex.SaveToImage(null, 0.45f);
+            
             if (outputFileInfo.Directory.Exists)
-                outputFileInfo.Directory.Create(); 
-            FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
-            bitmap.Save(stream, ImageFormat.Bmp);
-            stream.Close();
-            bitmap.Dispose();
+                outputFileInfo.Directory.Create();
+            if (saveHDR)
+            {
+                tex.SaveToHDR(outputFileInfo.FullName);
+            }
+            else
+            {
+                var bitmap = tex.TransferToBMP(null, 0.45f);
+                FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
+                bitmap.Save(stream, ImageFormat.Bmp);
+                stream.Close();
+                bitmap.Dispose();
+            }
+
             return true;
         }
     }
