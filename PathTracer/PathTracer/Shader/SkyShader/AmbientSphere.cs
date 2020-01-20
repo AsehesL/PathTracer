@@ -26,10 +26,10 @@ namespace ASL.PathTracer
 
             float v = 1.0f - theta* (float)MathUtils.InvPi;
 
-            double ldv = Math.Max(0, Vector3.Dot(dir, new Vector3(0.2556, 0.9409, 0.2222)));
-            ldv = Math.Pow(ldv, 2.2);
+            //double ldv = Math.Max(0, Vector3.Dot(dir, new Vector3(0.2556, 0.9409, 0.2222)));
+            //ldv = Math.Pow(ldv, 2.2);
 
-            return environment.Sample(u, v) * intensity + new Color(1, 0.9f, 0.8f) * (float)ldv * 3.8f;
+            return environment.Sample(u, v) * intensity;// + new Color(1, 0.9f, 0.8f) * (float)ldv * 3.8f;
         }
     }
 }
