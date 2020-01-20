@@ -415,7 +415,7 @@ namespace ASL.PathTracer
 
         public static bool Refract(Vector3 i, Vector3 n, double eta, out Vector3 result)
         {
-            double cosi = Vector3.Dot(i, n);
+            double cosi = Vector3.Dot(-1.0*i, n);
             double cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
             if (cost2 > 0)
             {

@@ -13,7 +13,7 @@ namespace ASL.PathTracer
             //Vector3 w = Vector3.Reflect(ray.direction.normalized, hit.normal);
             float et;
             Vector3 n;
-            if (Vector3.Dot(ray.direction.normalized, hit.normal) > 0)
+            if (Vector3.Dot(ray.direction, hit.normal) > 0)
             {
                 n = -1 * hit.normal;
                 et = refractive;
