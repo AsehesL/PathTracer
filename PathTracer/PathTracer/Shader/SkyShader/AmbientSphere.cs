@@ -32,4 +32,34 @@ namespace ASL.PathTracer
             return environment.Sample(u, v) * intensity;// + new Color(1, 0.9f, 0.8f) * (float)ldv * 3.8f;
         }
     }
+
+    [ShaderType("DirEnvironment")]
+    class DirAmbientSphere : Sky
+    {
+        public Texture environment;
+        public float intensity = 1.0f;
+        public Vector3 sun;
+        public float sunintensity;
+        public Color suncolor;
+
+        public DirAmbientSphere() : base()
+        {
+        }
+
+        public override Color RenderColor(Vector3 dir)
+        {
+            if (environment == null)
+                return Color.white;
+            float fi = (float)Math.Atan2(dir.x, dir.z);
+            float u = fi * 0.5f * (float)MathUtils.InvPi;
+            float theta = (float)Math.Acos(dir.y);
+
+            float v = 1.0f - theta * (float)MathUtils.InvPi;
+
+            double ldv = Math.Max(0, Vector3.Dot(dir, sun));
+            ldv = Math.Pow(ldv, 220);
+
+            return environment.Sample(u, v) * intensity + suncolor * (float)ldv * sunintensity;
+        }
+    }
 }

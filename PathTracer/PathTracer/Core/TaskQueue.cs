@@ -119,11 +119,11 @@ namespace ASL.PathTracer
             
             if (outputFileInfo.Directory.Exists)
                 outputFileInfo.Directory.Create();
-            if (saveHDR)
+            //if (saveHDR)
             {
-                tex.SaveToHDR(outputFileInfo.FullName);
+                tex.SaveToHDR(Path.Combine(outputFileInfo.FullName, ".hdr"));
             }
-            else
+            //else
             {
                 var bitmap = tex.TransferToBMP(null, 0.45f);
                 FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
