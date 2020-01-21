@@ -114,7 +114,7 @@ namespace ASL.PathTracer
 					}
 
 					Ray lray = new Ray(hit.hit, wi);
-					return ndl * Lambertatian() * (1.0f - F) * difcol * tracer.Tracing(lray, sky, sampler, hit.depth + 1);
+					return ndl * difcol * tracer.Tracing(lray, sky, sampler, hit.depth + 1)* Lambertatian() * (1.0f - F);
 				}
 			}
         }

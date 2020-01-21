@@ -14,10 +14,30 @@ namespace ASL.PathTracer.SceneSerialization
 		{
 			string position = geoParams["Position"].paramValue;
 			string radius = geoParams["Radius"].paramValue;
+			
 			float r = float.Parse(radius);
 			Vector3 p = StringUtils.StringToVector3(position);
+			var sphere = new Sphere(p, r, shaders[0]);
 
-			output.Add(new Sphere(p, r, shaders[0]));
+			if (geoParams.ContainsKey("UseTexcoord") && geoParams["UseTexcoord"].paramValue == "true")
+			{
+				sphere.useTexcoord = true;
+			}
+			else
+			{
+				sphere.useTexcoord = false;
+			}
+
+			if (geoParams.ContainsKey("UseTangent") && geoParams["UseTangent"].paramValue == "true")
+			{
+				sphere.useTangent = true;
+			}
+			else
+			{
+				sphere.useTangent = false;
+			}
+
+			output.Add(sphere);
 		}
 	}
 }

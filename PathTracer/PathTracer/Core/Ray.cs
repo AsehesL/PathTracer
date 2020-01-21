@@ -30,6 +30,7 @@ namespace ASL.PathTracer
         public Vector3 hit;
         public Vector2 texcoord;
         public Vector3 normal;
+		public Vector3 tangent;
         public int depth;
         public Shader shader;
         public double distance;

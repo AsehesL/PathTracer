@@ -8,7 +8,7 @@ namespace ASL.PathTracer
 {
 
     [ShaderType("Emissive")]
-    class LightShader : Shader
+    class EmissiveShader : Shader
     {
         //public Color baseColor;
         public Color color;

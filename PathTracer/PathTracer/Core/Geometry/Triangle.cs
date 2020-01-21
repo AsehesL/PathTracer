@@ -10,17 +10,8 @@ namespace ASL.PathTracer
 	{
 		public Vector3 position;
 		public Vector3 normal;
+		public Vector3 tangent;
 		public Vector2 uv;
-
-		public static Vertex Lerp(Vertex begin, Vertex end, double t)
-		{
-			return new Vertex
-			{
-				position = Vector3.Lerp(begin.position, end.position, t),
-				normal = Vector3.Lerp(begin.normal, end.normal, t),
-				uv = Vector2.Lerp(begin.uv, end.uv, t),
-			};
-		}
 	}
 
 	public class Triangle : BoundsGeometry
