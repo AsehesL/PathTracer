@@ -10,7 +10,6 @@ namespace ASL.PathTracer
 
         public override Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon)
         {
-            Vector3 w = Vector3.Reflect(ray.direction * -1, hit.normal);
             float et;
             Vector3 n;
             double cosine;
@@ -45,7 +44,8 @@ namespace ASL.PathTracer
 
             if (sampler.GetRandom() < reflectProb)
             {
-	            Ray lray = new Ray(hit.hit, w);
+	            Vector3 w = Vector3.Reflect(ray.direction * -1, hit.normal);
+				Ray lray = new Ray(hit.hit, w);
 	            return tracer.Tracing(lray, sky, sampler, hit.depth + 1);
 			}
             else
