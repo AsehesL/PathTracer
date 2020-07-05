@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,7 @@ namespace ASL.PathTracer
 			this.bounds = new Bounds(position, scale + new Vector3(0.1, 0.1, 0.1));
 		}
 
-		public override bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
+		protected override bool RayCastGeometry(Ray ray, double epsilon, ref RayCastHit hit)
 		{
 			double tmin = 0.0;
 			double tmax = hit.distance;
