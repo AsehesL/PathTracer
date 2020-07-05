@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +24,17 @@ namespace ASL.PathTracer
 
         
 
-        public abstract bool RayCast(Ray ray, double epsilon, ref RayCastHit hit);
+        public bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
+        {
+            if(RayCastGeometry(ray, epsilon, ref hit))
+            {
+                if (hit.shader != null && hit.shader.ShouldCull(ray, hit, epsilon))
+                    return false;
+                return true;
+            }
+            return false;
+        }
+
+        protected abstract bool RayCastGeometry(Ray ray, double epsilon, ref RayCastHit hit);
     }
 }

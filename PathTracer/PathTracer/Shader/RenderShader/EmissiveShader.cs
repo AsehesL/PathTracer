@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +16,8 @@ namespace ASL.PathTracer
 
         public override Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon)
         {
+            //if (isSunTracing)
+            //    return Color.black;
             //float ndv = (float)Math.Max(0, Vector3.Dot(-1*ray.direction, hit.normal));
 
             Color col = color * indensity;

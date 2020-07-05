@@ -19,23 +19,23 @@ namespace ASL.PathTracer.SceneSerialization
 			Vector3 p = StringUtils.StringToVector3(position);
 			var sphere = new Sphere(p, r, shaders[0]);
 
-			if (geoParams.ContainsKey("UseTexcoord") && geoParams["UseTexcoord"].paramValue == "true")
-			{
-				sphere.useTexcoord = true;
-			}
-			else
-			{
-				sphere.useTexcoord = false;
-			}
+			//if (geoParams.ContainsKey("UseTexcoord") && geoParams["UseTexcoord"].paramValue == "true")
+			//{
+			//	sphere.useTexcoord = true;
+			//}
+			//else
+			//{
+			//	sphere.useTexcoord = false;
+			//}
 
-			if (geoParams.ContainsKey("UseTangent") && geoParams["UseTangent"].paramValue == "true")
-			{
-				sphere.useTangent = true;
-			}
-			else
-			{
-				sphere.useTangent = false;
-			}
+			//if (geoParams.ContainsKey("UseTangent") && geoParams["UseTangent"].paramValue == "true")
+			//{
+			//	sphere.useTangent = true;
+			//}
+			//else
+			//{
+			//	sphere.useTangent = false;
+			//}
 
 			output.Add(sphere);
 		}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ASL.PathTracer
@@ -27,6 +27,8 @@ namespace ASL.PathTracer
 	    protected override bool RaycastTriangles(Ray ray, double epsilon, ref RayCastHit hit)
 		{
 			bool raycast = false;
+			if (m_Root == null)
+				return raycast;
 			if (m_Root.IsLeaf)
 			{
 				if (m_Root.Geometry != null)

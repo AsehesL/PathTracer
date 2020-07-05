@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -87,4 +87,73 @@ namespace ASL.PathTracer
             }
         }
     }
+
+    //public class PathTracerWithSun : PathTracer
+    //{
+    //    public PathTracerWithSun(int tracingTimes, double epsilon) : base(tracingTimes, epsilon) { }
+
+    //    public override Color Tracing(Ray ray, bool isSunTracing, Sky sky, SamplerBase sampler, int depth = 0)
+    //    {
+    //        if (depth > tracingTimes)
+    //            return Color.black;
+
+    //        RayCastHit hit;
+    //        hit.distance = double.MaxValue;
+
+    //        if (!isSunTracing)
+    //        {
+    //            if (sceneData.Raycast(ray, m_Epsilon, out hit))
+    //            {
+    //                hit.depth = depth;
+
+    //                Vector3 w = sky == null ? Vector3.down : - 1.0 * sky.sundirection;
+    //                Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
+    //                u.Normalize();
+    //                Vector3 v = Vector3.Cross(u, w);
+    //                Vector3 sp = SunLightOffset(sampler.Sample(), 0.2f);
+    //                Vector3 l = sp.x * u + sp.y * v + sp.z * w;
+    //                if (Vector3.Dot(l, hit.normal) < 0.0)
+    //                    l = -sp.x * u - sp.y * v - sp.z * w;
+    //                l.Normalize();
+    //                Ray lray = new Ray(hit.hit, l);
+
+    //                Color color = hit.shader == null ? new Color(1,0,1) : hit.shader.Render(this, false, sky, sampler, ray, hit, m_Epsilon);
+
+    //                return color + Tracing(lray, true, sky, sampler, depth);
+    //            }
+    //            else
+    //            {
+    //                if (sky != null)
+    //                    return sky.RenderColor(ray.direction, false);
+    //                return Color.black;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            if (sceneData.Raycast(ray, m_Epsilon, out hit))
+    //            {
+    //                hit.depth = depth;
+
+    //                return hit.shader == null ? new Color(1, 0, 1) : hit.shader.Render(this, true, sky, sampler, ray, hit, m_Epsilon);
+    //            }
+    //            else
+    //            {
+    //                if (sky != null)
+    //                    return sky.RenderColor(ray.direction, true);
+    //                return Color.black;
+    //            }
+    //        }
+    //    }
+
+    //    Vector3 SunLightOffset(Vector2 sample, float offset)
+    //    {
+    //        float a = offset * offset;
+
+    //        double phi = 2.0f * Math.PI * sample.x;
+    //        double cos_theta = Math.Sqrt((1.0 - sample.y) / (1.0 + (a * a - 1.0) * sample.y));
+    //        double sin_theta = Math.Sqrt(1.0 - cos_theta * cos_theta);
+
+    //        return new Vector3(Math.Cos(phi) * sin_theta, Math.Sin(phi) * sin_theta, cos_theta);
+    //    }
+    //}
 }

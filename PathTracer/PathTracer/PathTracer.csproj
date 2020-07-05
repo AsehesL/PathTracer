@@ -102,9 +102,7 @@
     <Compile Include="Scene.cs" />
     <Compile Include="Shader\RenderShader\DiffuseShader.cs" />
     <Compile Include="Shader\RenderShader\EmissiveShader.cs" />
-    <Compile Include="Shader\RenderShader\NormalMapTest.cs" />
     <Compile Include="Shader\RenderShader\PBRShader.cs" />
-    <Compile Include="Shader\RenderShader\PBRShaderBase.cs" />
     <Compile Include="Shader\RenderShader\SpecularShader.cs" />
     <Compile Include="Shader\RenderShader\TransparencyShader.cs" />
     <Compile Include="Shader\SkyShader\AmbientSphere.cs" />

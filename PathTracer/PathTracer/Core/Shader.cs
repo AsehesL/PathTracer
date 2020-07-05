@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -91,5 +91,7 @@ namespace ASL.PathTracer
         public abstract Color Render(Tracer tracer, Sky sky, SamplerBase sampler, Ray ray, RayCastHit hit, double epsilon);
 
         public abstract Color FastRender(Ray ray, RayCastHit hit);
+
+        public virtual bool ShouldCull(Ray ray, RayCastHit hit, double epsilon) { return false; }
     }
 }
