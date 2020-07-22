@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -145,11 +145,14 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlAttribute("FilterMode")]
         public string filterMode;
 
+        [XmlAttribute("Linear")]
+        public bool linear;
+
         public Texture CreateTexture(string scenePath)
         {
             var fileInfo = new System.IO.FileInfo(scenePath);
             string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
-            Texture tex = Texture.Create(p, 2.2f);
+            Texture tex = Texture.Create(p, linear ? 1.0f : 2.2f);
             FilterMode filterMode = FilterMode.Point;
             WrapMode wrapMode = WrapMode.Clamp;
             if (tex != null)

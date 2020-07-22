@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -488,6 +488,196 @@ namespace ASL.PathTracer
         public override string ToString()
         {
             return $"Vector3({this.x},{this.y},{this.z})";
+        }
+    }
+
+    public struct Vector4
+    {
+        public double x, y, z, w;
+
+        public double magnitude
+        {
+            get { return System.Math.Sqrt(x * x + y * y + z * z + w * w); }
+        }
+
+        public double sqrMagnitude
+        {
+            get { return x * x + y * y + z * z + w * w; }
+        }
+
+        public Vector3 xyz
+        {
+            get
+            {
+                return new Vector3(x, y, z);
+            }
+        }
+
+        public Vector4 normalized
+        {
+            get
+            {
+                double invm = 1.0 / this.magnitude;
+                return new Vector4(x * invm, y * invm, z * invm, w * invm);
+            }
+        }
+
+        public double this[int index]
+        {
+            get
+            {
+                if (index == 0)
+                    return x;
+                else if (index == 1)
+                    return y;
+                else if (index == 2)
+                    return z;
+                else if (index == 3)
+                    return w;
+                throw new System.IndexOutOfRangeException();
+            }
+            set
+            {
+                if (index == 0)
+                    x = value;
+                else if (index == 1)
+                    y = value;
+                else if (index == 2)
+                    z = value;
+                else if (index == 3)
+                    w = value;
+                else
+                    throw new System.IndexOutOfRangeException();
+            }
+        }
+
+        public Vector4(double x, double y, double z, double w)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
+
+        public void Normalize()
+        {
+            double invm = 1.0 / this.magnitude;
+            this.x *= invm;
+            this.y *= invm;
+            this.z *= invm;
+            this.w *= invm;
+        }
+
+        public void Scale(Vector4 scale)
+        {
+            this.x *= scale.x;
+            this.y *= scale.y;
+            this.z *= scale.z;
+            this.w *= scale.w;
+        }
+
+        public static bool operator ==(Vector4 v1, Vector4 v2)
+        {
+            if (v1.x - v2.x > double.Epsilon)
+                return false;
+            if (v2.x - v1.x > double.Epsilon)
+                return false;
+            if (v1.y - v2.y > double.Epsilon)
+                return false;
+            if (v2.y - v1.y > double.Epsilon)
+                return false;
+            if (v1.z - v2.z > double.Epsilon)
+                return false;
+            if (v2.z - v1.z > double.Epsilon)
+                return false;
+            if (v1.w - v2.w > double.Epsilon)
+                return false;
+            if (v2.w - v1.w > double.Epsilon)
+                return false;
+            return true;
+        }
+
+        public static bool operator !=(Vector4 v1, Vector4 v2)
+        {
+            if (v1.x - v2.x > double.Epsilon)
+                return true;
+            if (v2.x - v1.x > double.Epsilon)
+                return true;
+            if (v1.y - v2.y > double.Epsilon)
+                return true;
+            if (v2.y - v1.y > double.Epsilon)
+                return true;
+            if (v1.z - v2.z > double.Epsilon)
+                return true;
+            if (v2.z - v1.z > double.Epsilon)
+                return true;
+            if (v1.w - v2.w > double.Epsilon)
+                return true;
+            if (v2.w - v1.w > double.Epsilon)
+                return true;
+            return false;
+        }
+
+        public static Vector4 operator +(Vector4 v1, Vector4 v2)
+        {
+            return new Vector4(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
+        }
+
+        public static Vector4 operator -(Vector4 v1, Vector4 v2)
+        {
+            return new Vector4(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
+        }
+
+        public static Vector4 operator *(Vector4 v1, Vector4 v2)
+        {
+            return new Vector4(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w);
+        }
+
+        public static Vector4 operator *(Vector4 v, double f)
+        {
+            return new Vector4(v.x * f, v.y * f, v.z * f, v.w * f);
+        }
+
+        public static Vector4 operator *(double f, Vector4 v)
+        {
+            return new Vector4(v.x * f, v.y * f, v.z * f, v.w * f);
+        }
+
+        public static Vector4 operator /(Vector4 v, double f)
+        {
+            double invf = 1.0 / f;
+            return new Vector4(v.x * invf, v.y * invf, v.z * invf, v.w * invf);
+        }
+
+        public static Vector4 operator /(Vector4 v1, Vector4 v2)
+        {
+            return new Vector4(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w);
+        }
+
+        public static Vector4 Lerp(Vector4 a, Vector4 b, double t)
+        {
+            return new Vector4(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, a.w + (b.w - a.w) * t);
+        }
+
+        public static Vector4 Max(Vector4 lhs, Vector4 rhs)
+        {
+            return new Vector4(Math.Max(lhs.x, rhs.x), Math.Max(lhs.y, rhs.y), Math.Max(lhs.z, rhs.z), Math.Max(lhs.w, rhs.w));
+        }
+
+        public static Vector4 Min(Vector4 lhs, Vector4 rhs)
+        {
+            return new Vector4(Math.Min(lhs.x, rhs.x), Math.Min(lhs.y, rhs.y), Math.Min(lhs.z, rhs.z), Math.Min(lhs.w, rhs.w));
+        }
+
+        public override bool Equals(object obj)
+        {
+            var objVector = (Vector4)obj;
+            return objVector.x == this.x && objVector.y == this.y && objVector.z == this.z && objVector.w == this.w;
+        }
+
+        public override string ToString()
+        {
+            return $"Vector4({this.x},{this.y},{this.z},{this.w})";
         }
     }
 }
