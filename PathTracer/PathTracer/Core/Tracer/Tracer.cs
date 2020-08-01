@@ -34,6 +34,18 @@ namespace ASL.PathTracer
         public abstract Color Tracing(Ray ray, Sky sky, SamplerBase sampler, int depth = 0);
 
         public abstract Color FastTracing(Ray ray);
+
+        public bool TracingOnce(Ray ray)
+        {
+            RayCastHit hit;
+            hit.distance = double.MaxValue;
+
+            if (sceneData.Raycast(ray, m_Epsilon, out hit))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 
     public class PathTracer : Tracer

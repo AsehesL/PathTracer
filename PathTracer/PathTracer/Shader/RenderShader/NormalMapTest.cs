@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ASL.PathTracer
@@ -12,9 +12,9 @@ namespace ASL.PathTracer
 		{
 			Color bmpcol = bump.Sample((float)(hit.texcoord.x), (float)(hit.texcoord.y));
 
-			Vector3 wbnormal = Vector3.Cross(hit.normal, hit.tangent).normalized;
+			Vector3 wbnormal = Vector3.Cross(hit.normal, hit.tangent.xyz).normalized * hit.tangent.w;
 
-			Vector3 rnormal = new Vector3(bmpcol.r * 2 - 1, bmpcol.g * 2 - 1, bmpcol.b * 2 - 1);
+			Vector3 rnormal = new Vector3(bmpcol.r * 2 - 1, bmpcol.g * 2 - 1, bmpcol.b * 2 - 1) * -1;
 			Vector3 worldnormal = default(Vector3);
 			worldnormal.x = hit.tangent.x * rnormal.x + wbnormal.x * rnormal.y + hit.normal.x * rnormal.z;
 			worldnormal.y = hit.tangent.y * rnormal.x + wbnormal.y * rnormal.y + hit.normal.y * rnormal.z;
@@ -33,7 +33,26 @@ namespace ASL.PathTracer
 
 		public override Color FastRender(Ray ray, RayCastHit hit)
 		{
-			return Color.black;
+			Color bmpcol = bump.Sample((float)(hit.texcoord.x), (float)(hit.texcoord.y));
+
+			Vector3 wbnormal = Vector3.Cross(hit.normal, hit.tangent.xyz).normalized * hit.tangent.w;
+
+			Vector3 rnormal = new Vector3(bmpcol.r * 2 - 1, bmpcol.g * 2 - 1, bmpcol.b * 2 - 1) * -1;
+			Vector3 worldnormal = default(Vector3);
+			worldnormal.x = hit.tangent.x * rnormal.x + wbnormal.x * rnormal.y + hit.normal.x * rnormal.z;
+			worldnormal.y = hit.tangent.y * rnormal.x + wbnormal.y * rnormal.y + hit.normal.y * rnormal.z;
+			worldnormal.z = hit.tangent.z * rnormal.x + wbnormal.z * rnormal.y + hit.normal.z * rnormal.z;
+			worldnormal.Normalize();
+			if (Vector3.Dot(worldnormal, hit.normal) < 0)
+				worldnormal *= -1;
+
+			float vdn = (float)Math.Max(0, Vector3.Dot(-1.0 * ray.direction, worldnormal));
+			//float vdn = (float)Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
+
+			//return new Color((float)worldnormal.x * 0.5f + 0.5f, (float)worldnormal.y * 0.5f + 0.5f, (float)worldnormal.z * 0.5f + 0.5f);
+			return new Color(vdn, vdn, vdn);
+			//return bump.Sample((float)(hit.texcoord.x), (float)(hit.texcoord.y));
+			//return new Color((float)hit.tangent.x * 0.5f + 0.5f, (float)hit.tangent.y * 0.5f + 0.5f, (float)hit.tangent.z * 0.5f + 0.5f);
 		}
 	}
 }

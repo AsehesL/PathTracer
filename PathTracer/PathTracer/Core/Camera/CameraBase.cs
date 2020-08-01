@@ -1,58 +1,41 @@
-﻿#define USE_MULTI_THREAD
+#define USE_MULTI_THREAD
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Threading;
 
 namespace ASL.PathTracer
 {
-    public class Camera
+    [Flags]
+    public enum PTBufferType
     {
-        public Vector3 position { get; private set; }
+        None = 0,
+        Color = 1,
+        Volumetric = 2,
+    }
 
-        public Vector3 right
-        {
-            get { return m_Right; }
-        }
+    public abstract class CameraBase
+    {
+        public Vector3 position { get; protected set; }
 
-        public Vector3 up
-        {
-            get { return m_Up; }
-        }
+        public Vector3 right { get; private set; }
 
-        public Vector3 forward
-        {
-            get { return m_Forward; }
-        }
+        public Vector3 up { get; private set; }
 
-        public double near { get; private set; }
+        public Vector3 forward { get; private set; }
 
-        public double fieldOfView { get; private set; }
-
-        private Vector3 m_Right;
-        private Vector3 m_Up;
-        private Vector3 m_Forward;
-
-        private Texture m_RenderTarget;
-
-        private double m_Height;
-        private double m_Width;
+        protected Texture m_RenderTarget;
 
         private SamplerType m_SamplerType;
         private int m_NumSamples;
         private int m_NumSets;
 
-        public Camera(Vector3 position, Vector3 euler, double near, double fieldOfView)
+        public CameraBase(Vector3 position, Vector3 euler)
         {
-            this.near = near;
-            this.fieldOfView = fieldOfView;
             this.position = position;
 
             double cosx = Math.Cos(euler.x * 0.01745329252 * 0.5);
@@ -88,18 +71,9 @@ namespace ASL.PathTracer
             double rh = yz - xw;
             double ri = 1.0 - x2 - y2;
 
-            m_Right.x = ra;
-            m_Right.y = rb;
-            m_Right.z = rc;
-
-            m_Up.x = rd;
-            m_Up.y = re;
-            m_Up.z = rf;
-
-            m_Forward.x = rg;
-            m_Forward.y = rh;
-            m_Forward.z = ri;
-
+            this.right = new Vector3(ra, rb, rc);
+            this.up = new Vector3(rd, re, rf);
+            this.forward = new Vector3(rg, rh, ri);
         }
 
         public void SetRenderTarget(Texture renderTarget)
@@ -108,41 +82,21 @@ namespace ASL.PathTracer
             if (m_RenderTarget == null)
                 return;
 
-            float aspect = (((float) renderTarget.width) / renderTarget.height);
-
-            m_Height = near * Math.Tan(fieldOfView * 0.5 * 0.01745329252);
-            m_Width = aspect * m_Height;
+            ModifyResolution(renderTarget.width, renderTarget.height);
         }
+
+        protected virtual void ModifyResolution(uint width, uint height) { }
 
         public void SetSampler(SamplerType samplerType, int numSamples, int numSets = 83)
         {
             m_SamplerType = samplerType;
             m_NumSamples = numSamples;
             m_NumSets = numSets;
-            //m_Samplers = new SamplerBase[Environment.ProcessorCount];
-            //for (int i = 0; i < m_Samplers.Length; i++)
-            //    m_Samplers[i] = SamplerFactory.Create(samplerType, numSamples, numSets);
-            //m_Sampler = sampler;
         }
 
-        public Ray GetRayFromPixel(double x, double y)
-        {
-            if (m_RenderTarget == null)
-                throw new System.NullReferenceException();
-            x = (m_RenderTarget.width - 1 - x) / m_RenderTarget.width * 2 - 1;
-            y = y / m_RenderTarget.height * 2 - 1;
+        public abstract Ray GetRay(int x, int y, SamplerBase sampler);
 
-            Vector2 point = new Vector2(x * m_Width, y * m_Height);
-            return GetRayFromPoint(point);
-        }
-
-        public Ray GetRayFromPoint(Vector2 point)
-        {
-            Vector3 dir = m_Right * point.x + m_Up * point.y + m_Forward * this.near;
-            Vector3 ori = this.position + dir;
-            dir.Normalize();
-            return new Ray(ori, dir);
-        }
+        public abstract Ray GetRayWithoutSampler(float x, float y);
 
         public void Render(Scene scene, bool fastRender, System.Action<int, int> progressCallBackAction = null)
         {
@@ -169,8 +123,7 @@ namespace ASL.PathTracer
             Color col = Color.black;
             for (int k = 0; k < sampler.numSamples; k++)
             {
-                var sample = sampler.Sample();
-                Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
+                Ray ray = GetRay(x, y, sampler);
                 col += scene.tracer.Tracing(ray, scene.sky, sampler);
             }
 
@@ -184,8 +137,7 @@ namespace ASL.PathTracer
             Color col = Color.black;
             for (int k = 0; k < sampler.numSamples; k++)
             {
-                var sample = sampler.Sample();
-                Ray ray = GetRayFromPixel(x + sample.x, y + sample.y);
+                Ray ray = GetRay(x, y, sampler);
                 var pix = scene.tracer.Tracing(ray, scene.sky, sampler);
                 col += pix;
                 //m_RenderTarget.SetPixel(x, y, scene.tracer.Tracing(ray, scene.sky, sampler));
@@ -198,7 +150,7 @@ namespace ASL.PathTracer
 
         internal Color FastRenderPixelToColor(int x, int y, Scene scene)
         {
-            Ray ray = GetRayFromPixel(x + 0.5f, y + 0.5f);
+            Ray ray = GetRayWithoutSampler(x + 0.5f, y + 0.5f);
             return scene.tracer.FastTracing(ray);
         }
 
@@ -231,7 +183,7 @@ namespace ASL.PathTracer
             private class Job
             {
                 public SamplerBase sampler;
-                public Camera camera;
+                public CameraBase camera;
                 public Scene scene;
 
                 public bool isFastRender;
@@ -287,7 +239,7 @@ namespace ASL.PathTracer
             private Job[] m_Jobs;
             //private TempTexture m_TempTexture;
 
-            public RenderJob(SamplerType samplerType, int numSamples, int numSets, uint renderWidth, uint renderHeight, Scene scene, Camera camera, bool fastRender = false)
+            public RenderJob(SamplerType samplerType, int numSamples, int numSets, uint renderWidth, uint renderHeight, Scene scene, CameraBase camera, bool fastRender = false)
             {
                 m_Tiles = new ConcurrentQueue<Tile>();
                 m_Results = new ConcurrentQueue<Result>();

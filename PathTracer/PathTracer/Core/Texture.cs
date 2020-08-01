@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -73,7 +73,7 @@ namespace ASL.PathTracer
             if (dib.IsNull)
                 return null;
             var bpp = FreeImage.GetBPP(dib);
-            if (bpp != 24 && bpp != 32 && bpp != 96)
+            if (bpp != 24 && bpp != 32 && bpp != 96 && bpp != 8)
             {
                 FreeImage.UnloadEx(ref dib);
                 return null;
@@ -84,7 +84,20 @@ namespace ASL.PathTracer
             Texture tex = new Texture(w, h);
             for (int i = 0; i < h; i++)
             {
-                if (bpp == 24)
+                if(bpp == 8)
+                {
+                    Scanline<Byte> scanline = new Scanline<Byte>(dib, i);
+
+                    Byte[] data = scanline.Data;
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        var gray = data[j];
+                        Color color = Color.Color32(gray, gray, gray);
+                        color.Gamma(gamma);
+                        tex.SetPixel(j, i, color);
+                    }
+                }
+                else if (bpp == 24)
                 {
                     Scanline<RGBTRIPLE> scanline = new Scanline<RGBTRIPLE>(dib, i);
 

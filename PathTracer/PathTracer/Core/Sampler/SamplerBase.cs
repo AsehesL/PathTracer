@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -89,6 +89,50 @@ namespace ASL.PathTracer
             float pw = cos_theta;
 
             return new Vector3(pu, pv, pw);
+        }
+
+        public Vector2 SampleUnitDisk()
+        {
+            Vector2 sample = Sample();
+            sample.x = 2.0 * sample.x - 1.0;
+            sample.y = 2.0 * sample.y - 1.0;
+            double r = 0.0;
+            double phi = 0.0;
+            if(sample.x > -sample.y)
+            {
+                if(sample.x > sample.y)
+                {
+                    r = sample.x;
+                    phi = sample.y / sample.x;
+                }
+                else
+                {
+                    r = sample.y;
+                    phi = 2.0 - sample.x / sample.y;
+                }
+            }
+            else
+            {
+                if(sample.x < sample.y)
+                {
+                    r = -sample.x;
+                    phi = 4.0 + sample.y / sample.x;
+                }
+                else
+                {
+                    r = -sample.y;
+                    if(sample.y < -double.Epsilon || sample.y > double.Epsilon)
+                    {
+                        phi = 6.0 - sample.x / sample.y;
+                    }
+                    else
+                    {
+                        phi = 0.0;
+                    }
+                }
+            }
+            phi *= Math.PI * 0.25;
+            return new Vector2(r * Math.Cos(phi), r * Math.Sin(phi));
         }
 
         protected abstract void InitSampler(int numSamples, int numSets);

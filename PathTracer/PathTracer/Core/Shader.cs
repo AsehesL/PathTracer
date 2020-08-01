@@ -11,8 +11,10 @@ namespace ASL.PathTracer
         Number,
         Vector2,
         Vector3,
+        Vector4,
         Color,
         Texture,
+        Boolean,
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
@@ -47,6 +49,12 @@ namespace ASL.PathTracer
                 case ShaderParamType.Vector3:
                     this.SetVector3(key, (Vector3)value);
                     break;
+                case ShaderParamType.Vector4:
+                    this.SetVector4(key, (Vector4)value);
+                    break;
+                case ShaderParamType.Boolean:
+                    this.SetBoolean(key, (bool)value);
+                    break;
             }
         }
 
@@ -54,6 +62,13 @@ namespace ASL.PathTracer
         {
             var field = GetType().GetField(key);
             if (field != null && field.FieldType == typeof(float))
+                field.SetValue(this, value);
+        }
+
+        public void SetBoolean(string key, bool value)
+        {
+            var field = GetType().GetField(key);
+            if (field != null && field.FieldType == typeof(bool))
                 field.SetValue(this, value);
         }
 
@@ -68,6 +83,13 @@ namespace ASL.PathTracer
         {
             var field = GetType().GetField(key);
             if (field != null && field.FieldType == typeof(Vector3))
+                field.SetValue(this, value);
+        }
+
+        public void SetVector4(string key, Vector4 value)
+        {
+            var field = GetType().GetField(key);
+            if (field != null && field.FieldType == typeof(Vector4))
                 field.SetValue(this, value);
         }
 

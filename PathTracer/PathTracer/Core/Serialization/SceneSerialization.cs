@@ -39,13 +39,30 @@ namespace ASL.PathTracer.SceneSerialization
 
         [XmlAttribute("FieldOfView")] public double fieldOfView;
 
-        public Camera CreateCamera()
+        [XmlAttribute("Radius")] public float radius;
+
+        [XmlAttribute("Focal")] public float focal;
+
+        [XmlAttribute("UseThinLens")] public bool useThinLens;
+
+        public CameraBase CreateCamera()
         {
             Vector3 pos = StringUtils.StringToVector3(position);
             Vector3 rot = StringUtils.StringToVector3(euler);
-            Camera cam = new Camera(pos, rot, near, fieldOfView);
 
-            Log.Info($"相机创建成功:Position:{pos},Rotation:{rot}");
+            PerspectiveCamera cam = new PerspectiveCamera(pos, rot, near, fieldOfView);
+            cam.useThinLens = useThinLens;
+            cam.focal = focal;
+            cam.radius = radius;
+
+            if (useThinLens)
+            {
+                Log.Info($"相机创建成功:Position:{pos},Rotation:{rot},焦距:{focal},光圈半径:{radius}");
+            }
+            else
+            {
+                Log.Info($"相机创建成功:Position:{pos},Rotation:{rot}");
+            }
             return cam;
         }
     }
@@ -246,30 +263,56 @@ namespace ASL.PathTracer.SceneSerialization
             switch (paramType)
             {
                 case ShaderParamType.Color:
-                    string[] colSplit = paramValue.Split(',');
-                    float r = colSplit.Length > 0 ? float.Parse(colSplit[0]) : 1.0f;
-                    float g = colSplit.Length > 1 ? float.Parse(colSplit[1]) : 1.0f;
-                    float b = colSplit.Length > 2 ? float.Parse(colSplit[2]) : 1.0f;
-                    float a = colSplit.Length > 3 ? float.Parse(colSplit[3]) : 1.0f;
-                    return new Color(r, g, b, a);
+                    {
+                        string[] colSplit = paramValue.Split(',');
+                        float r = colSplit.Length > 0 ? float.Parse(colSplit[0]) : 1.0f;
+                        float g = colSplit.Length > 1 ? float.Parse(colSplit[1]) : 1.0f;
+                        float b = colSplit.Length > 2 ? float.Parse(colSplit[2]) : 1.0f;
+                        float a = colSplit.Length > 3 ? float.Parse(colSplit[3]) : 1.0f;
+                        Color color = new Color(r, g, b, a);
+                        color.Gamma(2.2f);
+                        return color;
+                    }
                 case ShaderParamType.Number:
-                    float floatval = float.Parse(paramValue);
-                    return floatval;
+                    {
+                        float floatval = float.Parse(paramValue);
+                        return floatval;
+                    }
+                case ShaderParamType.Boolean:
+                    {
+                        bool boolval = bool.Parse(paramValue);
+                        return boolval;
+                    }
                 case ShaderParamType.Texture:
-                    if (textures.ContainsKey(paramValue))
-                        return textures[paramValue];
-                    return null;
+                    {
+                        if (textures.ContainsKey(paramValue))
+                            return textures[paramValue];
+                        return null;
+                    }
                 case ShaderParamType.Vector2:
-                    string[] vec2Split = paramValue.Split(',');
-                    double vec2x = vec2Split.Length > 0 ? double.Parse(vec2Split[0]) : 0.0;
-                    double vec2y = vec2Split.Length > 1 ? double.Parse(vec2Split[1]) : 0.0;
-                    return new Vector2(vec2x, vec2y);
+                    {
+                        string[] vecsplit = paramValue.Split(',');
+                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
+                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
+                        return new Vector2(x, y);
+                    }
                 case ShaderParamType.Vector3:
-                    string[] vec3Split = paramValue.Split(',');
-                    double vec3x = vec3Split.Length > 0 ? double.Parse(vec3Split[0]) : 0.0;
-                    double vec3y = vec3Split.Length > 1 ? double.Parse(vec3Split[1]) : 0.0;
-                    double vec3z = vec3Split.Length > 2 ? double.Parse(vec3Split[2]) : 0.0;
-                    return new Vector3(vec3x, vec3y, vec3z);
+                    {
+                        string[] vecsplit = paramValue.Split(',');
+                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
+                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
+                        double z = vecsplit.Length > 2 ? double.Parse(vecsplit[2]) : 0.0;
+                        return new Vector3(x, y, z);
+                    }
+                case ShaderParamType.Vector4:
+                    {
+                        string[] vecsplit = paramValue.Split(',');
+                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
+                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
+                        double z = vecsplit.Length > 2 ? double.Parse(vecsplit[2]) : 0.0;
+                        double w = vecsplit.Length > 3 ? double.Parse(vecsplit[3]) : 0.0;
+                        return new Vector4(x, y, z, w);
+                    }
             }
             return null;
         }
@@ -319,7 +362,12 @@ namespace ASL.PathTracer.SceneSerialization
                     sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
                 }
             }
-            Log.Info($"天空盒创建成功:{type}");
+            if (sky.hasSun)
+            {
+                Log.Info($"天空盒创建成功:{type},太阳光方向:({sky.sunDirection.x},{sky.sunDirection.y},{sky.sunDirection.z})");
+            }
+            else
+                Log.Info($"天空盒创建成功:{type}");
             return sky;
         }
     }

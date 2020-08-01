@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace ASL.PathTracer
 
         protected Sky m_Sky;
 
-        protected Camera m_Camera;
+        protected CameraBase m_Camera;
 
         private SceneData m_SceneData;
 
