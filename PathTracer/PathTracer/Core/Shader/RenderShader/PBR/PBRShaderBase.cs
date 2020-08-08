@@ -411,7 +411,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public override Color RenderPreviewChannel(Tracer tracer, Ray ray, RayCastHit hit, RenderChannel renderChannel)
+        public override Color RenderPreviewChannel(Tracer tracer, SamplerBase sampler, Ray ray, RayCastHit hit, RenderChannel renderChannel)
         {
             T property = SampleProperty(ray, hit);
             switch(renderChannel)
@@ -435,7 +435,7 @@ namespace ASL.PathTracer
                     {
                         if (!tracer.sceneData.sky.hasSunLight)
                             return Color.black;
-                        Ray shadowray = new Ray(hit.hit, -1.0 * tracer.sceneData.sky.GetSunDirection(null));
+                        Ray shadowray = new Ray(hit.hit, -1.0 * tracer.sceneData.sky.GetSunDirection(sampler));
                         if (!tracer.TracingOnce(shadowray))
                             return tracer.sceneData.sky.GetSunColor();
                         return Color.black;
@@ -444,7 +444,7 @@ namespace ASL.PathTracer
                     {
                         if (!tracer.sceneData.sky.hasSunLight)
                             return Color.black;
-                        Vector3 sun = -1.0 * tracer.sceneData.sky.GetSunDirection(null);
+                        Vector3 sun = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
                         Vector3 worldNormal = property.TangentSpaceNormal() ? RecalucateNormal(hit.normal, hit.tangent, property.GetNormal()) : hit.normal;
                         float ndl = (float)Math.Max(0.0, Vector3.Dot(sun, worldNormal));
                         Ray shadowray = new Ray(hit.hit, sun);

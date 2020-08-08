@@ -82,8 +82,6 @@ namespace ASL.PathTracer
             public CameraBase camera;
             public Scene scene;
 
-            public RenderChannel renderChannel;
-
             private ConcurrentQueue<Tile> m_Tiles;
             private ConcurrentQueue<Result> m_Results;
             private ManualResetEvent m_ResetEvent;
@@ -112,7 +110,7 @@ namespace ASL.PathTracer
                     {
                         for (int i = tile.x; i < renderWidth && i - tile.x < 32; i++)
                         {
-                            Color col = camera.RenderPixelToColor(i, j, sampler, m_RenderState, renderChannel, scene);
+                            Color col = camera.RenderPixelToColor(i, j, sampler, m_RenderState, scene);
 
                             m_Results.Enqueue(new Result() { color = col, x = i, y = j });
 
@@ -129,7 +127,7 @@ namespace ASL.PathTracer
         private ManualResetEvent m_ResetEvent;
         private Job[] m_Jobs;
 
-        public RenderJob(SamplerType samplerType, int numSamples, int numSets, uint renderWidth, uint renderHeight, Scene scene, CameraBase camera, RenderChannel renderChannel)
+        public RenderJob(SamplerType samplerType, int numSamples, int numSets, uint renderWidth, uint renderHeight, Scene scene, CameraBase camera)
         {
             m_Tiles = new ConcurrentQueue<Tile>();
             m_Results = new ConcurrentQueue<Result>();
@@ -142,7 +140,6 @@ namespace ASL.PathTracer
                 m_Jobs[i].camera = camera;
                 m_Jobs[i].scene = scene;
                 m_Jobs[i].sampler = SamplerFactory.Create(samplerType, numSamples, numSets);
-                m_Jobs[i].renderChannel = renderChannel;
                 m_Jobs[i].renderWidth = renderWidth;
                 m_Jobs[i].renderHeight = renderHeight;
             }

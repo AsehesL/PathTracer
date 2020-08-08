@@ -12,6 +12,7 @@ namespace ASL.PathTracer
     public enum RenderChannel
     {
         Full,
+        SkyLight,
         Albedo,
         Roughness,
         Metallic,
@@ -104,7 +105,7 @@ namespace ASL.PathTracer
 
         public abstract Ray GetRay(int x, int y, SamplerBase sampler);
 
-        public abstract Ray GetRayWithoutSampler(float x, float y);
+        //public abstract Ray GetRayWithoutSampler(float x, float y);
 
         /// <summary>
         /// 执行相机渲染
@@ -112,14 +113,14 @@ namespace ASL.PathTracer
         /// <param name="scene"></param>
         /// <param name="renderChannel"></param>
         /// <param name="progressCallBackAction">渲染进度回调</param>
-        public void Render(Scene scene, RenderChannel renderChannel, System.Action<int, int> progressCallBackAction = null)
+        public void Render(Scene scene, System.Action<int, int> progressCallBackAction = null)
         {
             if (scene == null)
                 throw new System.ArgumentNullException();
             if (m_RenderTarget == null)
                 throw new System.NullReferenceException("未设置RenderTarget");
 
-            RenderJob job = new RenderJob(m_SamplerType, m_NumSamples, m_NumSets, m_RenderTarget.width, m_RenderTarget.height, scene, this, renderChannel);
+            RenderJob job = new RenderJob(m_SamplerType, m_NumSamples, m_NumSets, m_RenderTarget.width, m_RenderTarget.height, scene, this);
 
             for (int j = 0; j < m_RenderTarget.height; j += 32)
             {
@@ -132,9 +133,9 @@ namespace ASL.PathTracer
 
         }
 
-        internal Color RenderPixelToColor(int x, int y, SamplerBase sampler, RenderState renderState, RenderChannel renderChannel, Scene scene)
+        internal Color RenderPixelToColor(int x, int y, SamplerBase sampler, RenderState renderState, Scene scene)
         {
-            if (renderChannel == RenderChannel.Full)
+            //if (renderChannel == RenderChannel.Full)
             {
                 Color col = Color.black;
                 sampler.ResetSampler(); //重置采样器状态
@@ -148,12 +149,12 @@ namespace ASL.PathTracer
                 col.a = 1.0f;
                 return col;
             }
-            else
-            {
-                //如果只渲染某个通道，则调用PreviewTracing
-                Ray ray = GetRayWithoutSampler(x + 0.5f, y + 0.5f);
-                return scene.tracer.PreviewTracing(ray, renderChannel);
-            }
+            //else
+            //{
+            //    //如果只渲染某个通道，则调用PreviewTracing
+            //    Ray ray = GetRayWithoutSampler(x + 0.5f, y + 0.5f);
+            //    return scene.tracer.PreviewTracing(ray, renderChannel);
+            //}
         }
     }
 }

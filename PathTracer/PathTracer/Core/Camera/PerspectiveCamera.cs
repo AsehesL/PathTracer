@@ -65,10 +65,10 @@ namespace ASL.PathTracer
             return GetRayFromPixel(sample.x + x, sample.y + y);
         }
 
-        public override Ray GetRayWithoutSampler(float x, float y)
-        {
-            return GetRayFromPixel(x, y);
-        }
+        //public override Ray GetRayWithoutSampler(float x, float y)
+        //{
+        //    return GetRayFromPixel(x, y);
+        //}
 
         /// <summary>
         /// 根据焦距和透镜半径计算光线

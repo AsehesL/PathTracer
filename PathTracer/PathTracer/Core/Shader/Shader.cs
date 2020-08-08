@@ -139,7 +139,7 @@ namespace ASL.PathTracer
 
         public abstract Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit);
 
-        public abstract Color RenderPreviewChannel(Tracer tracer, Ray ray, RayCastHit hit, RenderChannel renderChannel);
+        public abstract Color RenderPreviewChannel(Tracer tracer, SamplerBase sampler, Ray ray, RayCastHit hit, RenderChannel renderChannel);
 
         public virtual bool ShouldCull(Ray ray, RayCastHit hit) { return false; }
 

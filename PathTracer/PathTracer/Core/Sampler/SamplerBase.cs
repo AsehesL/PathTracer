@@ -189,6 +189,8 @@ namespace ASL.PathTracer
 
         public Vector2 Sample()
         {
+            if (m_NumSamples == 1)
+                return new Vector2(0.5, 0.5);
             if ((int) (m_Index % m_NumSamples) == 0)
             {
                 m_Jump = sRandom.Next(0, m_NumSets) * m_NumSamples;

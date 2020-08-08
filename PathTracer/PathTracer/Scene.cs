@@ -98,16 +98,16 @@ namespace ASL.PathTracer
         public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, RenderChannel renderChannel, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
         {
             Texture result = new Texture(width, height);
-            m_Tracer.tracingTimes = renderChannel == RenderChannel.Full ? tracingTimes : 0;
+            m_Tracer.tracingTimes = tracingTimes;
+            m_Tracer.renderChannel = renderChannel;
             #if DEBUG
             m_Tracer.isDebugging = false;
             #endif
-            if (renderChannel == RenderChannel.Full)
-                m_Camera.SetSampler(samplerType, numSamples, numSets);
+            m_Camera.SetSampler(samplerType, numSamples, numSets);
             m_Camera.SetRenderTarget(result);
             try
             {
-                m_Camera.Render(this, renderChannel, progressCallBackAction);
+                m_Camera.Render(this, progressCallBackAction);
             }
             catch (System.Exception e)
             {
@@ -125,12 +125,13 @@ namespace ASL.PathTracer
             result.Fill(Color.black);
             m_Tracer.tracingTimes = tracingTimes;
             m_Tracer.isDebugging = true;
+            m_Tracer.renderChannel = RenderChannel.Full;
             //m_Camera.SetSampler(samplerType, numSamples, numSets);
             var sampler = SamplerFactory.Create(samplerType, numSamples, numSets);
             m_Camera.SetRenderTarget(result);
             try
             {
-                Color color = m_Camera.RenderPixelToColor(x, y, sampler, new RenderState(), RenderChannel.Full, this);
+                Color color = m_Camera.RenderPixelToColor(x, y, sampler, new RenderState(), this);
                 result.SetPixel(x, y, color);
             }
             catch (System.Exception e)

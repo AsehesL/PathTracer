@@ -17,6 +17,8 @@ namespace ASL.PathTracer
 
         public SceneData sceneData;
 
+        public RenderChannel renderChannel;
+
         public int tracingTimes;
 
         public double epsilon { get { return m_Epsilon; } }
@@ -30,7 +32,7 @@ namespace ASL.PathTracer
 
         public abstract Color Tracing(Ray ray, SamplerBase sampler, RenderState renderState, int depth = 0);
 
-        public abstract Color PreviewTracing(Ray ray, RenderChannel renderChannel);
+        //public abstract Color PreviewTracing(Ray ray, RenderChannel renderChannel);
 
         public bool TracingOnce(Ray ray)
         {
@@ -64,6 +66,20 @@ namespace ASL.PathTracer
 
         public override Color Tracing(Ray ray, SamplerBase sampler, RenderState renderState, int depth = 0)
         {
+            if (renderChannel != RenderChannel.Full && renderChannel != RenderChannel.SkyLight)
+            {
+#if DEBUG
+                Color previewcolor = PreviewTracing(ray, sampler, renderChannel);
+                if (isDebugging)
+                {
+                    Log.AddLog(LogType.Debugging, $"深度：{depth}，射线：{ray}，颜色：{previewcolor}");
+                }
+                return previewcolor;
+#else
+                return PreviewTracing(ray, sampler, renderChannel);
+#endif
+            }
+
             if (depth > tracingTimes)
             {
 #if DEBUG
@@ -86,10 +102,13 @@ namespace ASL.PathTracer
             {
                 hit.depth = depth;
 
-                if (hit.shader == null)
-                    color += new Color(1, 0, 1);
-                else
-                    color += hit.shader.Render(this, sampler, renderState, ray, hit);
+                if (renderChannel == RenderChannel.Full)
+                {
+                    if (hit.shader == null)
+                        color += new Color(1, 0, 1);
+                    else
+                        color += hit.shader.Render(this, sampler, renderState, ray, hit);
+                }
 
                 isHit = true;
             }
@@ -116,7 +135,7 @@ namespace ASL.PathTracer
             return color;
         }
 
-        public override Color PreviewTracing(Ray ray, RenderChannel renderChannel)
+        private Color PreviewTracing(Ray ray, SamplerBase sampler, RenderChannel renderChannel)
         {
             RayCastHit hit;
             hit.distance = double.MaxValue;
@@ -130,7 +149,7 @@ namespace ASL.PathTracer
                 }
                 else
                 {
-                    return hit.shader.RenderPreviewChannel(this, ray, hit, renderChannel);
+                    return hit.shader.RenderPreviewChannel(this, sampler, ray, hit, renderChannel);
                 }
             }
             else

@@ -200,17 +200,21 @@ namespace PathTracerForm
             uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
             uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
 
-            if (renderChannel == RenderChannel.Full && traceTimes <= 0)
-            {
-                MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //if (renderChannel == RenderChannel.Full && traceTimes <= 0)
+            //{
+            //    MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
+            if (traceTimes < 0)
+                traceTimes = 0;
 
-            if (renderChannel == RenderChannel.Full && numSamples <= 0)
-            {
-                MessageBox.Show("不允许采样次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //if (renderChannel == RenderChannel.Full && numSamples <= 0)
+            //{
+            //    MessageBox.Show("不允许采样次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
+            if (numSamples <= 0)
+                numSamples = 1;
 
             if (width <= 0 || height <= 0)
             {
