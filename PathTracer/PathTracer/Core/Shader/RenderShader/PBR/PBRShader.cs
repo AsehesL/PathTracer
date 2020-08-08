@@ -67,18 +67,15 @@ namespace ASL.PathTracer
 
 		public Color color;
         public Texture albedo;
-		public Texture metallicTex;
 		public float metallic;
-		public Texture roughnessTex;
 		public float roughness;
 		public Color emissive;
 		public Texture emissiveTex;
 		public float refractive;
 		public Vector2 tile;
 		public Texture bump;
-		public Texture metallicSmooth;
-		public Texture aoTex;
 		public bool transparent;
+		public Texture mroTex;
 
 		public override PBRShadingModel shadingModel
 		{
@@ -105,6 +102,16 @@ namespace ASL.PathTracer
 
 		private CookTorranceBRDF m_CookTorranceBRDF = new CookTorranceBRDF();
 
+		protected override float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit)
+		{
+			float alpha = color.a;
+			if (albedo != null)
+			{
+				alpha *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).a;
+			}
+			return alpha;
+		}
+
 		protected override PBRProperty SampleProperty(Ray ray, RayCastHit hit)
 		{
 			PBRProperty property = default(PBRProperty);
@@ -113,24 +120,30 @@ namespace ASL.PathTracer
 			{
 				property.albedo *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if (roughnessTex != null)
+			Color mro = mroTex != null ? mroTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)) : Color.black;
+			if (mroTex != null)
 			{
-				property.roughness = roughnessTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+				property.roughness = mro.g;
 			}
 			else
 				property.roughness = roughness;
-			if (metallicTex != null)
+			if (shadingModel != PBRShadingModel.Transparent)
 			{
-				property.metallic = metallicTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+				if (mroTex != null)
+				{
+					property.metallic = mro.r;
+				}
+				else
+					property.metallic = metallic;
 			}
-			else
-				property.metallic = metallic;
 			property.refractive = refractive;
+
 			property.emissive = emissive;
-			if(emissiveTex != null)
+			if (emissiveTex != null)
 			{
 				property.emissive *= emissiveTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
+
 			if (bump == null)
 				property.tangentSpaceNormal = false;
 			else
@@ -138,14 +151,17 @@ namespace ASL.PathTracer
 				property.tangentSpaceNormal = true;
 				property.normal = bump.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if(metallicSmooth != null)
-			{
-				Color col = metallicSmooth.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
-				property.metallic = col.r;
-				property.roughness = (1.0f - col.a);
-			}
-			if (aoTex != null)
-				property.occlusion = aoTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+			//if (shadingModel != PBRShadingModel.Transparent)
+			//{
+			//	if (metallicSmooth != null)
+			//	{
+			//		Color col = metallicSmooth.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
+			//		property.metallic = col.r;
+			//		property.roughness = (1.0f - col.a);
+			//	}
+			//}
+			if (mroTex != null)
+				property.occlusion = mro.b;
 			else
 				property.occlusion = 1.0f;
 			return property;

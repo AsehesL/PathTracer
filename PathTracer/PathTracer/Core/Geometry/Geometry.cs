@@ -23,7 +23,7 @@ namespace ASL.PathTracer
             if(RayCastGeometry(ray, epsilon, ref hit))
             {
                 //如果射线检测成功，则额外判断一下shader是否允许cull，用于实现材质的alpha裁剪等功能
-                if (hit.shader != null && hit.shader.ShouldCull(ray, hit, epsilon))
+                if (hit.shader != null && hit.shader.ShouldCull(ray, hit))
                     return false;
                 return true;
             }

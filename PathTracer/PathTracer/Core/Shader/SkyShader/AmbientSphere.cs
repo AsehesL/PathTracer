@@ -16,7 +16,7 @@ namespace ASL.PathTracer
 
         public float numExtraSamples;
 
-        public float maxDistance;
+        public float maxDistance; //最大距离
 
         public float scatteringCoef; //散射系数
 
@@ -89,14 +89,14 @@ namespace ASL.PathTracer
                     {
                         ambient = RenderSkyColor(shadowRay);
                     }
-                    light += ambient * coef * Mie((float)Vector3.Dot(ray.direction, shadowRay.direction));
+                    light += ambient * coef * MiePhase((float)Vector3.Dot(ray.direction, shadowRay.direction));
                     if(hasSunLight)
                     {
                         shadowdir = -1.0 * GetSunDirection(sampler);
                         shadowRay.direction = shadowdir;
                         if(!tracer.TracingOnce(shadowRay))
                         {
-                            light += GetSunColor() * coef * Mie((float)Vector3.Dot(ray.direction, shadowRay.direction));
+                            light += GetSunColor() * coef * MiePhase((float)Vector3.Dot(ray.direction, shadowRay.direction));
                         }
                     }
                 }
@@ -123,7 +123,7 @@ namespace ASL.PathTracer
         /// </summary>
         /// <param name="cosAngle">视线和光线的夹角</param>
         /// <returns></returns>
-        private float Mie(float cosAngle)
+        private float MiePhase(float cosAngle)
         {
             return m_Param1 * (m_Param2 * (1.0f + cosAngle * cosAngle)) / (m_Param3 * (float)Math.Pow(m_Param4 - m_Param0 * cosAngle, 1.5f));
         }

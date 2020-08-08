@@ -69,16 +69,17 @@ namespace ASL.PathTracer
     {
 		public Color color;
 		public Texture albedo;
-		public Texture roughnessTex;
+		//public Texture roughnessTex;
 		public float roughness;
 		public Color emissive;
 		public Texture emissiveTex;
 		public Vector2 tile;
 		public Texture bump;
-		public Texture aoTex;
+		//public Texture aoTex;
 		public Color transmissionColor;
 		public Texture transmissionTex;
 		public float transmittance;
+		public Texture eroTex;
 
 		public override PBRShadingModel shadingModel => PBRShadingModel.DoubleSidedTranslucent;
 
@@ -96,6 +97,16 @@ namespace ASL.PathTracer
 
 		private CookTorranceBRDF m_CookTorranceBRDF = new CookTorranceBRDF();
 
+		protected override float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit)
+		{
+			float alpha = color.a;
+			if (albedo != null)
+			{
+				alpha *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).a;
+			}
+			return alpha;
+		}
+
 		protected override DoubleSidedTransmittanceProperty SampleProperty(Ray ray, RayCastHit hit)
 		{
 			DoubleSidedTransmittanceProperty property = default(DoubleSidedTransmittanceProperty);
@@ -104,9 +115,10 @@ namespace ASL.PathTracer
 			{
 				property.albedo *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if (roughnessTex != null)
+			Color ero = eroTex != null ? eroTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)) : Color.black;
+			if (eroTex != null)
 			{
-				property.roughness = roughnessTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+				property.roughness = ero.g;
 			}
 			else
 				property.roughness = roughness;
@@ -122,8 +134,8 @@ namespace ASL.PathTracer
 				property.tangentSpaceNormal = true;
 				property.normal = bump.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if (aoTex != null)
-				property.occlusion = aoTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+			if (eroTex != null)
+				property.occlusion = ero.b;
 			else
 				property.occlusion = 1.0f;
 			property.transmissionColor = transmissionColor;

@@ -106,17 +106,11 @@
     <Compile Include="Core\Geometry\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scene.cs" />
-    <Compile Include="Core\Shader\RenderShader\CamTestShader.cs" />
-    <Compile Include="Core\Shader\RenderShader\DiffuseShader.cs" />
     <Compile Include="Core\Shader\RenderShader\EmissiveShader.cs" />
-    <Compile Include="Core\Shader\RenderShader\NormalMapTest.cs" />
     <Compile Include="Core\Shader\RenderShader\PBR\BRDF.cs" />
     <Compile Include="Core\Shader\RenderShader\PBR\PBRShader.cs" />
     <Compile Include="Core\Shader\RenderShader\PBR\PBRShaderBase.cs" />
-    <Compile Include="Core\Shader\RenderShader\SpecularShader.cs" />
-    <Compile Include="Core\Shader\RenderShader\TransparencyShader.cs" />
     <Compile Include="Core\Shader\SkyShader\AmbientSphere.cs" />
-    <Compile Include="Core\Shader\SkyShader\TestSky.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

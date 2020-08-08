@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -68,14 +68,13 @@ namespace ASL.PathTracer
     {
 		public Color color;
 		public Texture albedo;
-		public Texture roughnessTex;
+		public Texture rroTex;
 		public float roughness;
 		public float roughness2;
 		public Color emissive;
 		public Texture emissiveTex;
 		public Vector2 tile;
 		public Texture bump;
-		public Texture aoTex;
 
 		public override PBRShadingModel shadingModel => PBRShadingModel.CarPaint;
 
@@ -93,6 +92,16 @@ namespace ASL.PathTracer
 
 		private CookTorranceBRDF m_CookTorranceBRDF = new CookTorranceBRDF();
 
+		protected override float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit)
+		{
+			float alpha = color.a;
+			if (albedo != null)
+			{
+				alpha *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).a;
+			}
+			return alpha;
+		}
+
 		protected override CarPaintProperty SampleProperty(Ray ray, RayCastHit hit)
 		{
 			CarPaintProperty property = default(CarPaintProperty);
@@ -101,11 +110,11 @@ namespace ASL.PathTracer
 			{
 				property.albedo *= albedo.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if (roughnessTex != null)
+			Color rro = rroTex != null ? rroTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)) : Color.black;
+			if (rroTex != null)
 			{
-				Color rough = roughnessTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
-				property.roughness = rough.r;
-				property.roughness2 = rough.g;
+				property.roughness = rro.r;
+				property.roughness2 = rro.g;
 			}
 			else
 			{
@@ -125,8 +134,8 @@ namespace ASL.PathTracer
 				property.tangentSpaceNormal = true;
 				property.normal = bump.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y));
 			}
-			if (aoTex != null)
-				property.occlusion = aoTex.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y)).r;
+			if (rroTex != null)
+				property.occlusion = rro.b;
 			else
 				property.occlusion = 1.0f;
 			return property;

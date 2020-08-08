@@ -13,11 +13,14 @@ namespace ASL.PathTracer
     class Atmosphere : Sky
     {
         public float numSunSamples;
-        public float rayleighScatterCoef;
-        public float mieScatterCoef;
+        public float rayleighScatterCoef; //rayleigh散射系数
+        public float mieScatterCoef; //mie散射系数
+        public float rayleighExtinctionCoef; //rayleigh消光系数
+        public float mieExtinctionCoef; //mie消光系数
+        public float sunIntensityScale; 
 
-        private Color m_BetaR = new Color(5.8e-6f, 13.5e-6f, 33.1e-6f);
-        private Color m_BetaM = Color.white * 21e-6f;
+        private Color m_BR = new Color(5.8e-6f, 13.5e-6f, 33.1e-6f);
+        private Color m_BM = Color.white * 21e-6f;
         //private Color m_BetaM = Color.white * 0.0001f;
 
         /// <summary>
@@ -104,19 +107,14 @@ namespace ASL.PathTracer
 
             Color sumR = Color.black, sumM = Color.black;
 
-            float mu = (float)Vector3.Dot(ray.direction, sunDir); //只计算方向光的大气散射，不额外计算环境中其它光源的散射
-            float phaseR = m_Param0 * (1 + mu * mu);
-            float phaseM = m_Param1 * (m_Param2 * (1.0f + mu * mu)) / (m_Param3 * (float)Math.Pow(m_Param4 - m_Param5 * mu, 1.5f));
+            float cosAngle = (float)Vector3.Dot(ray.direction, sunDir); //只计算方向光的大气散射，不额外计算环境中其它光源的散射
+            float phaseR = RayleighPhase(cosAngle);
+            float phaseM = MiePhase(cosAngle);
 
             float opticalDepthLightR = 0, opticalDepthLightM = 0;
 
             int j = 0;
-            //if (shadow)
-            //{
-            //    j = (int)sunSamples;
-            //}
-            //else
-            //{
+     
             float lightDistance = RayCastSphere(sunDir, pos, m_AtmosphereRadius);
             float segmentLengthLight = lightDistance / numSunSamples, tCurrentLight = 0;
             for (j = 0; j < numSunSamples; j++)
@@ -128,16 +126,36 @@ namespace ASL.PathTracer
                 opticalDepthLightM += (float)Math.Exp(-heightLight / m_HM) * segmentLengthLight;
                 tCurrentLight += segmentLengthLight;
             }
-            //}
+            
             if (j == numSunSamples)
             {
-                Color tau = m_BetaR * (state.opticalDepthR + opticalDepthLightR) + m_BetaM * 1.1f * (state.opticalDepthM + opticalDepthLightM);
+                Color tau = m_BR * (state.opticalDepthR + opticalDepthLightR) * rayleighExtinctionCoef + m_BM * 1.1f * (state.opticalDepthM + opticalDepthLightM) * mieExtinctionCoef;
                 Color attenuation = new Color((float)Math.Exp(-tau.r), (float)Math.Exp(-tau.g), (float)Math.Exp(-tau.b)); ;
                 sumR += attenuation * hr;
                 sumM += attenuation * hm;
             }
 
-            return GetSunColor() * (phaseR * m_BetaR * sumR * rayleighScatterCoef + phaseM * m_BetaM * mieScatterCoef * sumM) * sampler.numSamples;
+            return GetSunColor() * sunIntensityScale * (phaseR * m_BR * sumR * rayleighScatterCoef + phaseM * m_BM * mieScatterCoef * sumM) * sampler.numSamples;
+        }
+
+        /// <summary>
+        /// Mie散射相位方程
+        /// </summary>
+        /// <param name="cosAngle">视线和光线的夹角</param>
+        /// <returns></returns>
+        private float MiePhase(float cosAngle)
+        {
+            return m_Param1 * (m_Param2 * (1.0f + cosAngle * cosAngle)) / (m_Param3 * (float)Math.Pow(m_Param4 - m_Param5 * cosAngle, 1.5f));
+        }
+
+        /// <summary>
+        /// Rayleigh散射相位方程
+        /// </summary>
+        /// <param name="cosAngle"></param>
+        /// <returns></returns>
+        private float RayleighPhase(float cosAngle)
+        {
+            return m_Param0 * (1 + cosAngle * cosAngle);
         }
 
         /// <summary>

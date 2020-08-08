@@ -141,7 +141,7 @@ namespace ASL.PathTracer
 
         public abstract Color RenderPreviewChannel(Tracer tracer, Ray ray, RayCastHit hit, RenderChannel renderChannel);
 
-        public virtual bool ShouldCull(Ray ray, RayCastHit hit, double epsilon) { return false; }
+        public virtual bool ShouldCull(Ray ray, RayCastHit hit) { return false; }
 
         protected static Vector3 RecalucateNormal(Vector3 normal, Vector4 tangent, Color normalColor)
         {

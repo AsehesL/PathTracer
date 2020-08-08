@@ -60,15 +60,16 @@ namespace ASL.PathTracer
 
         protected abstract BRDFBase DiffuseBRDF { get; }
 
-        public override bool ShouldCull(Ray ray, RayCastHit hit, double epsilon)
+        public override bool ShouldCull(Ray ray, RayCastHit hit)
         {
             if (!transparentCutOut)
                 return false;
-            T property = SampleProperty(ray, hit);
-            if (property.GetAlbedo().a < 0.5f)
+            if (GetTransparentCutOutAlpha(ray, hit) < 0.5f)
                 return true;
             return false;
         }
+
+        protected abstract float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit);
 
         public override Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
         {

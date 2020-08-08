@@ -91,7 +91,6 @@ namespace ASL.PathTracer
             sdata.Build(geometries);
 
             sdata.sky = sky;
-            //sdata.sunLight = sun;
             
             return new Scene(camera, sdata);
         }
@@ -114,52 +113,10 @@ namespace ASL.PathTracer
             {
                 Log.Err(e.Message);
             }
-            //m_Camera.Render(this, );
 
             return result;
         }
 
-//        public Texture FastRender(uint width, uint height, System.Action<int, int> progressCallBackAction = null)
-//        {
-//            //对图片按原始比例压缩到宽高不超过512
-//            uint w, h;
-
-//#if DEBUG
-//            w = width;
-//            h = height;
-//#else
-//            if (width < 256 && height < 256)
-//            {
-//                w = width;
-//                h = height;
-//            }
-//            else if (width > height)
-//            {
-//                w = 256;
-//                h = (uint) (((float) height) / width * w);
-//            }
-//            else
-//            {
-//                h = 256;
-//                w = (uint)(((float)width) / height * h);
-//            }
-//#endif
-
-//            Texture result = new Texture(w, h);
-//            m_Tracer.tracingTimes = 0;
-//            m_Tracer.isDebugging = false;
-//            m_Camera.SetRenderTarget(result);
-//            try
-//            {
-//                m_Camera.Render(this, true, progressCallBackAction);
-//            }
-//            catch (System.Exception e)
-//            {
-//                Log.Err(e.Message);
-//            }
-
-//            return result;
-//        }
 
 #if DEBUG
         public Texture RenderDebugSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83)
