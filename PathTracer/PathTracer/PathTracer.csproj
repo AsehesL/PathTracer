@@ -65,10 +65,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Bounds.cs" />
+    <Compile Include="Core\SceneData\Bounds.cs" />
     <Compile Include="Core\Camera\PerspectiveCamera.cs" />
     <Compile Include="Core\Camera\CameraBase.cs" />
-    <Compile Include="Core\Color.cs" />
+    <Compile Include="Core\Camera\RenderJob.cs" />
+    <Compile Include="Core\Shader\Color.cs" />
     <Compile Include="Core\Geometry\BoundsGeometry.cs" />
     <Compile Include="Core\Geometry\Cube.cs" />
     <Compile Include="Core\Geometry\Geometry.cs" />
@@ -76,9 +77,9 @@
     <Compile Include="Core\Geometry\Quad.cs" />
     <Compile Include="Core\Geometry\Sphere.cs" />
     <Compile Include="Core\Geometry\Triangle.cs" />
-    <Compile Include="Core\Log.cs" />
-    <Compile Include="Core\Matrix.cs" />
-    <Compile Include="Core\Ray.cs" />
+    <Compile Include="Core\Utils\Log.cs" />
+    <Compile Include="Core\Geometry\Matrix.cs" />
+    <Compile Include="Core\Tracer\Ray.cs" />
     <Compile Include="Core\Sampler\SamplerBase.cs" />
     <Compile Include="Core\SceneData\BVH\BVH.cs" />
     <Compile Include="Core\SceneData\List\ListSceneData.cs" />
@@ -90,28 +91,32 @@
     <Compile Include="Core\Serialization\QuadSerialization.cs" />
     <Compile Include="Core\Serialization\SceneSerialization.cs" />
     <Compile Include="Core\Serialization\SphereSerialization.cs" />
-    <Compile Include="Core\Shader.cs" />
-    <Compile Include="Core\Sky.cs" />
-    <Compile Include="Core\TaskQueue.cs" />
-    <Compile Include="Core\Texture.cs" />
+    <Compile Include="Core\Shader\RenderShader\PBR\CarPaintShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\PBR\DoubleSidedTransmittanceShader.cs" />
+    <Compile Include="Core\Shader\Shader.cs" />
+    <Compile Include="Core\Shader\SkyShader\Atmosphere.cs" />
+    <Compile Include="Core\Shader\SkyShader\Sky.cs" />
+    <Compile Include="Core\Shader\SkyShader\SunLight.cs" />
+    <Compile Include="Core\TaskQueue\TaskQueue.cs" />
+    <Compile Include="Core\Shader\Texture.cs" />
     <Compile Include="Core\Tracer\Tracer.cs" />
     <Compile Include="Core\Utils\MathUtils.cs" />
     <Compile Include="Core\Utils\MeshLoader.cs" />
     <Compile Include="Core\Utils\StringUtils.cs" />
-    <Compile Include="Core\Vector.cs" />
+    <Compile Include="Core\Geometry\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scene.cs" />
-    <Compile Include="Shader\RenderShader\CamTestShader.cs" />
-    <Compile Include="Shader\RenderShader\DiffuseShader.cs" />
-    <Compile Include="Shader\RenderShader\EmissiveShader.cs" />
-    <Compile Include="Shader\RenderShader\NormalMapTest.cs" />
-    <Compile Include="Shader\RenderShader\PBR\BRDF.cs" />
-    <Compile Include="Shader\RenderShader\PBR\PBRShader.cs" />
-    <Compile Include="Shader\RenderShader\PBR\PBRShaderBase.cs" />
-    <Compile Include="Shader\RenderShader\SpecularShader.cs" />
-    <Compile Include="Shader\RenderShader\TransparencyShader.cs" />
-    <Compile Include="Shader\SkyShader\AmbientSphere.cs" />
-    <Compile Include="Shader\SkyShader\TestSky.cs" />
+    <Compile Include="Core\Shader\RenderShader\CamTestShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\DiffuseShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\EmissiveShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\NormalMapTest.cs" />
+    <Compile Include="Core\Shader\RenderShader\PBR\BRDF.cs" />
+    <Compile Include="Core\Shader\RenderShader\PBR\PBRShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\PBR\PBRShaderBase.cs" />
+    <Compile Include="Core\Shader\RenderShader\SpecularShader.cs" />
+    <Compile Include="Core\Shader\RenderShader\TransparencyShader.cs" />
+    <Compile Include="Core\Shader\SkyShader\AmbientSphere.cs" />
+    <Compile Include="Core\Shader\SkyShader\TestSky.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

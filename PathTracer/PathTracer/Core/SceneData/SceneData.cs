@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,9 @@ namespace ASL.PathTracer
 {
     public abstract class SceneData
     {
-	    private List<Geometry> m_NormalGeometries;
+		public Sky sky;
+
+		private List<Geometry> m_NormalGeometries;
 
 	    public void Build(List<Geometry> geometries)
 	    {

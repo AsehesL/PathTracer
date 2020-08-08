@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace ASL.PathTracer
 {
+	/// <summary>
+	/// 层次包围盒
+	/// </summary>
 	class BVH : SceneData
 	{
 		private BVHNode m_Root;
@@ -12,6 +15,7 @@ namespace ASL.PathTracer
 	        List<uint> sortedMortons = new List<uint>();
 	        for (int i = 0; i < boundsGeometries.Count; i++)
 	        {
+				//计算所有几何体的morton码
 	            Vector3 center = boundsGeometries[i].bounds.center;
 	            double x = (center.x - bounds.min.x) / bounds.size.x;
 	            double y = (center.y - bounds.min.y) / bounds.size.y;
@@ -19,8 +23,10 @@ namespace ASL.PathTracer
 	            uint morton = Morton3D(x, y, z);
 	            sortedMortons.Add(morton);
 	        }
+			//根据莫顿码对几何体列表排序
 	        Sort(boundsGeometries, sortedMortons);
 
+			//生成bvh
 	        m_Root = GenerateHierarchy(boundsGeometries, sortedMortons, 0, sortedMortons.Count - 1);
         }
 
@@ -85,8 +91,10 @@ namespace ASL.PathTracer
 			if (first == last)
 				return new BVHNode(boundsGeometries[first]);
 
+			//查找分割平面位置
 			int split = FindSplit(sortedMortons, first, last);
 
+			//将几何体列表根据分割平面分割成左右子树
 			BVHNode child1 = GenerateHierarchy(boundsGeometries, sortedMortons, first, split);
 			BVHNode child2 = GenerateHierarchy(boundsGeometries, sortedMortons, split + 1, last);
 

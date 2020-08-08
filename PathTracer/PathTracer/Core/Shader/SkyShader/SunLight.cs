@@ -6,16 +6,14 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
-    public abstract class Sky : ShaderBase
+    public class SunLight
     {
-        public bool hasSun;
-
         public Vector3 sunDirection;
 
         public Color sunColor;
 
         public float sunIntensity;
 
-        public abstract Color RenderColor(Vector3 dir);
+        public bool renderParticipatingMedia;
     }
 }

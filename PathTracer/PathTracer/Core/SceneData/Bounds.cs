@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+    /// <summary>
+    /// AABB包围盒
+    /// </summary>
     public struct Bounds
     {
         public Vector3 center;

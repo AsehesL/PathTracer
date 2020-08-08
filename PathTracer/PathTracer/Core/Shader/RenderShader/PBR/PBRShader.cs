@@ -4,10 +4,68 @@ using System.Windows.Forms.Layout;
 
 namespace ASL.PathTracer
 {
-    [ShaderType("PBR")]
-    class PBRShader : PBRShaderBase
+	struct PBRProperty : IPBRProperty
+	{
+		public Color albedo;
+		public float roughness;
+		public float metallic;
+		public Color emissive;
+		public float refractive;
+		public bool tangentSpaceNormal;
+		public Color normal;
+		public float occlusion;
+
+		public Color GetAlbedo()
+		{
+			return albedo;
+		}
+		public float GetRoughness()
+		{
+			return roughness;
+		}
+		public float GetRoughness2()
+		{
+			return 0.0f;
+		}
+		public float GetMetallic()
+		{
+			return metallic;
+		}
+		public Color GetEmissive()
+		{
+			return emissive;
+		}
+		public float GetRefractive()
+		{
+			return refractive;
+		}
+		public bool TangentSpaceNormal()
+		{
+			return tangentSpaceNormal;
+		}
+		public Color GetNormal()
+		{
+			return normal;
+		}
+		public float GetOcclusion()
+		{
+			return occlusion;
+		}
+		public float GetDoubleSidedTransmittance()
+		{
+			return 0.0f;
+		}
+		public Color GetDoubleSidedTransmissionColor()
+		{
+			return Color.black;
+		}
+	}
+
+	[ShaderType("PBR")]
+    class PBRShader : PBRShaderBase<PBRProperty>
     {
-        public Color color;
+
+		public Color color;
         public Texture albedo;
 		public Texture metallicTex;
 		public float metallic;
@@ -20,6 +78,18 @@ namespace ASL.PathTracer
 		public Texture bump;
 		public Texture metallicSmooth;
 		public Texture aoTex;
+		public bool transparent;
+
+		public override PBRShadingModel shadingModel
+		{
+			get
+			{
+				if (transparent)
+					return PBRShadingModel.Transparent;
+				else
+					return PBRShadingModel.Default;
+			}
+		}
 
 		protected override BRDFBase DiffuseBRDF
 		{

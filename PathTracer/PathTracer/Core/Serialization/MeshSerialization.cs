@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,10 +7,13 @@ using PathTracer.Core.Utils;
 
 namespace ASL.PathTracer.SceneSerialization
 {
+	/// <summary>
+	/// Mesh序列化器
+	/// </summary>
 	[GeometryAnalyse(type = "Mesh")]
 	class MeshSerialization : GeometrySerialization
 	{
-		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams)
+		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams, ref GeometryStats stats)
 		{
 			string path = geoParams["Path"].paramValue;
 			string euler = geoParams["Euler"].paramValue;
@@ -27,6 +30,9 @@ namespace ASL.PathTracer.SceneSerialization
 			var triangles = MeshLoader.LoadMesh(p, pos, rot, sca, shaders);
 
 			output.AddRange(triangles);
+
+			stats.totalGeometries++;
+			stats.totalTriangles += triangles.Count;
 		}
 	}
 }

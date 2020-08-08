@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+    /// <summary>
+    /// 简单列表场景数据（仅用于测试）
+    /// </summary>
     class ListSceneData : SceneData
     {
         private List<BoundsGeometry> m_BoundsGeometries;

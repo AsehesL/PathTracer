@@ -8,19 +8,19 @@ namespace ASL.PathTracer
 {
     abstract class BRDFBase
     {
-        public abstract float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, PBRProperty property);
+        public abstract float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, float roughness);
 
-        public abstract float BRDFDirectional(Vector3 inDir, Vector3 outDir, Vector3 normal, PBRProperty property);
+        public abstract float BRDFDirectional(Vector3 inDir, Vector3 outDir, Vector3 normal, float roughness);
     }
 
     class LambertatianBRDF : BRDFBase
     {
-        public override float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, PBRProperty property)
+        public override float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, float roughness)
         {
             return (float)MathUtils.InvPi;
         }
 
-        public override float BRDFDirectional(Vector3 inDir, Vector3 OoutDirutDir, Vector3 normal, PBRProperty property)
+        public override float BRDFDirectional(Vector3 inDir, Vector3 OoutDirutDir, Vector3 normal, float roughness)
         {
             return (float)MathUtils.InvPi;
         }
@@ -28,20 +28,20 @@ namespace ASL.PathTracer
 
     class CookTorranceBRDF : BRDFBase
     {
-        public override float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, PBRProperty property)
+        public override float BRDF(Vector3 inDir, Vector3 outDir, Vector3 normal, float roughness)
         {
             double denominator = 4.0 * Math.Max(Vector3.Dot(normal, inDir), 0.0) * Math.Max(Vector3.Dot(normal, outDir), 0.0) + 0.001;
 
-            float nominator = G_SmithGGX(inDir, outDir, normal, property.roughness);
+            float nominator = G_SmithGGX(inDir, outDir, normal, roughness);
 
             return nominator / (float)denominator;
         }
 
-        public override float BRDFDirectional(Vector3 inDir, Vector3 outDir, Vector3 normal, PBRProperty property)
+        public override float BRDFDirectional(Vector3 inDir, Vector3 outDir, Vector3 normal, float roughness)
         {
             double denominator = 4.0 * Math.Max(Vector3.Dot(normal, inDir), 0.0) * Math.Max(Vector3.Dot(normal, outDir), 0.0) + 0.001;
 
-            float nominator = D_GGX((inDir + outDir).normalized, normal, property.roughness) * G_SmithGGX(inDir, outDir, normal, property.roughness);
+            float nominator = D_GGX((inDir + outDir).normalized, normal, roughness) * G_SmithGGX(inDir, outDir, normal, roughness);
 
             return nominator / (float)denominator;
         }

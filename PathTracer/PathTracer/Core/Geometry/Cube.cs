@@ -8,8 +8,8 @@ namespace ASL.PathTracer
 {
 	class Cube : BoundsGeometry
 	{
-		public Vector3 position { get; set; }
-		public Vector3 scale { get; set; }
+		public Vector3 position;
+		public Vector3 scale;
 
 		public Cube(Vector3 position, Vector3 scale, Shader shader) : base(shader)
 		{

@@ -1,4 +1,4 @@
-﻿using ASL.PathTracer;
+using ASL.PathTracer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -68,11 +68,14 @@ namespace PathTracerForm
                 this.numSampleInputBox.Enabled = false;
                 this.widthInputBox.Enabled = false;
                 this.heightInputBox.Enabled = false;
-                this.fastPreviewButton.Enabled = false;
+                //this.fastPreviewButton.Enabled = false;
+                this.renderChannelCombo.Enabled = false;
                 this.renderButton.Enabled = false;
                 this.SaveToolStripMenuItem.Enabled = false;
                 this.SaveHDRToolStripMenuItem.Enabled = false;
+#if DEBUG
                 this.pixelDebugCheckBox.Enabled = false;
+#endif
 
                 this.fileNameLabel.Text = "当前场景（空）";
             }
@@ -84,11 +87,14 @@ namespace PathTracerForm
                 this.numSampleInputBox.Enabled = true;
                 this.widthInputBox.Enabled = true;
                 this.heightInputBox.Enabled = true;
-                this.fastPreviewButton.Enabled = true;
+                //this.fastPreviewButton.Enabled = true;
+                this.renderChannelCombo.Enabled = true;
                 this.renderButton.Enabled = true;
                 this.SaveToolStripMenuItem.Enabled = true;
                 this.SaveHDRToolStripMenuItem.Enabled = true;
+#if DEBUG
                 this.pixelDebugCheckBox.Enabled = true;
+#endif
 
                 var tpnames = System.Enum.GetNames(typeof(SamplerType));
                 this.samplerTypeCombo.Items.Clear();
@@ -96,6 +102,12 @@ namespace PathTracerForm
                     this.samplerTypeCombo.Items.Add(it);
                 this.samplerTypeCombo.SelectedIndex = 0;
                 //this.samplerTypeCombo.
+
+                var chnames = System.Enum.GetNames(typeof(RenderChannel));
+                this.renderChannelCombo.Items.Clear();
+                foreach (var it in chnames)
+                    this.renderChannelCombo.Items.Add(it);
+                this.renderChannelCombo.SelectedIndex = 0;
 
                 this.fileNameLabel.Text = "当前场景:" + fileName;
             }
@@ -138,44 +150,44 @@ namespace PathTracerForm
             }
         }
 
-        private void fastPreviewButton_Click(object sender, EventArgs e)
-        {
-            if (m_Scene == null)
-                return;
-            uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
-            uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
-            if (width <= 0 || height <= 0)
-            {
-                MessageBox.Show("请输入宽高合法的宽高!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            Log.Info("开始快速预览");
+        //private void fastPreviewButton_Click(object sender, EventArgs e)
+        //{
+        //    if (m_Scene == null)
+        //        return;
+        //    uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
+        //    uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
+        //    if (width <= 0 || height <= 0)
+        //    {
+        //        MessageBox.Show("请输入宽高合法的宽高!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        return;
+        //    }
+        //    Log.Info("开始快速预览");
 
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            this.progressBar.Value = 0;
-            this.progressBar.Maximum = 100;
-            m_Result = m_Scene.FastRender(width, height, this.ProgressCallBack);
-            stopWatch.Stop();
+        //    Stopwatch stopWatch = new Stopwatch();
+        //    stopWatch.Start();
+        //    this.progressBar.Value = 0;
+        //    this.progressBar.Maximum = 100;
+        //    m_Result = m_Scene.FastRender(width, height, this.ProgressCallBack);
+        //    stopWatch.Stop();
 
-            if (m_Result != null)
-            {
-                Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
+        //    if (m_Result != null)
+        //    {
+        //        Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                if (m_Bitmap != null)
-                {
-                    m_Bitmap.Dispose();
-                    m_Bitmap = null;
-                }
+        //        if (m_Bitmap != null)
+        //        {
+        //            m_Bitmap.Dispose();
+        //            m_Bitmap = null;
+        //        }
 
-                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f);
-                this.renderResultBox.BackgroundImage = m_Bitmap;
+        //        m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f);
+        //        this.renderResultBox.BackgroundImage = m_Bitmap;
 
-                this.progressBar.Value = 0;
-            }
-            else
-                Log.Err("渲染预览!");
-        }
+        //        this.progressBar.Value = 0;
+        //    }
+        //    else
+        //        Log.Err("渲染预览!");
+        //}
 
         private void renderButton_Click(object sender, EventArgs e)
         {
@@ -184,16 +196,17 @@ namespace PathTracerForm
             int traceTimes = string.IsNullOrEmpty(this.bounceInputBox.Text)?0: int.Parse(this.bounceInputBox.Text);
             int numSamples = string.IsNullOrEmpty(this.numSampleInputBox.Text) ? 0 : int.Parse(this.numSampleInputBox.Text);
             var sampleType = (SamplerType) this.samplerTypeCombo.SelectedIndex;
+            var renderChannel = (RenderChannel)this.renderChannelCombo.SelectedIndex;
             uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
             uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
 
-            if (traceTimes <= 0)
+            if (renderChannel == RenderChannel.Full && traceTimes <= 0)
             {
                 MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (numSamples <= 0)
+            if (renderChannel == RenderChannel.Full && numSamples <= 0)
             {
                 MessageBox.Show("不允许采样次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -211,7 +224,7 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            m_Result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, 83, this.ProgressCallBack);
+            m_Result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, renderChannel, 83, this.ProgressCallBack);
             stopWatch.Stop();
 
             if (m_Result != null)
@@ -235,6 +248,7 @@ namespace PathTracerForm
 
         private void renderResultBox_MouseClick(object sender, MouseEventArgs e)
         {
+            #if DEBUG
             if (this.pixelDebugCheckBox.Checked)
             {
                 if (MessageBox.Show("开启单像素调试后点击画布将对单个像素渲染，这会清空之前的渲染结果，是否继续？", "警告", MessageBoxButtons.YesNo) ==
@@ -272,7 +286,7 @@ namespace PathTracerForm
 
                     Log.Info($"渲染目标像素:({x},{y})");
 
-                    m_Result = m_Scene.RenderSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
+                    m_Result = m_Scene.RenderDebugSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
 
                     if (m_Result != null)
                     {
@@ -284,7 +298,7 @@ namespace PathTracerForm
                         Log.Err("渲染失败!");
                 }
             }
-
+            #endif
         }
 
         private void ProgressCallBack(int progress, int total)

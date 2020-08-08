@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
@@ -6,6 +6,10 @@ using System.Xml.Serialization;
 
 namespace ASL.PathTracer
 {
+    /// <summary>
+    /// TaskQueue以xml的形式存放在硬盘上，主要作用是方便渲染多个文件，并自动在渲染结束后存储文件，执行指定cmd文件等
+    /// 例如可以渲染多个文件，并在渲染结束后执行关机命令
+    /// </summary>
     public class TaskQueue
     {
         [XmlArray(ElementName = "Tasks")]
@@ -115,7 +119,7 @@ namespace ASL.PathTracer
             if (width <= 0 || height <= 0)
                 return false;
             var scene = Scene.Create(scenePath);
-            var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height);
+            var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height, RenderChannel.Full);
             
             if (outputFileInfo.Directory.Exists)
                 outputFileInfo.Directory.Create();

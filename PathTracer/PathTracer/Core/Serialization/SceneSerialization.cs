@@ -85,7 +85,7 @@ namespace ASL.PathTracer.SceneSerialization
         [XmlArrayItem("Shader")]
         public List<ShaderName> shaders;
 
-        public void CreateGeometry(string scenePath, List<Geometry> output, Dictionary<string, Shader> shadersDic)
+        public void CreateGeometry(string scenePath, List<Geometry> output, Dictionary<string, Shader> shadersDic, ref GeometryStats stats)
 		{
 			Dictionary<string, GeometryParamData> geoParamDic = new Dictionary<string, GeometryParamData>();
 			for (int i = 0; i < geoParams.Count; i++)
@@ -130,12 +130,12 @@ namespace ASL.PathTracer.SceneSerialization
 				return;
 	        }
 
-			geoSerialization.GenerateGeometry(s, scenePath, output, geoParamDic);
-			//      var geo = geoSerialization.GenerateGeometry(s, geoParams);
-			//      if (geo != null)
-			//       output.Add(geo);
-			//else
-			//       Log.Warn($"几何体创建失败！");
+			geoSerialization.GenerateGeometry(s, scenePath, output, geoParamDic, ref stats);
+            //      var geo = geoSerialization.GenerateGeometry(s, geoParams);
+            //      if (geo != null)
+            //       output.Add(geo);
+            //else
+            //       Log.Warn($"几何体创建失败！");
 		}
     }
 
@@ -264,14 +264,7 @@ namespace ASL.PathTracer.SceneSerialization
             {
                 case ShaderParamType.Color:
                     {
-                        string[] colSplit = paramValue.Split(',');
-                        float r = colSplit.Length > 0 ? float.Parse(colSplit[0]) : 1.0f;
-                        float g = colSplit.Length > 1 ? float.Parse(colSplit[1]) : 1.0f;
-                        float b = colSplit.Length > 2 ? float.Parse(colSplit[2]) : 1.0f;
-                        float a = colSplit.Length > 3 ? float.Parse(colSplit[3]) : 1.0f;
-                        Color color = new Color(r, g, b, a);
-                        color.Gamma(2.2f);
-                        return color;
+                        return StringUtils.StringToColor(paramValue);
                     }
                 case ShaderParamType.Number:
                     {
@@ -291,27 +284,15 @@ namespace ASL.PathTracer.SceneSerialization
                     }
                 case ShaderParamType.Vector2:
                     {
-                        string[] vecsplit = paramValue.Split(',');
-                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
-                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
-                        return new Vector2(x, y);
+                        return StringUtils.StringToVector2(paramValue);
                     }
                 case ShaderParamType.Vector3:
                     {
-                        string[] vecsplit = paramValue.Split(',');
-                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
-                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
-                        double z = vecsplit.Length > 2 ? double.Parse(vecsplit[2]) : 0.0;
-                        return new Vector3(x, y, z);
+                        return StringUtils.StringToVector3(paramValue);
                     }
                 case ShaderParamType.Vector4:
                     {
-                        string[] vecsplit = paramValue.Split(',');
-                        double x = vecsplit.Length > 0 ? double.Parse(vecsplit[0]) : 0.0;
-                        double y = vecsplit.Length > 1 ? double.Parse(vecsplit[1]) : 0.0;
-                        double z = vecsplit.Length > 2 ? double.Parse(vecsplit[2]) : 0.0;
-                        double w = vecsplit.Length > 3 ? double.Parse(vecsplit[3]) : 0.0;
-                        return new Vector4(x, y, z, w);
+                        return StringUtils.StringToVector4(paramValue);
                     }
             }
             return null;
@@ -323,6 +304,9 @@ namespace ASL.PathTracer.SceneSerialization
 
         [XmlAttribute("ShaderType")]
         public string shaderType;
+
+        [XmlElement("SunLight")]
+        public SunLightData sun;
 
         [XmlArray("Params")]
         [XmlArrayItem("Param")]
@@ -349,7 +333,7 @@ namespace ASL.PathTracer.SceneSerialization
                 }
             }
 
-            Sky sky = System.Activator.CreateInstance(type) as Sky;
+            Sky sky = System.Activator.CreateInstance(type, sun != null ? sun.CreateSunLight() : null) as Sky;
             if (sky == null)
                 return null;
             if (shaderParams != null)
@@ -362,13 +346,36 @@ namespace ASL.PathTracer.SceneSerialization
                     sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
                 }
             }
-            if (sky.hasSun)
-            {
-                Log.Info($"天空盒创建成功:{type},太阳光方向:({sky.sunDirection.x},{sky.sunDirection.y},{sky.sunDirection.z})");
-            }
-            else
-                Log.Info($"天空盒创建成功:{type}");
+
+            Log.Info($"天空盒创建成功:{type}");
+
+            //if (sun != null)
+            //    sky.sunLight = sun.CreateSunLight();
+            
+            
             return sky;
+        }
+    }
+
+    public class SunLightData
+    {
+        [XmlAttribute("Direction")] public string direction;
+
+        [XmlAttribute("Color")] public string color;
+
+        [XmlAttribute("Intensity")] public float intensity;
+
+        [XmlAttribute("VolumetricLighting")] public bool renderParticipatingMedia;
+
+        public SunLight CreateSunLight()
+        {
+            Vector3 dir = StringUtils.StringToVector3(direction);
+            Color col = StringUtils.StringToColor(color);
+
+            SunLight light = new SunLight { sunDirection = dir, sunColor = col, sunIntensity = intensity, renderParticipatingMedia = renderParticipatingMedia };
+
+            Log.Info($"创建SunLight成功:方向:{dir},颜色:{col},强度:{intensity},是否渲染参与介质:{renderParticipatingMedia}");
+            return light;
         }
     }
 

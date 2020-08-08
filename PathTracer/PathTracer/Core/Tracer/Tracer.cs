@@ -6,34 +6,31 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
+    /// <summary>
+    /// 光线追踪器基类
+    /// </summary>
     public abstract class Tracer
     {
-        public int tracingTimes
-        {
-            get { return m_TracingTimes; }
-        }
+#if DEBUG
+        public bool isDebugging;
+#endif
 
-        public SceneData sceneData
-        {
-            get { return m_SceneData; }
-            set { m_SceneData = value; }
-        }
+        public SceneData sceneData;
 
-        private int m_TracingTimes;
+        public int tracingTimes;
+
+        public double epsilon { get { return m_Epsilon; } }
 
         protected double m_Epsilon;
 
-        protected SceneData m_SceneData;
-
-        public Tracer(int tracingTimes, double epsilon)
+        public Tracer(double epsilon)
         {
-            m_TracingTimes = tracingTimes;
             m_Epsilon = epsilon;
         }
 
-        public abstract Color Tracing(Ray ray, Sky sky, SamplerBase sampler, int depth = 0);
+        public abstract Color Tracing(Ray ray, SamplerBase sampler, RenderState renderState, int depth = 0);
 
-        public abstract Color FastTracing(Ray ray);
+        public abstract Color PreviewTracing(Ray ray, RenderChannel renderChannel);
 
         public bool TracingOnce(Ray ray)
         {
@@ -46,38 +43,81 @@ namespace ASL.PathTracer
             }
             return false;
         }
+
+        public bool TracingOnce(Ray ray, out RayCastHit hit)
+        {
+            hit.distance = double.MaxValue;
+            if (sceneData.Raycast(ray, m_Epsilon, out hit))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 
+    /// <summary>
+    /// 路径追踪器
+    /// </summary>
     public class PathTracer : Tracer
     {
-        public PathTracer(int tracingTimes, double epsilon) : base(tracingTimes, epsilon) { }
+        public PathTracer(double epsilon) : base(epsilon) { }
 
-        public override Color Tracing(Ray ray, Sky sky, SamplerBase sampler, int depth = 0)
+        public override Color Tracing(Ray ray, SamplerBase sampler, RenderState renderState, int depth = 0)
         {
             if (depth > tracingTimes)
+            {
+#if DEBUG
+                if (isDebugging)
+                {
+                    Log.AddLog(LogType.Debugging, $"深度：{depth}，射线：{ray}，颜色：{Color.black}");
+                }
+#endif
                 return Color.black;
+            }
 
             RayCastHit hit;
             hit.distance = double.MaxValue;
 
+            Color color = default(Color);
+            //Color volumetric = default(Color);
+
+            bool isHit = false;
             if (sceneData.Raycast(ray, m_Epsilon, out hit))
             {
                 hit.depth = depth;
+
                 if (hit.shader == null)
-                    return new Color(1, 0, 1);
-                return hit.shader.Render(this, sky, sampler, ray, hit, m_Epsilon);
+                    color += new Color(1, 0, 1);
+                else
+                    color += hit.shader.Render(this, sampler, renderState, ray, hit);
+
+                isHit = true;
             }
-            else
+
+            if (!isHit || (isHit && depth == 0 && sceneData.sky != null && sceneData.sky.shouldRenderParticipatingMedia))
             {
-                if (sky != null)
-                    return sky.RenderColor(ray.direction);
-                return Color.black;
+                if (sceneData.sky != null)
+                    color += sceneData.sky.RenderColor(this, sampler, renderState, ray, hit, depth, isHit);
+                else
+                    color += Color.black;
             }
+
+
+            if (depth == 0)
+                color /= sampler.numSamples;
+
+            //return color + volumetric;
+#if DEBUG
+            if (isDebugging)
+            {
+                Log.AddLog(LogType.Debugging, $"深度：{depth}，射线：{ray}，颜色：{color}");
+            }
+#endif
+            return color;
         }
 
-        public override Color FastTracing(Ray ray)
+        public override Color PreviewTracing(Ray ray, RenderChannel renderChannel)
         {
-
             RayCastHit hit;
             hit.distance = double.MaxValue;
 
@@ -85,12 +125,12 @@ namespace ASL.PathTracer
             {
                 if (hit.shader == null)
                 {
-                    float vdn = (float) Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
+                    float vdn = (float)Math.Max(0, Vector3.Dot(-1.0 * ray.direction, hit.normal));
                     return new Color(vdn, vdn, vdn, 1.0f);
                 }
                 else
                 {
-                    return hit.shader.FastRender(ray, hit);
+                    return hit.shader.RenderPreviewChannel(this, ray, hit, renderChannel);
                 }
             }
             else
@@ -99,73 +139,4 @@ namespace ASL.PathTracer
             }
         }
     }
-
-    //public class PathTracerWithSun : PathTracer
-    //{
-    //    public PathTracerWithSun(int tracingTimes, double epsilon) : base(tracingTimes, epsilon) { }
-
-    //    public override Color Tracing(Ray ray, bool isSunTracing, Sky sky, SamplerBase sampler, int depth = 0)
-    //    {
-    //        if (depth > tracingTimes)
-    //            return Color.black;
-
-    //        RayCastHit hit;
-    //        hit.distance = double.MaxValue;
-
-    //        if (!isSunTracing)
-    //        {
-    //            if (sceneData.Raycast(ray, m_Epsilon, out hit))
-    //            {
-    //                hit.depth = depth;
-
-    //                Vector3 w = sky == null ? Vector3.down : - 1.0 * sky.sundirection;
-    //                Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
-    //                u.Normalize();
-    //                Vector3 v = Vector3.Cross(u, w);
-    //                Vector3 sp = SunLightOffset(sampler.Sample(), 0.2f);
-    //                Vector3 l = sp.x * u + sp.y * v + sp.z * w;
-    //                if (Vector3.Dot(l, hit.normal) < 0.0)
-    //                    l = -sp.x * u - sp.y * v - sp.z * w;
-    //                l.Normalize();
-    //                Ray lray = new Ray(hit.hit, l);
-
-    //                Color color = hit.shader == null ? new Color(1,0,1) : hit.shader.Render(this, false, sky, sampler, ray, hit, m_Epsilon);
-
-    //                return color + Tracing(lray, true, sky, sampler, depth);
-    //            }
-    //            else
-    //            {
-    //                if (sky != null)
-    //                    return sky.RenderColor(ray.direction, false);
-    //                return Color.black;
-    //            }
-    //        }
-    //        else
-    //        {
-    //            if (sceneData.Raycast(ray, m_Epsilon, out hit))
-    //            {
-    //                hit.depth = depth;
-
-    //                return hit.shader == null ? new Color(1, 0, 1) : hit.shader.Render(this, true, sky, sampler, ray, hit, m_Epsilon);
-    //            }
-    //            else
-    //            {
-    //                if (sky != null)
-    //                    return sky.RenderColor(ray.direction, true);
-    //                return Color.black;
-    //            }
-    //        }
-    //    }
-
-    //    Vector3 SunLightOffset(Vector2 sample, float offset)
-    //    {
-    //        float a = offset * offset;
-
-    //        double phi = 2.0f * Math.PI * sample.x;
-    //        double cos_theta = Math.Sqrt((1.0 - sample.y) / (1.0 + (a * a - 1.0) * sample.y));
-    //        double sin_theta = Math.Sqrt(1.0 - cos_theta * cos_theta);
-
-    //        return new Vector3(Math.Cos(phi) * sin_theta, Math.Sin(phi) * sin_theta, cos_theta);
-    //    }
-    //}
 }

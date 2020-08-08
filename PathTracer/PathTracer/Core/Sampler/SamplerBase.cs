@@ -16,6 +16,9 @@ namespace ASL.PathTracer
         /// 抖动采样
         /// </summary>
         Jittered,
+        /// <summary>
+        /// Hammersley采样
+        /// </summary>
         Hammersley,
         /// <summary>
         /// 规则采样
@@ -45,10 +48,18 @@ namespace ASL.PathTracer
 
     public abstract class SamplerBase
     {
+        /// <summary>
+        /// 采样点总数
+        /// </summary>
         public int numSamples
         {
             get { return m_NumSamples; }
         }
+
+        /// <summary>
+        /// 当前采样
+        /// </summary>
+        public int currentSample { get; private set; }
 
         protected int m_NumSamples;
         protected int m_NumSets;
@@ -71,26 +82,65 @@ namespace ASL.PathTracer
             SetupShuffledIndices();
         }
 
+        public bool NextSample()
+        {
+            if(currentSample < numSamples)
+            {
+                currentSample++;
+                return true;
+            }
+            return false;
+        }
+
+        public void ResetSampler()
+        {
+            currentSample = 0;
+        }
+
         public double GetRandom()
         {
 	        return sRandom.NextDouble();
         }
 
+        /// <summary>
+        /// 半球映射
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         public Vector3 SampleHemiSphere(float e)
         {
             Vector2 sample = Sample();
 
-            float cos_phi = (float)Math.Cos(2.0f * Math.PI * sample.x);
-            float sin_phi = (float)Math.Sin(2.0f * Math.PI * sample.x);
-            float cos_theta = (float)Math.Pow(1.0f - sample.y, 1.0f / (e + 1.0f));
-            float sin_theta = (float)Math.Sqrt(1.0f - cos_theta * cos_theta);
-            float pu = sin_theta * cos_phi;
-            float pv = sin_theta * sin_phi;
-            float pw = cos_theta;
+            double cos_phi = Math.Cos(2.0f * Math.PI * sample.x);
+            double sin_phi = Math.Sin(2.0f * Math.PI * sample.x);
+            double cos_theta = Math.Pow(1.0f - sample.y, 1.0f / (e + 1.0f));
+            double sin_theta = Math.Sqrt(1.0f - cos_theta * cos_theta);
+            double pu = sin_theta * cos_phi;
+            double pv = sin_theta * sin_phi;
+            double pw = cos_theta;
 
             return new Vector3(pu, pv, pw);
         }
 
+        /// <summary>
+        /// 球形映射
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 SampleSphere()
+        {
+            Vector2 sample = Sample();
+
+            double x = Math.Cos(2.0f * Math.PI * sample.x) * 2.0f * Math.Sqrt(sample.y * (1 - sample.y));
+            double y = Math.Sin(2.0f * Math.PI * sample.x) * 2.0f * Math.Sqrt(sample.y * (1 - sample.y));
+            double z = 1.0f - 2.0f * sample.y;
+
+            return new Vector3(x, y, z);
+        }
+
+        /// <summary>
+        /// 单位圆形映射
+        /// </summary>
+        /// <returns></returns>
         public Vector2 SampleUnitDisk()
         {
             Vector2 sample = Sample();

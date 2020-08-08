@@ -10,8 +10,6 @@ namespace ASL.PathTracer
     {
 	    public Vector3 position;
         public double radius;
-        //public bool useTexcoord = true;
-        //public bool useTangent = true;
 
         public Sphere(Vector3 position, double radius, Shader shader) : base(shader)
         {
@@ -42,31 +40,11 @@ namespace ASL.PathTracer
 
                 if (t > epsilon && t <= hit.distance)
                 {
-                    // if (hit.depth == 0 && m_Material.isLight && LScene.ignoreLight)
-                    //     return false;
+
                     hit.distance = t;
                     hit.normal = (tocenter + ray.direction * hit.distance) / radius;
                     hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
-
-                    //if (useTexcoord)
-                    //{
-	                   // float fi = (float) Math.Atan2(hit.hit.x - position.x, hit.hit.z - position.z);
-	                   // float u = fi * 0.5f * (float) MathUtils.InvPi;
-	                   // float theta = (float) Math.Acos(hit.hit.y - position.y);
-
-	                   // float v = (1.0f - theta * (float) MathUtils.InvPi) * 2;
-
-	                   // hit.texcoord = new Vector2(u, v);
-                    //}
-                    //else
-	                   // hit.texcoord = default(Vector2);
-                    //if (useTangent)
-                    //{
-	                   // hit.tangent = Vector3.Cross(hit.hit - position, Vector3.up).normalized;
-                    //}
-                    //else
-	                   // hit.texcoord = default(Vector2);
 
 					return true;
                 }
@@ -76,31 +54,11 @@ namespace ASL.PathTracer
 
                 if (t > epsilon && t <= hit.distance)
                 {
-                    // if (hit.depth == 0 && m_Material.isLight && LScene.ignoreLight)
-                    //     return false;
+
                     hit.distance = t;
                     hit.normal = (tocenter + ray.direction * hit.distance) / radius;
                     hit.hit = ray.origin + ray.direction * hit.distance;
                     hit.shader = shader;
-
-                    //if (useTexcoord)
-                    //{
-	                   // float fi = (float) Math.Atan2(hit.hit.x - position.x, hit.hit.z - position.z);
-	                   // float u = fi * 0.5f * (float) MathUtils.InvPi;
-	                   // float theta = (float) Math.Acos(hit.hit.y - position.y);
-
-	                   // float v = (1.0f - theta * (float) MathUtils.InvPi) * 2;
-
-	                   // hit.texcoord = new Vector2(u, v);
-                    //}
-                    //else
-	                   // hit.texcoord = default(Vector2);
-                    //if (useTangent)
-                    //{
-	                   // hit.tangent = Vector3.Cross(hit.hit - position, Vector3.up).normalized;
-                    //}
-                    //else
-	                   // hit.texcoord = default(Vector2);
 
 					return true;
                 }

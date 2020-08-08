@@ -1,3 +1,4 @@
+using ASL.PathTracer.SceneSerialization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,21 +15,20 @@ namespace ASL.PathTracer
             get { return m_Tracer; }
         }
 
-        public Sky sky
-        {
-            get { return m_Sky; }
-        }
-
         protected Tracer m_Tracer;
-
-        protected Sky m_Sky;
 
         protected CameraBase m_Camera;
 
         private SceneData m_SceneData;
 
-        private Scene()
+        private Scene(CameraBase camera, SceneData sceneData)
         {
+            m_Tracer = new PathTracer(0.000001);
+
+            m_Camera = camera;
+            m_SceneData = sceneData;
+
+            m_Tracer.sceneData = sceneData;
         }
 
         public static Scene Create(string scenePath)
@@ -40,8 +40,8 @@ namespace ASL.PathTracer
                 return null;
             }
 
-            Scene scene = new Scene();
-            scene.m_Camera = sceneData.camera.CreateCamera();
+            //Scene scene = new Scene();
+            var camera = sceneData.camera.CreateCamera();
 
             Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
             if (sceneData.textures != null)
@@ -56,7 +56,8 @@ namespace ASL.PathTracer
 
             Log.Info($"纹理加载完毕：共{textures.Count}张纹理");
 
-            scene.m_Sky = sceneData.sky != null ? sceneData.sky.CreateSky(textures) : null;
+            var sky = sceneData.sky != null ? sceneData.sky.CreateSky(textures) : null;
+            //var sun = sceneData.sun != null ? sceneData.sun.CreateSunLight() : null;
             
             Dictionary<string ,Shader> shaders = new Dictionary<string, Shader>();
             if (sceneData.shaders != null)
@@ -73,34 +74,41 @@ namespace ASL.PathTracer
 
             List<Geometry> geometries = new List<Geometry>();
 
+            GeometryStats stats = new GeometryStats { totalGeometries = 0, totalTriangles = 0, };
             if (sceneData.geometries != null)
             {
                 for (int i = 0; i < sceneData.geometries.Count; i++)
                 {
-                    sceneData.geometries[i].CreateGeometry(scenePath, geometries, shaders);
+                    sceneData.geometries[i].CreateGeometry(scenePath, geometries, shaders, ref stats);
                 }
             }
 
-            Log.Info($"几何体加载完毕：共{geometries.Count}个几何体");
+            Log.Info($"几何体加载完毕：共{stats.totalGeometries}个几何体，{stats.totalTriangles}个三角形");
 
-            scene.m_SceneData = new BVH();
+            var sdata = new BVH();
 
-            Log.Info($"开始构建场景数据，场景数据类型：{scene.m_SceneData.GetType()}");
-            scene.m_SceneData.Build(geometries);
+            Log.Info($"开始构建场景数据，场景数据类型：{sdata.GetType()}");
+            sdata.Build(geometries);
+
+            sdata.sky = sky;
+            //sdata.sunLight = sun;
             
-            return scene;
+            return new Scene(camera, sdata);
         }
 
-        public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
+        public Texture Render(int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, RenderChannel renderChannel, int numSets = 83, System.Action<int, int> progressCallBackAction = null)
         {
             Texture result = new Texture(width, height);
-            m_Tracer = new PathTracer(tracingTimes, 0.000001);
-            m_Tracer.sceneData = m_SceneData;
-            m_Camera.SetSampler(samplerType, numSamples, numSets);
+            m_Tracer.tracingTimes = renderChannel == RenderChannel.Full ? tracingTimes : 0;
+            #if DEBUG
+            m_Tracer.isDebugging = false;
+            #endif
+            if (renderChannel == RenderChannel.Full)
+                m_Camera.SetSampler(samplerType, numSamples, numSets);
             m_Camera.SetRenderTarget(result);
             try
             {
-                m_Camera.Render(this, false, progressCallBackAction);
+                m_Camera.Render(this, renderChannel, progressCallBackAction);
             }
             catch (System.Exception e)
             {
@@ -111,60 +119,62 @@ namespace ASL.PathTracer
             return result;
         }
 
-        public Texture FastRender(uint width, uint height, System.Action<int, int> progressCallBackAction = null)
-        {
-            //对图片按原始比例压缩到宽高不超过512
-            uint w, h;
+//        public Texture FastRender(uint width, uint height, System.Action<int, int> progressCallBackAction = null)
+//        {
+//            //对图片按原始比例压缩到宽高不超过512
+//            uint w, h;
+
+//#if DEBUG
+//            w = width;
+//            h = height;
+//#else
+//            if (width < 256 && height < 256)
+//            {
+//                w = width;
+//                h = height;
+//            }
+//            else if (width > height)
+//            {
+//                w = 256;
+//                h = (uint) (((float) height) / width * w);
+//            }
+//            else
+//            {
+//                h = 256;
+//                w = (uint)(((float)width) / height * h);
+//            }
+//#endif
+
+//            Texture result = new Texture(w, h);
+//            m_Tracer.tracingTimes = 0;
+//            m_Tracer.isDebugging = false;
+//            m_Camera.SetRenderTarget(result);
+//            try
+//            {
+//                m_Camera.Render(this, true, progressCallBackAction);
+//            }
+//            catch (System.Exception e)
+//            {
+//                Log.Err(e.Message);
+//            }
+
+//            return result;
+//        }
 
 #if DEBUG
-            w = width;
-            h = height;
-#else
-            if (width < 256 && height < 256)
-            {
-                w = width;
-                h = height;
-            }
-            else if (width > height)
-            {
-                w = 256;
-                h = (uint) (((float) height) / width * w);
-            }
-            else
-            {
-                h = 256;
-                w = (uint)(((float)width) / height * h);
-            }
-#endif
-
-            Texture result = new Texture(w, h);
-            m_Tracer = new PathTracer(0, 0.000001);
-            m_Tracer.sceneData = m_SceneData;
-            m_Camera.SetRenderTarget(result);
-            try
-            {
-                m_Camera.Render(this, true, progressCallBackAction);
-            }
-            catch (System.Exception e)
-            {
-                Log.Err(e.Message);
-            }
-
-            return result;
-        }
-
-        public Texture RenderSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83)
+        public Texture RenderDebugSinglePixel(int x, int y, int tracingTimes, SamplerType samplerType, int numSamples, uint width, uint height, int numSets = 83)
         {
             Texture result = new Texture(width, height);
             result.Fill(Color.black);
-            m_Tracer = new PathTracer(tracingTimes, 0.000001);
-            m_Tracer.sceneData = m_SceneData;
+            m_Tracer.tracingTimes = tracingTimes;
+            m_Tracer.isDebugging = true;
             //m_Camera.SetSampler(samplerType, numSamples, numSets);
             var sampler = SamplerFactory.Create(samplerType, numSamples, numSets);
             m_Camera.SetRenderTarget(result);
             try
             {
-                m_Camera.RenderPixel(x, y, sampler, this);
+                Color color = m_Camera.RenderPixelToColor(x, y, sampler, new RenderState(), RenderChannel.Full, this);
+                result.SetPixel(x, y, color);
             }
             catch (System.Exception e)
             {
@@ -173,5 +183,6 @@ namespace ASL.PathTracer
 
             return result;
         }
+#endif
     }
 }

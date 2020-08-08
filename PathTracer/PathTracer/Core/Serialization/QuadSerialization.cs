@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace ASL.PathTracer.SceneSerialization
 	[GeometryAnalyse(type = "Quad")]
 	class QuadSerialization : GeometrySerialization
 	{
-		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams)
+		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams, ref GeometryStats stats)
 		{
 			string position = geoParams["Position"].paramValue;
 			string normal = geoParams["Normal"].paramValue;
@@ -23,6 +23,8 @@ namespace ASL.PathTracer.SceneSerialization
 			Vector3 u = StringUtils.StringToVector3(up);
 
 			output.Add(new Quad(p, n, r, u, shaders[0]));
+
+			stats.totalGeometries++;
 		}
 	}
 }

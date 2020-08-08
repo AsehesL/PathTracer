@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ namespace ASL.PathTracer
         Warnning,
         Error,
         Complete,
+        Debugging,
     }
 
     public class Log
@@ -95,6 +96,7 @@ namespace ASL.PathTracer
                     return System.Drawing.Color.MediumBlue;
                 case LogType.Info:
                 case LogType.Warnning:
+                case LogType.Debugging:
                 default:
                     return System.Drawing.Color.Black;
             }
@@ -110,6 +112,8 @@ namespace ASL.PathTracer
                     return System.Drawing.Color.Yellow;
                 case LogType.Complete:
                     return System.Drawing.Color.Green;
+                case LogType.Debugging:
+                    return System.Drawing.Color.Cyan;
                 case LogType.Info:
                 default:
                     return System.Drawing.Color.White;

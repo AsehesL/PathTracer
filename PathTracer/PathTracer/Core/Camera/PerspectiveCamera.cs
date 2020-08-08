@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace ASL.PathTracer
 {
+    /// <summary>
+    /// 透视相机
+    /// </summary>
     public class PerspectiveCamera : CameraBase
     {
 
@@ -18,10 +21,19 @@ namespace ASL.PathTracer
 
         public double fieldOfView { get; private set; }
 
+        /// <summary>
+        /// 透镜半径
+        /// </summary>
         public float radius;
 
+        /// <summary>
+        /// 焦距
+        /// </summary>
         public float focal;
 
+        /// <summary>
+        /// 启用薄透镜
+        /// </summary>
         public bool useThinLens;
 
         private double m_Height;
@@ -58,6 +70,13 @@ namespace ASL.PathTracer
             return GetRayFromPixel(x, y);
         }
 
+        /// <summary>
+        /// 根据焦距和透镜半径计算光线
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="sampler"></param>
+        /// <returns></returns>
         private Ray GetThinLensRayFromPixel(int x, int y, SamplerBase sampler)
         {
             if (m_RenderTarget == null)
