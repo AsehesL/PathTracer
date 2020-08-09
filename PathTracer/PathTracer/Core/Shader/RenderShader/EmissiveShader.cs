@@ -41,6 +41,7 @@ namespace ASL.PathTracer
                 case RenderChannel.Emissive:
                     return color * indensity;
                 case RenderChannel.Occlusion:
+                case RenderChannel.Alpha:
                     return Color.white;
             }
             return Color.black;

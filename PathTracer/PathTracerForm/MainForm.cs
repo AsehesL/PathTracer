@@ -57,9 +57,10 @@ namespace PathTracerForm
 
         private void GenerateScene(string fileName)
         {
+            int defaultWidth, defaultHeight;
             Log.Clear();
             Log.Info("载入场景:"+fileName);
-            m_Scene = Scene.Create(fileName);
+            m_Scene = Scene.Create(fileName, out defaultWidth, out defaultHeight);
             if (m_Scene == null)
             {
                 Log.Err("载入场景异常");
@@ -82,6 +83,10 @@ namespace PathTracerForm
             else
             {
                 Log.Info("场景载入成功");
+                if (defaultWidth > 0)
+                    this.widthInputBox.Text = defaultWidth.ToString();
+                if (defaultHeight > 0)
+                    this.heightInputBox.Text = defaultHeight.ToString();
                 this.bounceInputBox.Enabled = true;
                 this.samplerTypeCombo.Enabled = true;
                 this.numSampleInputBox.Enabled = true;

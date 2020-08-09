@@ -19,6 +19,7 @@ namespace ASL.PathTracer
         WorldNormal,
         Occlusion,
         Emissive,
+        Alpha,
         DiffuseNoLighting,
         Diffuse,
         DirectionalLightShadow,

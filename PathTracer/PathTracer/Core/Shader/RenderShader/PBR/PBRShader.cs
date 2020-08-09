@@ -82,7 +82,7 @@ namespace ASL.PathTracer
 			get
 			{
 				if (transparent)
-					return PBRShadingModel.Transparent;
+					return PBRShadingModel.Transparency;
 				else
 					return PBRShadingModel.Default;
 			}
@@ -127,7 +127,7 @@ namespace ASL.PathTracer
 			}
 			else
 				property.roughness = roughness;
-			if (shadingModel != PBRShadingModel.Transparent)
+			if (shadingModel != PBRShadingModel.Transparency)
 			{
 				if (mroTex != null)
 				{

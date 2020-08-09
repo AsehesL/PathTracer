@@ -45,8 +45,15 @@ namespace ASL.PathTracer.SceneSerialization
 
         [XmlAttribute("UseThinLens")] public bool useThinLens;
 
-        public CameraBase CreateCamera()
+        [XmlAttribute("Width")] public int width;
+
+        [XmlAttribute("Height")] public int height;
+
+        public CameraBase CreateCamera(out int defaultWidth, out int defaultHeight)
         {
+            defaultWidth = width;
+            defaultHeight = height;
+
             Vector3 pos = StringUtils.StringToVector3(position);
             Vector3 rot = StringUtils.StringToVector3(euler);
 

@@ -33,6 +33,14 @@ namespace ASL.PathTracer
 
         public static Scene Create(string scenePath)
         {
+            int dwidth, dheight;
+            return Create(scenePath, out dwidth, out dheight);
+        }
+
+        public static Scene Create(string scenePath, out int defaultWidth, out int defaultHeight)
+        {
+            defaultWidth = 0;defaultHeight = 0;
+
             var sceneData = ASL.PathTracer.SceneSerialization.SceneSerialization.Deserialize(scenePath);
             if (sceneData == null)
             {
@@ -41,7 +49,7 @@ namespace ASL.PathTracer
             }
 
             //Scene scene = new Scene();
-            var camera = sceneData.camera.CreateCamera();
+            var camera = sceneData.camera.CreateCamera(out defaultWidth, out defaultHeight);
 
             Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
             if (sceneData.textures != null)

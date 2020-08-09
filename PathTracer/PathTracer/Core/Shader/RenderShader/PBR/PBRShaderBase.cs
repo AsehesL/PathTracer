@@ -19,7 +19,7 @@ namespace ASL.PathTracer
         /// <summary>
         /// 透明
         /// </summary>
-        Transparent,
+        Transparency,
         /// <summary>
         /// 双面薄透光材质
         /// </summary>
@@ -104,7 +104,7 @@ namespace ASL.PathTracer
         {
             Color albedo = property.GetAlbedo();
             float roughness = property.GetRoughness();
-            if (shadingModel != PBRShadingModel.Transparent || sampler.GetRandom() < albedo.a)
+            if (shadingModel != PBRShadingModel.Transparency || sampler.GetRandom() < albedo.a)
             {
                 if(shadingModel == PBRShadingModel.CarPaint)
                 {
@@ -270,7 +270,7 @@ namespace ASL.PathTracer
         {
             Color albedo = property.GetAlbedo();
             float roughness = property.GetRoughness();
-            if (shadingModel != PBRShadingModel.Transparent || sampler.GetRandom() < albedo.a)
+            if (shadingModel != PBRShadingModel.Transparency || sampler.GetRandom() < albedo.a)
             {
                 if (shadingModel == PBRShadingModel.CarPaint)
                 {
@@ -418,6 +418,12 @@ namespace ASL.PathTracer
             {
                 case RenderChannel.Albedo:
                     return property.GetAlbedo();
+                case RenderChannel.Alpha:
+                    {
+                        if (shadingModel == PBRShadingModel.Transparency)
+                            return Color.white * property.GetAlbedo().a;
+                        return Color.white;
+                    }
                 case RenderChannel.Metallic:
                     return Color.white * property.GetMetallic();
                 case RenderChannel.Roughness:
