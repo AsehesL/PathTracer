@@ -12,6 +12,8 @@ namespace ASL.PathTracer
         public Color color = Color.white;
         public float refractive;
         public float roughness;
+        public Vector2 tile;
+        public Texture bump;
 
         private BRDFBase m_SpecularBRDF = new CookTorranceBRDF();
 
@@ -19,14 +21,16 @@ namespace ASL.PathTracer
         {
             Color result = default(Color);
 
+            Vector3 worldNormal = bump != null ? RecalucateNormal(hit.normal, hit.tangent, bump.Sample((float)(hit.texcoord.x * tile.x), (float)(hit.texcoord.y * tile.y))) : hit.normal;
+
             if (tracer.sceneData.sky != null && tracer.sceneData.sky.hasSunLight)
             {
                 //单独计算方向光照
-                result += RenderDirectionalLighting(tracer, sampler, hit.hit, hit.normal, ray.direction);
+                result += RenderDirectionalLighting(tracer, sampler, hit.hit, worldNormal, ray.direction);
             }
 
             //计算环境光照
-            result += RenderAmbientLighting(tracer, sampler, renderState, hit.hit, hit.normal, ray.direction, hit.depth);
+            result += RenderAmbientLighting(tracer, sampler, renderState, hit.hit, worldNormal, ray.direction, hit.depth);
 
             return result;
         }

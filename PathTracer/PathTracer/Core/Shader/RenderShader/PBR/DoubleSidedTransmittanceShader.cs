@@ -97,6 +97,11 @@ namespace ASL.PathTracer
 
 		private CookTorranceBRDF m_CookTorranceBRDF = new CookTorranceBRDF();
 
+		public override bool ShouldRenderBackFace()
+		{
+			return true;
+		}
+
 		protected override float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit)
 		{
 			float alpha = color.a;

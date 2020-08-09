@@ -75,9 +75,13 @@ namespace ASL.PathTracer
 
             Vector3 n = Vector3.Cross(e1, e2);
             double ndv = Vector3.Dot(ray.direction, n);
+            bool back = false;
             if (ndv > 0)
             {
-                return false;
+                if (shader != null && shader.ShouldRenderBackFace() == false)
+                    return false;
+                back = true;
+                //return false;
             }
 
             Vector3 p = Vector3.Cross(ray.direction, e2);
@@ -125,6 +129,8 @@ namespace ASL.PathTracer
             hit.tangent = (1.0 - u - v) * vertex0.tangent + u * vertex1.tangent + v * vertex2.tangent;
             hit.shader = shader;
             hit.distance = rt;
+            if (back)
+                hit.normal = -1.0 * hit.normal;
             return true;
         }
     }

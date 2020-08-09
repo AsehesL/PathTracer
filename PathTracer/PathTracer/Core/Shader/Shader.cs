@@ -135,6 +135,7 @@ namespace ASL.PathTracer
 
     public abstract class Shader : ShaderBase
     {
+
         public abstract Color Render(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit);
 
         public abstract Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit);
@@ -142,6 +143,8 @@ namespace ASL.PathTracer
         public abstract Color RenderPreviewChannel(Tracer tracer, SamplerBase sampler, Ray ray, RayCastHit hit, RenderChannel renderChannel);
 
         public virtual bool ShouldCull(Ray ray, RayCastHit hit) { return false; }
+
+        public virtual bool ShouldRenderBackFace() { return false; }
 
         protected static Vector3 RecalucateNormal(Vector3 normal, Vector4 tangent, Color normalColor)
         {

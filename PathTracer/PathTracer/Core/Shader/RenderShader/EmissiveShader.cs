@@ -11,18 +11,18 @@ namespace ASL.PathTracer
     class EmissiveShader : Shader
     {
         public Color color;
-        public float indensity;
+        public float intensity;
 
         public override Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
         {
-            Color col = color * indensity;
+            Color col = color * intensity;
 
             return col;
         }
 
         public override Color Render(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
         {
-            Color col = color * indensity;
+            Color col = color * intensity;
 
             return col;
         }
@@ -39,7 +39,7 @@ namespace ASL.PathTracer
                 case RenderChannel.DiffuseNoLighting:
                 case RenderChannel.Diffuse:
                 case RenderChannel.Emissive:
-                    return color * indensity;
+                    return color * intensity;
                 case RenderChannel.Occlusion:
                 case RenderChannel.Alpha:
                     return Color.white;
