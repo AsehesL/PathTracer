@@ -97,6 +97,8 @@ namespace ASL.PathTracer
             //计算环境光照
             result += property.GetOcclusion() * RenderAmbientLighting(tracer, sampler, renderState, ray, hit.hit, worldNormal, property, hit.depth);
 
+            
+
             return result + property.GetEmissive();
         }
 
@@ -143,23 +145,6 @@ namespace ASL.PathTracer
                 }
                 {
                     //Opaque
-                    if (shadingModel == PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetDoubleSidedTransmittance())
-                    {
-                        //Translucent
-                        worldNormal *= -1;
-                        worldPoint += worldNormal * tracer.epsilon * 3.0;
-
-                        Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
-                        double ndl = Vector3.Dot(worldNormal, L);
-                        if (ndl < 0.0)
-                            return Color.black;
-                        Ray lray = new Ray(worldPoint, L);
-                        bool shadow = tracer.TracingOnce(lray);
-                        if (shadow)
-                            return Color.black;
-                        ndl = Math.Max(ndl, 0.0);
-                        return albedo * property.GetDoubleSidedTransmissionColor() * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
-                    }
                     float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
                     if (shadingModel != PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetMetallic())
                     {
@@ -178,6 +163,8 @@ namespace ASL.PathTracer
                     }
                     else
                     {
+                        Color result = default(Color);
+
                         //Dielectric
                         float F = FresnelSchlickRoughness(ndv, 0.04f, roughness);
                         if (sampler.GetRandom() < F)
@@ -192,7 +179,7 @@ namespace ASL.PathTracer
                             if (shadow)
                                 return Color.black;
                             ndl = Math.Max(ndl, 0.0);
-                            return tracer.sceneData.sky.GetSunColor() * SpecularBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                            result = tracer.sceneData.sky.GetSunColor() * SpecularBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
                         }
                         else
                         {
@@ -206,8 +193,28 @@ namespace ASL.PathTracer
                             if (shadow)
                                 return Color.black;
                             ndl = Math.Max(ndl, 0.0);
-                            return albedo * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                            result = albedo * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
                         }
+
+                        if (shadingModel == PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetDoubleSidedTransmittance())
+                        {
+                            //Translucent
+                            worldNormal *= -1;
+                            worldPoint += worldNormal * tracer.epsilon * 3.0;
+
+                            Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
+                            double ndl = Vector3.Dot(worldNormal, L);
+                            if (ndl < 0.0)
+                                return Color.black;
+                            Ray lray = new Ray(worldPoint, L);
+                            bool shadow = tracer.TracingOnce(lray);
+                            if (shadow)
+                                return Color.black;
+                            ndl = Math.Max(ndl, 0.0);
+                            result += albedo * property.GetDoubleSidedTransmissionColor() * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                        }
+
+                        return result;
                     }
                 }
             }
@@ -299,26 +306,6 @@ namespace ASL.PathTracer
                 }
                 {
                     //Opaque
-                    if (shadingModel == PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetDoubleSidedTransmittance())
-                    {
-                        //Translucent
-                        worldNormal *= -1;
-                        worldPoint += worldNormal * tracer.epsilon * 3.0;
-
-                        Vector3 w = worldNormal;
-                        Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
-                        u.Normalize();
-                        Vector3 v = Vector3.Cross(u, w);
-                        Vector3 sp = sampler.SampleHemiSphere(0);
-
-                        Vector3 wi = sp.x * u + sp.y * v + sp.z * w;
-                        wi.Normalize();
-
-                        float ndl = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, wi));
-
-                        Ray lray = new Ray(worldPoint, wi);
-                        return ndl * albedo * property.GetDoubleSidedTransmissionColor() * tracer.Tracing(lray, sampler, renderState, depth + 1) * DiffuseBRDF.BRDF(-1.0 * ray.direction, wi, worldNormal, roughness);
-                    }
                     float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
                     if (shadingModel != PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetMetallic())
                     {
@@ -333,6 +320,9 @@ namespace ASL.PathTracer
                     }
                     else
                     {
+
+                        Color result = default(Color);
+
                         //Dielectric
                         float F = FresnelSchlickRoughness(ndv, 0.04f, roughness);
                         if (sampler.GetRandom() < F)
@@ -342,7 +332,7 @@ namespace ASL.PathTracer
                             Vector3 L = Vector3.Reflect(ray.direction * -1, N);
                             Ray lray = new Ray(worldPoint, L);
                             float ndl = (float)Math.Max(Vector3.Dot(worldNormal, L), 0.0);
-                            return tracer.Tracing(lray, sampler, renderState, depth + 1) * SpecularBRDF.BRDF(-1.0 * ray.direction, L, worldNormal, roughness) * ndl;
+                            result = tracer.Tracing(lray, sampler, renderState, depth + 1) * SpecularBRDF.BRDF(-1.0 * ray.direction, L, worldNormal, roughness) * ndl;
                         }
                         else
                         {
@@ -359,8 +349,31 @@ namespace ASL.PathTracer
                             float ndl = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, wi));
 
                             Ray lray = new Ray(worldPoint, wi);
-                            return ndl * albedo * tracer.Tracing(lray, sampler, renderState, depth + 1) * DiffuseBRDF.BRDF(-1.0 * ray.direction, wi, worldNormal, roughness);
+                            result = ndl * albedo * tracer.Tracing(lray, sampler, renderState, depth + 1) * DiffuseBRDF.BRDF(-1.0 * ray.direction, wi, worldNormal, roughness);
                         }
+
+                        if (shadingModel == PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetDoubleSidedTransmittance())
+                        {
+                            //Translucent
+                            worldNormal *= -1;
+                            worldPoint += worldNormal * tracer.epsilon * 3.0;
+
+                            Vector3 w = worldNormal;
+                            Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
+                            u.Normalize();
+                            Vector3 v = Vector3.Cross(u, w);
+                            Vector3 sp = sampler.SampleHemiSphere(0);
+
+                            Vector3 wi = sp.x * u + sp.y * v + sp.z * w;
+                            wi.Normalize();
+
+                            float ndl = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, wi));
+
+                            Ray lray = new Ray(worldPoint, wi);
+                            result += ndl * albedo * property.GetDoubleSidedTransmissionColor() * tracer.Tracing(lray, sampler, renderState, depth + 1) * DiffuseBRDF.BRDF(-1.0 * ray.direction, wi, worldNormal, roughness);
+                        }
+
+                        return result;
                     }
                 }
             }
