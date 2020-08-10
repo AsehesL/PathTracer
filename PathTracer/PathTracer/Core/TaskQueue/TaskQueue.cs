@@ -37,7 +37,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public void Execute()
+        public bool Execute(System.Action<int, int> progressCallBackAction = null)
         {
             bool result = false;
             if (renderTasks != null)
@@ -46,7 +46,7 @@ namespace ASL.PathTracer
                 {
                     if (renderTasks[i] != null)
                     {
-                        if (renderTasks[i].Execute())
+                        if (renderTasks[i].Execute(progressCallBackAction))
                         {
                             result = true;
                             ExecuteCommand(renderTasks[i].finishCommand);
@@ -59,6 +59,7 @@ namespace ASL.PathTracer
                     ExecuteCommand(finishCommand);
                 }
             }
+            return result;
         }
 
         private void ExecuteCommand(string command)
@@ -101,7 +102,7 @@ namespace ASL.PathTracer
         [XmlAttribute(AttributeName = "FinishCmd")]
         public string finishCommand;
 
-        public bool Execute()
+        public bool Execute(System.Action<int, int> progressCallBackAction = null)
         {
             if (string.IsNullOrEmpty(scenePath))
                 return false;
@@ -119,7 +120,7 @@ namespace ASL.PathTracer
             if (width <= 0 || height <= 0)
                 return false;
             var scene = Scene.Create(scenePath);
-            var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height, RenderChannel.Full);
+            var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height, RenderChannel.Full, 83, progressCallBackAction);
             
             if (outputFileInfo.Directory.Exists)
                 outputFileInfo.Directory.Create();

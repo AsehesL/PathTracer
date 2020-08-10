@@ -349,7 +349,17 @@ namespace PathTracerForm
                 }
 
                 var queue = ASL.PathTracer.TaskQueue.Load(this.openFileDialog.FileName);
-                queue?.Execute();
+                
+                bool success = queue != null ? queue.Execute(this.ProgressCallBack) : false;
+
+                if (success)
+                {
+                    Log.CompleteInfo($"渲染完成!");
+
+                    this.progressBar.Value = 0;
+                }
+                else
+                    Log.Err("渲染失败!");
             }
         }
 
