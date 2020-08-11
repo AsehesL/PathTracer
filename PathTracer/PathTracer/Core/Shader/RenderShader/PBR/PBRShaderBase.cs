@@ -113,7 +113,7 @@ namespace ASL.PathTracer
                     // Car Paint
                     float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
                     
-                    float F = FresnelSchlickRoughness(ndv, 0.04f, roughness);
+                    float F = FresnelSchlickRoughness(ndv, 0.1f, roughness);
                     if (sampler.GetRandom() < F)
                     {
                         Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
@@ -283,7 +283,7 @@ namespace ASL.PathTracer
                 {
                     // Car Paint
                     float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
-                    float F = FresnelSchlickRoughness(ndv, 0.04f, roughness);
+                    float F = FresnelSchlickRoughness(ndv, 0.1f, roughness);
                     if (sampler.GetRandom() < F)
                     {
                         Vector3 N = ImportanceGGXDirection(worldNormal, sampler, roughness);
