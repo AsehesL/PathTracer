@@ -17,6 +17,11 @@ namespace ASL.PathTracer
 
         private BRDFBase m_SpecularBRDF = new CookTorranceBRDF();
 
+        public override bool ShouldRenderBackFace()
+        {
+            return true;
+        }
+
         public override Color Render(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
         {
             Color result = default(Color);

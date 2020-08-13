@@ -69,6 +69,11 @@ namespace ASL.PathTracer
             return false;
         }
 
+        public override bool ShouldRenderBackFace()
+        {
+            return true;
+        }
+
         protected abstract float GetTransparentCutOutAlpha(Ray ray, RayCastHit hit);
 
         public override Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
