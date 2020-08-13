@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -74,12 +74,39 @@ namespace ASL.PathTracer
             Color.RGBToHSV(this, ref h, ref s, ref v);
         }
 
-        public void FixColor(float gamma)
+        public float Luminance()
         {
-            this.r = (float)Math.Pow(MathUtils.SaturateF(r), gamma);
-            this.g = (float)Math.Pow(MathUtils.SaturateF(g), gamma);
-            this.b = (float)Math.Pow(MathUtils.SaturateF(b), gamma);
-            this.a = (float)Math.Pow(MathUtils.SaturateF(a), gamma);
+            return r * 0.22f + g * 0.707f + b * 0.071f;
+        }
+
+        //public void FixColor(float gamma)
+        //{
+        //    this.r = (float)Math.Pow(MathUtils.SaturateF(r), gamma);
+        //    this.g = (float)Math.Pow(MathUtils.SaturateF(g), gamma);
+        //    this.b = (float)Math.Pow(MathUtils.SaturateF(b), gamma);
+        //    this.a = (float)Math.Pow(MathUtils.SaturateF(a), gamma);
+        //}
+
+        public void FixColor()
+        {
+            this.r = (float)MathUtils.SaturateF(r);
+            this.g = (float)MathUtils.SaturateF(g);
+            this.b = (float)MathUtils.SaturateF(b);
+            this.a = (float)MathUtils.SaturateF(a);
+        }
+
+        public void Tonemapping(float exposure)
+        {
+            this.r = TonemappingChannel(this.r, exposure);
+            this.g = TonemappingChannel(this.g, exposure);
+            this.b = TonemappingChannel(this.b, exposure);
+            this.a = TonemappingChannel(this.a, exposure);
+        }
+
+        private float TonemappingChannel(float channel, float exposure)
+        {
+            channel *= exposure;
+            return (channel * (2.51f * channel + 0.03f)) / (channel * (2.43f * channel + 0.59f) + 0.14f);
         }
 
         public void Gamma(float gamma)

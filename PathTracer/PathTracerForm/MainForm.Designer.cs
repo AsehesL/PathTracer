@@ -30,12 +30,12 @@ namespace PathTracerForm
         {
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.FileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OpenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SaveHDRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveHDRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.OpenTaskQueueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openTaskQueueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel = new System.Windows.Forms.Panel();
             this.infoLabel = new System.Windows.Forms.Label();
             this.fileNameLabel = new System.Windows.Forms.Label();
@@ -44,11 +44,12 @@ namespace PathTracerForm
             this.logType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.logMsg = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.settingPanel = new System.Windows.Forms.Panel();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.retonemappingButton = new System.Windows.Forms.Button();
+            this.tonemappingCheckBox = new System.Windows.Forms.CheckBox();
+            this.renderChannelCombo = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.exposureInputBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            #if DEBUG
-            this.pixelDebugCheckBox = new System.Windows.Forms.CheckBox();
-            #endif
             this.renderButton = new System.Windows.Forms.Button();
             this.heightInputBox = new System.Windows.Forms.TextBox();
             this.widthInputBox = new System.Windows.Forms.TextBox();
@@ -62,8 +63,6 @@ namespace PathTracerForm
             this.bounceInputBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.label2 = new System.Windows.Forms.Label();
-            this.renderChannelCombo = new System.Windows.Forms.ComboBox();
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -83,59 +82,59 @@ namespace PathTracerForm
             // 
             this.menuStrip.BackColor = System.Drawing.SystemColors.MenuBar;
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FileToolStripMenuItem});
+            this.fileToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(767, 25);
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip1";
             // 
-            // FileToolStripMenuItem
+            // fileToolStripMenuItem
             // 
-            this.FileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.OpenToolStripMenuItem,
-            this.SaveToolStripMenuItem,
-            this.SaveHDRToolStripMenuItem,
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.saveHDRToolStripMenuItem,
             this.toolStripSeparator1,
-            this.OpenTaskQueueMenuItem});
-            this.FileToolStripMenuItem.Name = "FileToolStripMenuItem";
-            this.FileToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
-            this.FileToolStripMenuItem.Text = "文件";
+            this.openTaskQueueMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.fileToolStripMenuItem.Text = "文件";
             // 
-            // OpenToolStripMenuItem
+            // openToolStripMenuItem
             // 
-            this.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem";
-            this.OpenToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.OpenToolStripMenuItem.Text = "打开...";
-            this.OpenToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.openToolStripMenuItem.Text = "打开...";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
-            // SaveToolStripMenuItem
+            // saveToolStripMenuItem
             // 
-            this.SaveToolStripMenuItem.Enabled = false;
-            this.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem";
-            this.SaveToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.SaveToolStripMenuItem.Text = "保存渲染结果";
-            this.SaveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Enabled = false;
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.saveToolStripMenuItem.Text = "保存渲染结果";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
-            // SaveHDRToolStripMenuItem
+            // saveHDRToolStripMenuItem
             // 
-            this.SaveHDRToolStripMenuItem.Enabled = false;
-            this.SaveHDRToolStripMenuItem.Name = "SaveHDRToolStripMenuItem";
-            this.SaveHDRToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.SaveHDRToolStripMenuItem.Text = "保存HDR渲染结果";
-            this.SaveHDRToolStripMenuItem.Click += new System.EventHandler(this.SaveHDRToolStripMenuItem_Click);
+            this.saveHDRToolStripMenuItem.Enabled = false;
+            this.saveHDRToolStripMenuItem.Name = "saveHDRToolStripMenuItem";
+            this.saveHDRToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.saveHDRToolStripMenuItem.Text = "保存HDR渲染结果";
+            this.saveHDRToolStripMenuItem.Click += new System.EventHandler(this.SaveHDRToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(171, 6);
             // 
-            // OpenTaskQueueMenuItem
+            // openTaskQueueMenuItem
             // 
-            this.OpenTaskQueueMenuItem.Name = "OpenTaskQueueMenuItem";
-            this.OpenTaskQueueMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.OpenTaskQueueMenuItem.Text = "运行渲染队列...";
-            this.OpenTaskQueueMenuItem.Click += new System.EventHandler(this.OpenTaskQueueMenuItem_Click);
+            this.openTaskQueueMenuItem.Name = "openTaskQueueMenuItem";
+            this.openTaskQueueMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.openTaskQueueMenuItem.Text = "运行渲染队列...";
+            this.openTaskQueueMenuItem.Click += new System.EventHandler(this.OpenTaskQueueMenuItem_Click);
             // 
             // panel
             // 
@@ -217,13 +216,12 @@ namespace PathTracerForm
             // 
             this.settingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.settingPanel.Controls.Add(this.retonemappingButton);
+            this.settingPanel.Controls.Add(this.tonemappingCheckBox);
             this.settingPanel.Controls.Add(this.renderChannelCombo);
             this.settingPanel.Controls.Add(this.label2);
-            this.settingPanel.Controls.Add(this.textBox1);
+            this.settingPanel.Controls.Add(this.exposureInputBox);
             this.settingPanel.Controls.Add(this.label1);
-            #if DEBUG
-            this.settingPanel.Controls.Add(this.pixelDebugCheckBox);
-            #endif
             this.settingPanel.Controls.Add(this.renderButton);
             this.settingPanel.Controls.Add(this.heightInputBox);
             this.settingPanel.Controls.Add(this.widthInputBox);
@@ -240,43 +238,72 @@ namespace PathTracerForm
             this.settingPanel.Size = new System.Drawing.Size(242, 334);
             this.settingPanel.TabIndex = 5;
             // 
-            // textBox1
+            // retonemappingButton
             // 
-            this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(75, 160);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(164, 21);
-            this.textBox1.TabIndex = 18;
+            this.retonemappingButton.Enabled = false;
+            this.retonemappingButton.Location = new System.Drawing.Point(75, 270);
+            this.retonemappingButton.Name = "retonemappingButton";
+            this.retonemappingButton.Size = new System.Drawing.Size(137, 23);
+            this.retonemappingButton.TabIndex = 23;
+            this.retonemappingButton.Text = "重新Tonemapping";
+            this.retonemappingButton.UseVisualStyleBackColor = true;
+            this.retonemappingButton.Click += new System.EventHandler(this.retonemappingButton_Click);
+            // 
+            // tonemappingCheckBox
+            // 
+            this.tonemappingCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tonemappingCheckBox.AutoSize = true;
+            this.tonemappingCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.tonemappingCheckBox.Enabled = false;
+            this.tonemappingCheckBox.ForeColor = System.Drawing.Color.Black;
+            this.tonemappingCheckBox.Location = new System.Drawing.Point(3, 190);
+            this.tonemappingCheckBox.Name = "tonemappingCheckBox";
+            this.tonemappingCheckBox.Size = new System.Drawing.Size(90, 16);
+            this.tonemappingCheckBox.TabIndex = 22;
+            this.tonemappingCheckBox.Text = "Tonemapping";
+            this.tonemappingCheckBox.UseVisualStyleBackColor = true;
+            this.tonemappingCheckBox.CheckedChanged += new System.EventHandler(this.TonemappingCheckBox_CheckedChanged);
+            // 
+            // renderChannelCombo
+            // 
+            this.renderChannelCombo.Enabled = false;
+            this.renderChannelCombo.FormattingEnabled = true;
+            this.renderChannelCombo.Location = new System.Drawing.Point(75, 160);
+            this.renderChannelCombo.Name = "renderChannelCombo";
+            this.renderChannelCombo.Size = new System.Drawing.Size(164, 20);
+            this.renderChannelCombo.TabIndex = 20;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 163);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.TabIndex = 19;
+            this.label2.Text = "渲染通道";
+            // 
+            // exposureInputBox
+            // 
+            this.exposureInputBox.Enabled = false;
+            this.exposureInputBox.Location = new System.Drawing.Point(75, 214);
+            this.exposureInputBox.Name = "exposureInputBox";
+            this.exposureInputBox.Size = new System.Drawing.Size(164, 21);
+            this.exposureInputBox.TabIndex = 18;
+            this.exposureInputBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.exposureInputBox_KeyPress);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 163);
+            this.label1.Location = new System.Drawing.Point(3, 217);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(47, 12);
+            this.label1.Size = new System.Drawing.Size(53, 12);
             this.label1.TabIndex = 17;
-            this.label1.Text = "Adapted";
-            #if DEBUG
-            // 
-            // pixelDebugCheckBox
-            // 
-            this.pixelDebugCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pixelDebugCheckBox.AutoSize = true;
-            this.pixelDebugCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.pixelDebugCheckBox.Enabled = false;
-            this.pixelDebugCheckBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
-            this.pixelDebugCheckBox.Location = new System.Drawing.Point(3, 311);
-            this.pixelDebugCheckBox.Name = "pixelDebugCheckBox";
-            this.pixelDebugCheckBox.Size = new System.Drawing.Size(84, 16);
-            this.pixelDebugCheckBox.TabIndex = 6;
-            this.pixelDebugCheckBox.Text = "单像素调试";
-            this.pixelDebugCheckBox.UseVisualStyleBackColor = true;
-            #endif
+            this.label1.Text = "曝光强度";
             // 
             // renderButton
             // 
             this.renderButton.Enabled = false;
-            this.renderButton.Location = new System.Drawing.Point(75, 224);
+            this.renderButton.Location = new System.Drawing.Point(75, 241);
             this.renderButton.Name = "renderButton";
             this.renderButton.Size = new System.Drawing.Size(137, 23);
             this.renderButton.TabIndex = 16;
@@ -382,24 +409,6 @@ namespace PathTracerForm
             // 
             this.saveFileDialog.Filter = "BMP文件|*.bmp";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 190);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 12);
-            this.label2.TabIndex = 19;
-            this.label2.Text = "渲染通道";
-            // 
-            // renderChannelCombo
-            // 
-            this.renderChannelCombo.Enabled = false;
-            this.renderChannelCombo.FormattingEnabled = true;
-            this.renderChannelCombo.Location = new System.Drawing.Point(75, 187);
-            this.renderChannelCombo.Name = "renderChannelCombo";
-            this.renderChannelCombo.Size = new System.Drawing.Size(164, 20);
-            this.renderChannelCombo.TabIndex = 20;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -448,9 +457,9 @@ namespace PathTracerForm
         private System.Windows.Forms.Label samplerLabel;
         private System.Windows.Forms.Label bounceLabel;
         private System.Windows.Forms.TextBox bounceInputBox;
-        private System.Windows.Forms.ToolStripMenuItem FileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem OpenToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SaveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.Label fileNameLabel;
         private System.Windows.Forms.Label infoLabel;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
@@ -459,12 +468,14 @@ namespace PathTracerForm
         private System.Windows.Forms.CheckBox pixelDebugCheckBox;
 #endif
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem OpenTaskQueueMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SaveHDRToolStripMenuItem;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.ToolStripMenuItem openTaskQueueMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveHDRToolStripMenuItem;
+        private System.Windows.Forms.TextBox exposureInputBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox renderChannelCombo;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox tonemappingCheckBox;
+        private System.Windows.Forms.Button retonemappingButton;
     }
 }
 

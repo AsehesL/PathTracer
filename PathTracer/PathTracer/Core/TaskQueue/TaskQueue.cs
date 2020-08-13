@@ -93,6 +93,10 @@ namespace ASL.PathTracer
         public int numSamples;
         [XmlAttribute(AttributeName = "HDR")]
         public bool saveHDR;
+        [XmlAttribute(AttributeName = "Tonemapping")]
+        public bool tonemapping;
+        [XmlAttribute(AttributeName = "Exposure")]
+        public float exposure;
         [XmlAttribute(AttributeName = "Width")]
         public int width;
         [XmlAttribute(AttributeName = "Height")]
@@ -130,7 +134,7 @@ namespace ASL.PathTracer
             }
             //else
             {
-                var bitmap = tex.TransferToBMP(null, 0.45f);
+                var bitmap = tex.TransferToBMP(null, 0.45f, tonemapping ? exposure : -1.0f);
                 FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
                 bitmap.Save(stream, ImageFormat.Bmp);
                 stream.Close();

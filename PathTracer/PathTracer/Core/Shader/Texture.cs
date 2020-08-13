@@ -212,16 +212,21 @@ namespace ASL.PathTracer
             return default(Color);
         }
 
-        public System.Drawing.Bitmap TransferToBMP(Bitmap bitmap, float gamma)
+        public System.Drawing.Bitmap TransferToBMP(Bitmap bitmap, float gamma, float exposure)
         {
             if(bitmap == null)
                 bitmap = new System.Drawing.Bitmap((int)m_Width, (int)m_Height);
+            Color[] colors = m_Colors;
             for (int i = 0; i < m_Width; i++)
             {
                 for (int j = 0; j < m_Height; j++)
                 {
-                    Color col = m_Colors[j * m_Width + i];
-                    col.FixColor(gamma);
+                    Color col = colors[j * m_Width + i];
+                    if (exposure > 0)
+                        col.Tonemapping(exposure);
+                    col.Gamma(gamma);
+                    //col.FixColor(gamma);
+                    col.FixColor();
                     System.Drawing.Color c = System.Drawing.Color.FromArgb((int) (col.r * 255.0f),
                         (int) (col.g * 255.0f), (int) (col.b * 255.0f));
                     bitmap.SetPixel((int)m_Width - 1 - i, (int)m_Height - 1 - j, c);

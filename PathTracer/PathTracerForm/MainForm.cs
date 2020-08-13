@@ -72,8 +72,9 @@ namespace PathTracerForm
                 //this.fastPreviewButton.Enabled = false;
                 this.renderChannelCombo.Enabled = false;
                 this.renderButton.Enabled = false;
-                this.SaveToolStripMenuItem.Enabled = false;
-                this.SaveHDRToolStripMenuItem.Enabled = false;
+                this.saveToolStripMenuItem.Enabled = false;
+                this.saveHDRToolStripMenuItem.Enabled = false;
+                this.tonemappingCheckBox.Enabled = false;
 #if DEBUG
                 this.pixelDebugCheckBox.Enabled = false;
 #endif
@@ -95,8 +96,9 @@ namespace PathTracerForm
                 //this.fastPreviewButton.Enabled = true;
                 this.renderChannelCombo.Enabled = true;
                 this.renderButton.Enabled = true;
-                this.SaveToolStripMenuItem.Enabled = true;
-                this.SaveHDRToolStripMenuItem.Enabled = true;
+                this.saveToolStripMenuItem.Enabled = true;
+                this.saveHDRToolStripMenuItem.Enabled = true;
+                this.tonemappingCheckBox.Enabled = true;
 #if DEBUG
                 this.pixelDebugCheckBox.Enabled = true;
 #endif
@@ -134,6 +136,11 @@ namespace PathTracerForm
         }
 
         private void heightInputBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            this.LimitInputNumber(sender, e);
+        }
+
+        private void exposureInputBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             this.LimitInputNumber(sender, e);
         }
@@ -205,6 +212,12 @@ namespace PathTracerForm
             uint width = string.IsNullOrEmpty(this.widthInputBox.Text) ? 0 : uint.Parse(this.widthInputBox.Text);
             uint height = string.IsNullOrEmpty(this.heightInputBox.Text) ? 0 : uint.Parse(this.heightInputBox.Text);
 
+            float exposure = -1.0f;
+            if(this.tonemappingCheckBox.Checked && !string.IsNullOrEmpty(this.exposureInputBox.Text))
+            {
+                exposure = float.Parse(this.exposureInputBox.Text);
+            }
+
             //if (renderChannel == RenderChannel.Full && traceTimes <= 0)
             //{
             //    MessageBox.Show("不允许反弹次数小于等于0!", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -246,8 +259,10 @@ namespace PathTracerForm
                     m_Bitmap = null;
                 }
 
-                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f);
+                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f, exposure);
                 this.renderResultBox.BackgroundImage = m_Bitmap;
+                if (this.tonemappingCheckBox.Checked)
+                    this.retonemappingButton.Enabled = true;
 
                 this.progressBar.Value = 0;
             }
@@ -377,6 +392,35 @@ namespace PathTracerForm
                 }
                 
                 m_Result.SaveToHDR(this.saveFileDialog.FileName);
+            }
+        }
+
+        private void TonemappingCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.exposureInputBox.Enabled = this.tonemappingCheckBox.Checked;
+            if (this.renderResultBox.BackgroundImage == null)
+                return;
+            this.retonemappingButton.Enabled = this.tonemappingCheckBox.Checked;
+        }
+
+        private void retonemappingButton_Click(object sender, EventArgs e)
+        {
+            if (m_Result != null)
+            {
+                if (m_Bitmap != null)
+                {
+                    m_Bitmap.Dispose();
+                    m_Bitmap = null;
+                }
+
+                float exposure = -1.0f;
+                if (this.tonemappingCheckBox.Checked && !string.IsNullOrEmpty(this.exposureInputBox.Text))
+                {
+                    exposure = float.Parse(this.exposureInputBox.Text);
+                }
+
+                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f, exposure);
+                this.renderResultBox.BackgroundImage = m_Bitmap;
             }
         }
     }
