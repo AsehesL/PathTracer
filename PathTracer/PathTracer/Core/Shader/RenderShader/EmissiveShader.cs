@@ -12,14 +12,14 @@ namespace ASL.PathTracer
     {
         public Color color;
         public float intensity;
-        public bool invisible;
+        //public bool invisible;
 
-        public override bool ShouldCull(Ray ray, RayCastHit hit)
-        {
-            if (invisible && hit.depth == 0)
-                return true;
-            return base.ShouldCull(ray, hit);
-        }
+        //public override bool ShouldCull(Ray ray, RayCastHit hit)
+        //{
+        //    if (invisible && hit.depth == 0)
+        //        return true;
+        //    return base.ShouldCull(ray, hit);
+        //}
 
         public override Color RenderEmissiveOnly(Tracer tracer, SamplerBase sampler, RenderState renderState, Ray ray, RayCastHit hit)
         {

@@ -63,6 +63,9 @@ namespace PathTracerForm
             this.bounceInputBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+#if DEBUG
+            this.pixelDebugCheckBox = new System.Windows.Forms.CheckBox();
+#endif
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -233,6 +236,9 @@ namespace PathTracerForm
             this.settingPanel.Controls.Add(this.samplerLabel);
             this.settingPanel.Controls.Add(this.bounceLabel);
             this.settingPanel.Controls.Add(this.bounceInputBox);
+#if DEBUG
+            this.settingPanel.Controls.Add(this.pixelDebugCheckBox);
+#endif
             this.settingPanel.Location = new System.Drawing.Point(12, 27);
             this.settingPanel.Name = "settingPanel";
             this.settingPanel.Size = new System.Drawing.Size(242, 334);
@@ -251,7 +257,6 @@ namespace PathTracerForm
             // 
             // tonemappingCheckBox
             // 
-            this.tonemappingCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tonemappingCheckBox.AutoSize = true;
             this.tonemappingCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.tonemappingCheckBox.Enabled = false;
@@ -391,6 +396,22 @@ namespace PathTracerForm
             this.bounceLabel.Size = new System.Drawing.Size(53, 12);
             this.bounceLabel.TabIndex = 6;
             this.bounceLabel.Text = "反弹次数";
+#if DEBUG
+            // 
+            // pixelDebugCheckBox
+            // 
+            this.pixelDebugCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pixelDebugCheckBox.AutoSize = true;
+            this.pixelDebugCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.pixelDebugCheckBox.Enabled = false;
+            this.pixelDebugCheckBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
+            this.pixelDebugCheckBox.Location = new System.Drawing.Point(3, 311);
+            this.pixelDebugCheckBox.Name = "pixelDebugCheckBox";
+            this.pixelDebugCheckBox.Size = new System.Drawing.Size(84, 16);
+            this.pixelDebugCheckBox.TabIndex = 6;
+            this.pixelDebugCheckBox.Text = "单像素调试";
+            this.pixelDebugCheckBox.UseVisualStyleBackColor = true;
+#endif
             // 
             // bounceInputBox
             // 

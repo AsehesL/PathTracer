@@ -93,15 +93,14 @@ namespace ASL.PathTracer
 
             RayCastHit hit;
             hit.distance = double.MaxValue;
-            hit.depth = depth;
-
+            
             Color color = default(Color);
             //Color volumetric = default(Color);
 
             bool isHit = false;
             if (sceneData.Raycast(ray, m_Epsilon, out hit))
             {
-
+                hit.depth = depth;
                 if (renderChannel == RenderChannel.Full)
                 {
                     if (hit.shader == null)

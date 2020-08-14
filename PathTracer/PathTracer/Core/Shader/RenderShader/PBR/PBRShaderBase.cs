@@ -151,11 +151,12 @@ namespace ASL.PathTracer
                 {
                     //Opaque
                     float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
+                    Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
                     if (shadingModel != PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetMetallic())
                     {
                         //Metallic
                         Vector3 F = FresnelSchlickRoughness(ndv, new Vector3(albedo.r, albedo.g, albedo.b), roughness);
-                        Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
+                        
                         double ndl = Vector3.Dot(worldNormal, L);
                         if (ndl < 0.0)
                             return Color.black;
@@ -175,7 +176,6 @@ namespace ASL.PathTracer
                         if (sampler.GetRandom() < F)
                         {
                             //Specular
-                            Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
                             double ndl = Vector3.Dot(worldNormal, L);
                             if (ndl < 0.0)
                                 return Color.black;
@@ -189,7 +189,6 @@ namespace ASL.PathTracer
                         else
                         {
                             //Diffuse
-                            Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
                             double ndl = Vector3.Dot(worldNormal, L);
                             if (ndl < 0.0)
                                 return Color.black;
@@ -207,16 +206,17 @@ namespace ASL.PathTracer
                             worldNormal *= -1;
                             worldPoint += worldNormal * tracer.epsilon * 3.0;
 
-                            Vector3 L = -1.0 * tracer.sceneData.sky.GetSunDirection(sampler);
                             double ndl = Vector3.Dot(worldNormal, L);
-                            if (ndl < 0.0)
-                                return Color.black;
-                            Ray lray = new Ray(worldPoint, L);
-                            bool shadow = tracer.TracingOnce(lray);
-                            if (shadow)
-                                return Color.black;
-                            ndl = Math.Max(ndl, 0.0);
-                            result += albedo * property.GetDoubleSidedTransmissionColor() * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                            if (ndl >= 0.0)
+                            {
+                                Ray lray = new Ray(worldPoint, L);
+                                bool shadow = tracer.TracingOnce(lray);
+                                if (!shadow)
+                                {
+                                    ndl = Math.Max(ndl, 0.0);
+                                    result += albedo * property.GetDoubleSidedTransmissionColor() * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                                }
+                            }
                         }
 
                         return result;
