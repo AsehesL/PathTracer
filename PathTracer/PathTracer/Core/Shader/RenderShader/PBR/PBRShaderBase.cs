@@ -173,8 +173,10 @@ namespace ASL.PathTracer
 
                         //Dielectric
                         float F = FresnelSchlickRoughness(ndv, 0.04f, roughness);
-                        if (sampler.GetRandom() < F)
-                        {
+
+                        { 
+                        //if (sampler.GetRandom() < F)
+                        //{
                             //Specular
                             double ndl = Vector3.Dot(worldNormal, L);
                             if (ndl < 0.0)
@@ -184,20 +186,23 @@ namespace ASL.PathTracer
                             if (shadow)
                                 return Color.black;
                             ndl = Math.Max(ndl, 0.0);
-                            result = tracer.sceneData.sky.GetSunColor() * SpecularBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
-                        }
-                        else
-                        {
+
+
+                            result += F * tracer.sceneData.sky.GetSunColor() * SpecularBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                        //}
+                        //else
+                        //{
                             //Diffuse
-                            double ndl = Vector3.Dot(worldNormal, L);
-                            if (ndl < 0.0)
-                                return Color.black;
-                            Ray lray = new Ray(worldPoint, L);
-                            bool shadow = tracer.TracingOnce(lray);
-                            if (shadow)
-                                return Color.black;
-                            ndl = Math.Max(ndl, 0.0);
-                            result = albedo * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                            //double ndl = Vector3.Dot(worldNormal, L);
+                            //if (ndl < 0.0)
+                            //    return Color.black;
+                            //Ray lray = new Ray(worldPoint, L);
+                            //bool shadow = tracer.TracingOnce(lray);
+                            //if (shadow)
+                            //    return Color.black;
+                            //ndl = Math.Max(ndl, 0.0);
+                            result += (1.0f - F) * albedo * tracer.sceneData.sky.GetSunColor() * DiffuseBRDF.BRDFDirectional(-1.0 * ray.direction, L, worldNormal, roughness) * (float)ndl;
+                        //}
                         }
 
                         if (shadingModel == PBRShadingModel.DoubleSidedTranslucent && sampler.GetRandom() < property.GetDoubleSidedTransmittance())

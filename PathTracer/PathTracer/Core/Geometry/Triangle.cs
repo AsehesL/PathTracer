@@ -124,7 +124,7 @@ namespace ASL.PathTracer
             v *= finvdet;
 
             hit.hit = ray.origin + ray.direction * rt;
-            hit.texcoord = (1.0 - u - v) * vertex0.uv + u * vertex1.uv + v * vertex2.uv; ;
+            hit.texcoord = (1.0 - u - v) * vertex0.uv + u * vertex1.uv + v * vertex2.uv;
             hit.normal = (1.0 - u - v) * vertex0.normal + u * vertex1.normal + v * vertex2.normal;
             hit.tangent = (1.0 - u - v) * vertex0.tangent + u * vertex1.tangent + v * vertex2.tangent;
             hit.shader = shader;
