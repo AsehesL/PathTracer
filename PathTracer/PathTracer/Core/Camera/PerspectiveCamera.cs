@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 namespace ASL.PathTracer
 {
@@ -61,14 +60,9 @@ namespace ASL.PathTracer
             {
                 return GetThinLensRayFromPixel(x, y, sampler);
             }
-            var sample = sampler.Sample();
+            var sample = sampler.SampleUnitSquare();
             return GetRayFromPixel(sample.x + x, sample.y + y);
         }
-
-        //public override Ray GetRayWithoutSampler(float x, float y)
-        //{
-        //    return GetRayFromPixel(x, y);
-        //}
 
         /// <summary>
         /// 根据焦距和透镜半径计算光线
@@ -79,11 +73,11 @@ namespace ASL.PathTracer
         /// <returns></returns>
         private Ray GetThinLensRayFromPixel(int x, int y, SamplerBase sampler)
         {
-            if (m_RenderTarget == null)
+            if (renderTarget == null)
                 throw new System.NullReferenceException();
-            var sample = sampler.Sample();
-            double px = (m_RenderTarget.width - 1 - (sample.x + x)) / m_RenderTarget.width * 2 - 1;
-            double py = (sample.y + y) / m_RenderTarget.height * 2 - 1;
+            var sample = sampler.SampleUnitSquare();
+            double px = (renderTarget.width - 1 - (sample.x + x)) / renderTarget.width * 2 - 1;
+            double py = (sample.y + y) / renderTarget.height * 2 - 1;
             px *= m_Width;
             py *= m_Height;
             double per = focal / near;
@@ -101,10 +95,10 @@ namespace ASL.PathTracer
 
         private Ray GetRayFromPixel(double x, double y)
         {
-            if (m_RenderTarget == null)
+            if (renderTarget == null)
                 throw new System.NullReferenceException();
-            x = (m_RenderTarget.width - 1 - x) / m_RenderTarget.width * 2 - 1;
-            y = y / m_RenderTarget.height * 2 - 1;
+            x = (renderTarget.width - 1 - x) / renderTarget.width * 2 - 1;
+            y = y / renderTarget.height * 2 - 1;
 
             Vector2 point = new Vector2(x * m_Width, y * m_Height);
             return GetRayFromPoint(point);

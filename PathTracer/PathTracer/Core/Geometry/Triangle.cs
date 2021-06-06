@@ -14,7 +14,7 @@ namespace ASL.PathTracer
 		public Vector2 uv;
 	}
 
-	public class Triangle : BoundsGeometry
+	public class Triangle : Geometry
     {
         public Vertex vertex0;
         public Vertex vertex1;
@@ -34,7 +34,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Shader shader) : base(shader)
+        public Triangle(Vertex vertex0, Vertex vertex1, Vertex vertex2, Material material) : base(material)
         {
 			this.vertex0 = vertex0;
 			this.vertex1 = vertex1;
@@ -58,13 +58,11 @@ namespace ASL.PathTracer
             if (si.z <= 0)
                 si.z = 0.1;
 
-            this.bounds = new Bounds(ct, si);
+            this.m_bounds = new Bounds(ct, si);
         }
 
-        protected override bool RayCastGeometry(Ray ray, double epsilon, ref RayCastHit hit)
+        protected override bool RayCastGeometry(Ray ray, ref RayCastHit hit)
         {
-            if (bounds.Raycast(ray) == false)
-                return false;
             double rt = 0.0;
 
             Vector3 e1 = this.vertex1.position - this.vertex0.position;
@@ -78,10 +76,9 @@ namespace ASL.PathTracer
             bool back = false;
             if (ndv > 0)
             {
-                if (shader != null && shader.ShouldRenderBackFace() == false)
-                    return false;
                 back = true;
-                //return false;
+                if (material != null && !material.ShouldRenderBackFace())
+                    return false;
             }
 
             Vector3 p = Vector3.Cross(ray.direction, e2);
@@ -97,7 +94,7 @@ namespace ASL.PathTracer
                 t = this.vertex0.position - ray.origin;
                 det = -det;
             }
-            if (det < epsilon)
+            if (det < double.Epsilon)
             {
                 return false;
             }
@@ -127,11 +124,34 @@ namespace ASL.PathTracer
             hit.texcoord = (1.0 - u - v) * vertex0.uv + u * vertex1.uv + v * vertex2.uv;
             hit.normal = (1.0 - u - v) * vertex0.normal + u * vertex1.normal + v * vertex2.normal;
             hit.tangent = (1.0 - u - v) * vertex0.tangent + u * vertex1.tangent + v * vertex2.tangent;
-            hit.shader = shader;
+            hit.material = material;
+            hit.geometry = this;
             hit.distance = rt;
-            if (back)
-                hit.normal = -1.0 * hit.normal;
+            //if (back)
+            //    hit.normal = -1.0 * hit.normal;
+            if (hit.isBackFace)
+                hit.hit -= hit.normal * 0.00000000000001;
+            else
+                hit.hit += hit.normal * 0.00000000000001;
+            //hit.distance = Vector3.Distance(hit.hit, ray.origin);
+
+            hit.isBackFace = back;
             return true;
+        }
+
+        public override Vector3 GetNormal(Vector3 point)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override float GetPDF()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Vector3 Sample(SamplerBase sampler)
+        {
+            throw new NotImplementedException();
         }
     }
 }

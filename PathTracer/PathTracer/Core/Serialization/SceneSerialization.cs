@@ -5,31 +5,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using PathTracer.Core.Utils;
 
 namespace ASL.PathTracer.SceneSerialization
 {
     [XmlRoot("SceneRoot")]
-    public class SceneDataRoot
+    public class SceneSerializableData
     {
         [XmlArray("Textures")]
         [XmlArrayItem("Texture")]
-        public List<TextureData> textures;
+        public List<TextureSerializableData> textures;
 
-        [XmlArray("Shaders")]
-        [XmlArrayItem("Shader")]
-        public List<ShaderData> shaders;
+        [XmlArray("Materials")]
+        [XmlArrayItem("Material")]
+        public List<MaterialSerializableData> materials;
 
-        [XmlElement("Sky")] public SkyData sky;
+        [XmlElement("Sky")] public SkySerializableData sky;
 
-        [XmlElement("Camera")] public CameraData camera;
+        [XmlElement("SunLight")] public SunLightSerializableData sun;
+
+        [XmlElement("Camera")] public CameraSerializableData camera;
 
         [XmlArray("Geometries")]
         [XmlArrayItem("Geometry")]
-        public List<GeometryData> geometries;
+        public List<GeometrySerializableData> geometries;
     }
 
-    public class CameraData
+    public class CameraSerializableData
     {
         [XmlAttribute("Position")] public string position;
 
@@ -54,8 +55,8 @@ namespace ASL.PathTracer.SceneSerialization
             defaultWidth = width;
             defaultHeight = height;
 
-            Vector3 pos = StringUtils.StringToVector3(position);
-            Vector3 rot = StringUtils.StringToVector3(euler);
+            Vector3 pos = Vector3.Parse(position);
+            Vector3 rot = Vector3.Parse(euler);
 
             PerspectiveCamera cam = new PerspectiveCamera(pos, rot, near, fieldOfView);
             cam.useThinLens = useThinLens;
@@ -74,40 +75,26 @@ namespace ASL.PathTracer.SceneSerialization
         }
     }
 
-    public struct ShaderName
+    public struct MaterialName
     {
         [XmlAttribute("Name")]
-        public string shaderName;
+        public string materialName;
     }
 
-    public class GeometryData
+    public class GeometrySerializableData
     {
         [XmlAttribute("Type")] public string type;
 
 	    [XmlArray("Params")]
 	    [XmlArrayItem("Param")]
-	    public List<GeometryParamData> geoParams;
+	    public List<GeometryParameterSerializableData> geoParams;
 
-        [XmlArray("Shaders")]
-        [XmlArrayItem("Shader")]
-        public List<ShaderName> shaders;
+        [XmlArray("Materials")]
+        [XmlArrayItem("Material")]
+        public List<MaterialName> materials;
 
-        public void CreateGeometry(string scenePath, List<Geometry> output, Dictionary<string, Shader> shadersDic, ref GeometryStats stats)
+        public void CreateGeometry(string scenePath, Scene scene, List<Geometry> output)
 		{
-			Dictionary<string, GeometryParamData> geoParamDic = new Dictionary<string, GeometryParamData>();
-			for (int i = 0; i < geoParams.Count; i++)
-			{
-				geoParamDic[geoParams[i].paramName] = geoParams[i];
-			}
-
-            List<Shader> s = new List<Shader>();
-		    for (int i = 0; i < shaders.Count; i++)
-		    {
-		        if (shadersDic.ContainsKey(shaders[i].shaderName))
-		            s.Add(shadersDic[shaders[i].shaderName]);
-		    }
-            
-
 	        System.Type[] types = typeof(Geometry).Assembly.GetTypes();
 	        System.Type geoSerializationType = typeof(GeometrySerialization);
 	        GeometrySerialization geoSerialization = null;
@@ -137,7 +124,23 @@ namespace ASL.PathTracer.SceneSerialization
 				return;
 	        }
 
-			geoSerialization.GenerateGeometry(s, scenePath, output, geoParamDic, ref stats);
+            List<Material> mats = new List<Material>();
+            for (int i = 0; i < materials.Count; i++)
+            {
+                var mat = scene.GetMaterial(materials[i].materialName);
+                if (mat != null)
+                    mats.Add(mat);
+            }
+
+            if (geoParams != null)
+            {
+                for (int i = 0; i < geoParams.Count; i++)
+                {
+                    geoSerialization.SetParameter(geoParams[i].paramName, geoParams[i].paramValue);
+                }
+            }
+
+			geoSerialization.GenerateGeometry(scenePath, scene, mats, output);
             //      var geo = geoSerialization.GenerateGeometry(s, geoParams);
             //      if (geo != null)
             //       output.Add(geo);
@@ -146,8 +149,8 @@ namespace ASL.PathTracer.SceneSerialization
 		}
     }
 
-	public class GeometryParamData
-	{
+	public class GeometryParameterSerializableData
+    {
 
 		[XmlAttribute("Key")] public string paramName;
 
@@ -155,7 +158,7 @@ namespace ASL.PathTracer.SceneSerialization
 
 	}
 
-	public class TextureData
+	public class TextureSerializableData
     {
         [XmlAttribute("Name")]
         public string name;
@@ -196,32 +199,34 @@ namespace ASL.PathTracer.SceneSerialization
         }
     }
 
-    public class ShaderData
+    public class MaterialSerializableData
     {
         [XmlAttribute("Name")]
         public string name;
 
-        [XmlAttribute("ShaderType")]
-        public string shaderType;
+        [XmlAttribute("MaterialType")]
+        public string materialType;
 
         [XmlArray("Params")]
         [XmlArrayItem("Param")]
-        public List<ShaderParamData> shaderParams;
+        public List<MaterialParameterSerializableData> materialParameters;
 
-        public Shader CreateShader(Dictionary<string, Texture> textures)
+        public Material CreateMaterial(Scene scene)
         {
-            var assembly = typeof(Shader).Assembly;
+            if (scene == null)
+                return null;
+            var assembly = typeof(Material).Assembly;
             var types = assembly.GetTypes();
             Type type = null;
             for (int i = 0; i < types.Length; i++)
             {
-                if(types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Shader)))
+                if(types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Material)))
                     continue;
-                var attributes = types[i].GetCustomAttributes(typeof(ShaderTypeAttribute), true);
+                var attributes = types[i].GetCustomAttributes(typeof(MaterialTypeAttribute), true);
                 if (attributes != null && attributes.Length > 0)
                 {
-                    var shaderAttribute = attributes[0] as ShaderTypeAttribute;
-                    if (shaderAttribute != null && shaderAttribute.shaderType == shaderType)
+                    var shaderAttribute = attributes[0] as MaterialTypeAttribute;
+                    if (shaderAttribute != null && shaderAttribute.materialType == materialType)
                     {
                         type = types[i];
                         break;
@@ -230,109 +235,106 @@ namespace ASL.PathTracer.SceneSerialization
             }
             if (type == null)
             {
-                Log.Warn($"Shader初时化失败！未找到该类型的Shader:{shaderType}");
+                Log.Warn($"Shader初时化失败！未找到该类型的材质:{materialType}");
                 return null;
             }
 
-            Shader shader = System.Activator.CreateInstance(type) as Shader;
+            Material mat = System.Activator.CreateInstance(type) as Material;
 
-            if (shader == null)
+            if (mat == null)
                 return null;
-            if (shaderParams != null)
+            if (materialParameters != null)
             {
-                for (int i = 0; i < shaderParams.Count; i++)
+                for (int i = 0; i < materialParameters.Count; i++)
                 {
-                    var paramObj = shaderParams[i].CreateParam(textures);
+                    var paramObj = materialParameters[i].CreateParameter(scene);
                     if (paramObj == null)
                         continue;
-                    shader.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
+                    mat.SetParam(materialParameters[i].parameterType, materialParameters[i].parameterName, paramObj);
                 }
             }
 
-            return shader;
+            return mat;
         }
     }
 
-    public class ShaderParamData
+    public class MaterialParameterSerializableData
     {
 
         [XmlAttribute("Key")]
-        public string paramName;
+        public string parameterName;
 
         [XmlAttribute("Value")]
-        public string paramValue;
+        public string parameterValue;
 
         [XmlAttribute("Type")]
-        public ShaderParamType paramType;
+        public MaterialParameterType parameterType;
 
-        public System.Object CreateParam(Dictionary<string, Texture> textures)
+        public System.Object CreateParameter(Scene scene)
         {
-            switch (paramType)
+            switch (parameterType)
             {
-                case ShaderParamType.Color:
+                case MaterialParameterType.Color:
                     {
-                        return StringUtils.StringToColor(paramValue);
+                        return Color.Parse(parameterValue);
                     }
-                case ShaderParamType.Number:
+                case MaterialParameterType.Number:
                     {
-                        float floatval = float.Parse(paramValue);
+                        float floatval = float.Parse(parameterValue);
                         return floatval;
                     }
-                case ShaderParamType.Boolean:
+                case MaterialParameterType.Boolean:
                     {
-                        bool boolval = bool.Parse(paramValue);
+                        bool boolval = bool.Parse(parameterValue);
                         return boolval;
                     }
-                case ShaderParamType.Texture:
+                case MaterialParameterType.Texture:
                     {
-                        if (textures.ContainsKey(paramValue))
-                            return textures[paramValue];
-                        return null;
+                        return scene != null ? scene.GetTexture(parameterValue) : null;
                     }
-                case ShaderParamType.Vector2:
+                case MaterialParameterType.Vector2:
                     {
-                        return StringUtils.StringToVector2(paramValue);
+                        return Vector2.Parse(parameterValue);
                     }
-                case ShaderParamType.Vector3:
+                case MaterialParameterType.Vector3:
                     {
-                        return StringUtils.StringToVector3(paramValue);
+                        return Vector3.Parse(parameterValue);
                     }
-                case ShaderParamType.Vector4:
+                case MaterialParameterType.Vector4:
                     {
-                        return StringUtils.StringToVector4(paramValue);
+                        return Vector4.Parse(parameterValue);
                     }
             }
             return null;
         }
     }
 
-    public class SkyData
+    public class SkySerializableData
     {
 
-        [XmlAttribute("ShaderType")]
-        public string shaderType;
-
-        [XmlElement("SunLight")]
-        public SunLightData sun;
+        [XmlAttribute("MaterialType")]
+        public string materialType;
 
         [XmlArray("Params")]
         [XmlArrayItem("Param")]
-        public List<ShaderParamData> shaderParams;
+        public List<MaterialParameterSerializableData> materialParameters;
 
-        public Sky CreateSky(Dictionary<string, Texture> textures)
+        public SkyLight CreateSky(Scene scene)
         {
-            var assembly = typeof(Sky).Assembly;
+            if (scene == null)
+                return null;
+            var assembly = typeof(Material).Assembly;
             var types = assembly.GetTypes();
             Type type = null;
             for (int i = 0; i < types.Length; i++)
             {
-                if (types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Sky)))
+                if (types[i].IsAbstract || !types[i].IsSubclassOf(typeof(Material)))
                     continue;
-                var attributes = types[i].GetCustomAttributes(typeof(ShaderTypeAttribute), true);
+                var attributes = types[i].GetCustomAttributes(typeof(MaterialTypeAttribute), true);
                 if (attributes != null && attributes.Length > 0)
                 {
-                    var shaderAttribute = attributes[0] as ShaderTypeAttribute;
-                    if (shaderAttribute != null && shaderAttribute.shaderType == shaderType)
+                    var shaderAttribute = attributes[0] as MaterialTypeAttribute;
+                    if (shaderAttribute != null && shaderAttribute.materialType == materialType)
                     {
                         type = types[i];
                         break;
@@ -340,31 +342,28 @@ namespace ASL.PathTracer.SceneSerialization
                 }
             }
 
-            Sky sky = System.Activator.CreateInstance(type, sun != null ? sun.CreateSunLight() : null) as Sky;
-            if (sky == null)
+            Material skyMat = System.Activator.CreateInstance(type) as Material;
+            if (skyMat == null)
                 return null;
-            if (shaderParams != null)
+            if (materialParameters != null)
             {
-                for (int i = 0; i < shaderParams.Count; i++)
+                for (int i = 0; i < materialParameters.Count; i++)
                 {
-                    var paramObj = shaderParams[i].CreateParam(textures);
+                    var paramObj = materialParameters[i].CreateParameter(scene);
                     if (paramObj == null)
                         continue;
-                    sky.SetParam(shaderParams[i].paramType, shaderParams[i].paramName, paramObj);
+                    skyMat.SetParam(materialParameters[i].parameterType, materialParameters[i].parameterName, paramObj);
                 }
             }
 
             Log.Info($"天空盒创建成功:{type}");
-
-            //if (sun != null)
-            //    sky.sunLight = sun.CreateSunLight();
             
             
-            return sky;
+            return new SkyLight(skyMat);
         }
     }
 
-    public class SunLightData
+    public class SunLightSerializableData
     {
         [XmlAttribute("Direction")] public string direction;
 
@@ -376,8 +375,8 @@ namespace ASL.PathTracer.SceneSerialization
 
         public SunLight CreateSunLight()
         {
-            Vector3 dir = StringUtils.StringToVector3(direction);
-            Color col = StringUtils.StringToColor(color);
+            Vector3 dir = Vector3.Parse(direction);
+            Color col = Color.Parse(color);
 
             SunLight light = new SunLight { sunDirection = dir, sunColor = col, sunIntensity = intensity, renderParticipatingMedia = renderParticipatingMedia };
 
@@ -388,7 +387,7 @@ namespace ASL.PathTracer.SceneSerialization
 
     static class SceneSerialization
     {
-        public static SceneDataRoot Deserialize(string path)
+        public static SceneSerializableData Deserialize(string path)
         {
             if (System.IO.File.Exists(path) == false)
             {
@@ -398,11 +397,11 @@ namespace ASL.PathTracer.SceneSerialization
 
             FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
-            XmlSerializer serializer = new XmlSerializer(typeof(SceneDataRoot));
-            SceneDataRoot root = null;
+            XmlSerializer serializer = new XmlSerializer(typeof(SceneSerializableData));
+            SceneSerializableData root = null;
             try
             {
-                root = (SceneDataRoot) serializer.Deserialize(stream);
+                root = (SceneSerializableData) serializer.Deserialize(stream);
             }
             catch (System.Exception e)
             {

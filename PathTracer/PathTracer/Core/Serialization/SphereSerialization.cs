@@ -3,24 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PathTracer.Core.Utils;
 
 namespace ASL.PathTracer.SceneSerialization
 {
 	[GeometryAnalyse(type = "Sphere")]
 	class SphereSerialization : GeometrySerialization
 	{
-		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams, ref GeometryStats stats)
-		{
-			string position = geoParams["Position"].paramValue;
-			string radius = geoParams["Radius"].paramValue;
-			
-			float r = float.Parse(radius);
-			Vector3 p = StringUtils.StringToVector3(position);
-			var sphere = new Sphere(p, r, shaders[0]);
+		public Vector3 position;
 
-			output.Add(sphere);
-			stats.totalGeometries++;
+		public float radius;
+
+		public override void GenerateGeometry(string scenePath, Scene scene, List<Material> materials, List<Geometry> output)
+		{
+			output.Add(new Sphere(position, radius, materials.Count > 0 ? materials[0] : null));
 		}
 	}
 }

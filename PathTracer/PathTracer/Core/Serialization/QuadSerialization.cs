@@ -3,28 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PathTracer.Core.Utils;
 
 namespace ASL.PathTracer.SceneSerialization
 {
 	[GeometryAnalyse(type = "Quad")]
 	class QuadSerialization : GeometrySerialization
 	{
-		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams, ref GeometryStats stats)
+		public Vector3 position;
+
+		public Vector3 normal;
+
+		public Vector3 right;
+
+		public Vector3 up;
+
+        public override void GenerateGeometry(string scenePath, Scene scene, List<Material> materials, List<Geometry> output)
 		{
-			string position = geoParams["Position"].paramValue;
-			string normal = geoParams["Normal"].paramValue;
-			string right = geoParams["Right"].paramValue;
-			string up = geoParams["Up"].paramValue;
-
-			Vector3 p = StringUtils.StringToVector3(position);
-			Vector3 n = StringUtils.StringToVector3(normal);
-			Vector3 r = StringUtils.StringToVector3(right);
-			Vector3 u = StringUtils.StringToVector3(up);
-
-			output.Add(new Quad(p, n, r, u, shaders[0]));
-
-			stats.totalGeometries++;
+			output.Add(new Quad(position, normal, right, up, materials.Count > 0 ? materials[0] : null));
 		}
 	}
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace ASL.PathTracer
 {
@@ -18,19 +17,71 @@ namespace ASL.PathTracer
 
     public class Log
     {
-        private static Log sInstance;
-
-        private ListView m_ListView;
-
-        public static void Init(ListView listView)
+        public struct LogItem
         {
-            if (sInstance == null)
-                sInstance = new Log(listView);
+            public LogType logType;
+
+            public string message;
+
+            public LogItem(string message, LogType type)
+            {
+                this.message = message;
+                this.logType = type;
+            }
+
+            public Color GetFontColor()
+            {
+                switch (logType)
+                {
+                    case LogType.Error:
+                        return Color.maroon;
+                    case LogType.Complete:
+                        return Color.mediumBlue;
+                    case LogType.Info:
+                    case LogType.Warnning:
+                    case LogType.Debugging:
+                    default:
+                        return Color.black;
+                }
+            }
+
+            public Color GetBackColor()
+            {
+                switch (logType)
+                {
+                    case LogType.Error:
+                        return Color.darkOrange;
+                    case LogType.Warnning:
+                        return Color.yellow;
+                    case LogType.Complete:
+                        return Color.green;
+                    case LogType.Debugging:
+                        return Color.cyan;
+                    case LogType.Info:
+                    default:
+                        return Color.white;
+                }
+            }
         }
 
-        private Log(ListView listView)
+        public delegate void AddLogEventHandler(LogItem logItem);
+
+        public delegate void ClearLogEventHandler();
+
+        public static event AddLogEventHandler onAddLogEvent;
+
+        public static event ClearLogEventHandler onClearLogEvent;
+
+        private static Log sInstance;
+
+        public static void Init()
         {
-            m_ListView = listView;
+            if (sInstance == null)
+                sInstance = new Log();
+        }
+
+        private Log()
+        {
         }
 
         public static void Info(string message)
@@ -72,52 +123,16 @@ namespace ASL.PathTracer
         {
             if (sInstance == null)
                 return;
-            sInstance.m_ListView.Items.Clear();
+            onClearLogEvent();
         }
 
         private void AddLogItem(LogType type, string message)
         {
-            ListViewItem item = new ListViewItem();
-            item.Text = type.ToString();
-            item.SubItems.Add(message);
-            item.ForeColor = GetFontColor(type);
-            item.BackColor = GetBackColor(type);
+            LogItem item = new LogItem(message, type);
 
-            this.m_ListView.Items.Add(item);
+            onAddLogEvent(item);
         }
 
-        private System.Drawing.Color GetFontColor(LogType type)
-        {
-            switch (type)
-            {
-                case LogType.Error:
-                    return System.Drawing.Color.Maroon;
-                case LogType.Complete:
-                    return System.Drawing.Color.MediumBlue;
-                case LogType.Info:
-                case LogType.Warnning:
-                case LogType.Debugging:
-                default:
-                    return System.Drawing.Color.Black;
-            }
-        }
-
-        private System.Drawing.Color GetBackColor(LogType type)
-        {
-            switch (type)
-            {
-                case LogType.Error:
-                    return System.Drawing.Color.DarkOrange;
-                case LogType.Warnning:
-                    return System.Drawing.Color.Yellow;
-                case LogType.Complete:
-                    return System.Drawing.Color.Green;
-                case LogType.Debugging:
-                    return System.Drawing.Color.Cyan;
-                case LogType.Info:
-                default:
-                    return System.Drawing.Color.White;
-            }
-        }
+        
     }
 }

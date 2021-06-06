@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PathTracer.Core.Utils;
 
 namespace ASL.PathTracer.SceneSerialization
 {
@@ -13,26 +12,22 @@ namespace ASL.PathTracer.SceneSerialization
 	[GeometryAnalyse(type = "Mesh")]
 	class MeshSerialization : GeometrySerialization
 	{
-		public override void GenerateGeometry(List<Shader> shaders, string scenePath, List<Geometry> output, Dictionary<string, GeometryParamData> geoParams, ref GeometryStats stats)
+		public string path;
+
+		public Vector3 position;
+
+		public Vector3 euler;
+
+		public Vector3 scale;
+
+		public override void GenerateGeometry(string scenePath, Scene scene, List<Material> materials, List<Geometry> output)
 		{
-			string path = geoParams["Path"].paramValue;
-			string euler = geoParams["Euler"].paramValue;
-			string scale = geoParams["Scale"].paramValue;
-			string position = geoParams["Position"].paramValue;
+            var fileInfo = new System.IO.FileInfo(scenePath);
+            string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
 
-			var fileInfo = new System.IO.FileInfo(scenePath);
-			string p = System.IO.Path.Combine(fileInfo.DirectoryName, path);
-
-			Vector3 rot = StringUtils.StringToVector3(euler);
-			Vector3 sca = StringUtils.StringToVector3(scale);
-			Vector3 pos = StringUtils.StringToVector3(position);
-
-			var triangles = MeshLoader.LoadMesh(p, pos, rot, sca, shaders);
+			var triangles = MeshLoader.LoadMesh(p, position, euler, scale, materials);
 
 			output.AddRange(triangles);
-
-			stats.totalGeometries++;
-			stats.totalTriangles += triangles.Count;
 		}
 	}
 }

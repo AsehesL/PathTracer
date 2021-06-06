@@ -33,7 +33,6 @@ namespace PathTracerForm
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveHDRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.openTaskQueueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel = new System.Windows.Forms.Panel();
@@ -61,11 +60,9 @@ namespace PathTracerForm
             this.samplerLabel = new System.Windows.Forms.Label();
             this.bounceLabel = new System.Windows.Forms.Label();
             this.bounceInputBox = new System.Windows.Forms.TextBox();
+            this.pixelDebugCheckBox = new System.Windows.Forms.CheckBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-#if DEBUG
-            this.pixelDebugCheckBox = new System.Windows.Forms.CheckBox();
-#endif
             this.menuStrip.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.renderResultBox)).BeginInit();
@@ -97,7 +94,6 @@ namespace PathTracerForm
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
-            this.saveHDRToolStripMenuItem,
             this.toolStripSeparator1,
             this.openTaskQueueMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -107,7 +103,7 @@ namespace PathTracerForm
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "打开...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
@@ -115,27 +111,19 @@ namespace PathTracerForm
             // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "保存渲染结果";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
-            // 
-            // saveHDRToolStripMenuItem
-            // 
-            this.saveHDRToolStripMenuItem.Enabled = false;
-            this.saveHDRToolStripMenuItem.Name = "saveHDRToolStripMenuItem";
-            this.saveHDRToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.saveHDRToolStripMenuItem.Text = "保存HDR渲染结果";
-            this.saveHDRToolStripMenuItem.Click += new System.EventHandler(this.SaveHDRToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(171, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // openTaskQueueMenuItem
             // 
             this.openTaskQueueMenuItem.Name = "openTaskQueueMenuItem";
-            this.openTaskQueueMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.openTaskQueueMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openTaskQueueMenuItem.Text = "运行渲染队列...";
             this.openTaskQueueMenuItem.Click += new System.EventHandler(this.OpenTaskQueueMenuItem_Click);
             // 
@@ -236,9 +224,7 @@ namespace PathTracerForm
             this.settingPanel.Controls.Add(this.samplerLabel);
             this.settingPanel.Controls.Add(this.bounceLabel);
             this.settingPanel.Controls.Add(this.bounceInputBox);
-#if DEBUG
             this.settingPanel.Controls.Add(this.pixelDebugCheckBox);
-#endif
             this.settingPanel.Location = new System.Drawing.Point(12, 27);
             this.settingPanel.Name = "settingPanel";
             this.settingPanel.Size = new System.Drawing.Size(242, 334);
@@ -396,7 +382,15 @@ namespace PathTracerForm
             this.bounceLabel.Size = new System.Drawing.Size(53, 12);
             this.bounceLabel.TabIndex = 6;
             this.bounceLabel.Text = "反弹次数";
-#if DEBUG
+            // 
+            // bounceInputBox
+            // 
+            this.bounceInputBox.Enabled = false;
+            this.bounceInputBox.Location = new System.Drawing.Point(75, 25);
+            this.bounceInputBox.Name = "bounceInputBox";
+            this.bounceInputBox.Size = new System.Drawing.Size(164, 21);
+            this.bounceInputBox.TabIndex = 5;
+            this.bounceInputBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.bounceInputBox_KeyPress);
             // 
             // pixelDebugCheckBox
             // 
@@ -411,16 +405,6 @@ namespace PathTracerForm
             this.pixelDebugCheckBox.TabIndex = 6;
             this.pixelDebugCheckBox.Text = "单像素调试";
             this.pixelDebugCheckBox.UseVisualStyleBackColor = true;
-#endif
-            // 
-            // bounceInputBox
-            // 
-            this.bounceInputBox.Enabled = false;
-            this.bounceInputBox.Location = new System.Drawing.Point(75, 25);
-            this.bounceInputBox.Name = "bounceInputBox";
-            this.bounceInputBox.Size = new System.Drawing.Size(164, 21);
-            this.bounceInputBox.TabIndex = 5;
-            this.bounceInputBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.bounceInputBox_KeyPress);
             // 
             // openFileDialog
             // 
@@ -490,7 +474,6 @@ namespace PathTracerForm
 #endif
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem openTaskQueueMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveHDRToolStripMenuItem;
         private System.Windows.Forms.TextBox exposureInputBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox renderChannelCombo;

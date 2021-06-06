@@ -9,14 +9,14 @@ namespace ASL.PathTracer
 {
     static class MeshLoader
     {
-        public static List<Triangle> LoadMesh(string path, Vector3 position, Vector3 euler, Vector3 scale, List<Shader> shaders)
+        public static List<Triangle> LoadMesh(string path, Vector3 position, Vector3 euler, Vector3 scale, List<Material> materials)
         {
             Matrix matrix = Matrix.TRS(position, euler, scale);
 
-            return LoadMesh(path, matrix, shaders);
+            return LoadMesh(path, matrix, materials);
         }
 
-        static List<Triangle> LoadMesh(string path, Matrix matrix, List<Shader> shaders)
+        static List<Triangle> LoadMesh(string path, Matrix matrix, List<Material> materials)
         {
             if(System.IO.File.Exists(path) == false)
                 return null;
@@ -124,7 +124,7 @@ namespace ASL.PathTracer
 
                             //if (sdindex >= 0 && sdindex < shaders.Count)
                             {
-                                Triangle triangle = new Triangle(vertex0, vertex1, vertex2, shaders[0]);
+                                Triangle triangle = new Triangle(vertex0, vertex1, vertex2, materials.Count > 0 ? materials[0] : null);
 
                                 triangles.Add(triangle);
                             }

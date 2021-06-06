@@ -18,13 +18,16 @@ namespace PathTracerForm
     {
         private Scene m_Scene;
         private Bitmap m_Bitmap;
-        private Texture m_Result;
+        private IRenderResult m_Result;
 
         public MainForm()
         {
             InitializeComponent();
 
-            Log.Init(this.logListView);
+            Log.Init();
+
+            Log.onAddLogEvent += OnAddLog;
+            Log.onClearLogEvent += OnClearLog;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -73,7 +76,6 @@ namespace PathTracerForm
                 this.renderChannelCombo.Enabled = false;
                 this.renderButton.Enabled = false;
                 this.saveToolStripMenuItem.Enabled = false;
-                this.saveHDRToolStripMenuItem.Enabled = false;
                 this.tonemappingCheckBox.Enabled = false;
 #if DEBUG
                 this.pixelDebugCheckBox.Enabled = false;
@@ -97,7 +99,6 @@ namespace PathTracerForm
                 this.renderChannelCombo.Enabled = true;
                 this.renderButton.Enabled = true;
                 this.saveToolStripMenuItem.Enabled = true;
-                this.saveHDRToolStripMenuItem.Enabled = true;
                 this.tonemappingCheckBox.Enabled = true;
 #if DEBUG
                 this.pixelDebugCheckBox.Enabled = true;
@@ -246,23 +247,44 @@ namespace PathTracerForm
             stopWatch.Start();
             this.progressBar.Value = 0;
             this.progressBar.Maximum = 100;
-            m_Result = m_Scene.Render(traceTimes, sampleType, numSamples, width, height, renderChannel, 83, this.ProgressCallBack);
+            var pt = new ASL.PathTracer.PathTracer(m_Scene);
+            //var pt = new ASL.PathTracer.VolumeTextureRenderer(m_Scene);
+            RenderConfig config = new RenderConfig()
+            {
+                traceTimes = traceTimes,
+                samplerType = sampleType,
+                numSamples = numSamples,
+                numSets = 83,
+                width = width,
+                height = height,
+            };
+
+            m_Result = pt.Render(config, this.ProgressCallBack);
             stopWatch.Stop();
 
             if (m_Result != null)
             {
                 Log.CompleteInfo($"渲染完成，总计用时:{stopWatch.ElapsedMilliseconds}");
 
-                if (m_Bitmap != null)
+                if (m_Result is Texture)
                 {
-                    m_Bitmap.Dispose();
-                    m_Bitmap = null;
-                }
+                    if (m_Bitmap != null)
+                    {
+                        m_Bitmap.Dispose();
+                        m_Bitmap = null;
+                    }
 
-                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f, exposure);
-                this.renderResultBox.BackgroundImage = m_Bitmap;
-                if (this.tonemappingCheckBox.Checked)
-                    this.retonemappingButton.Enabled = true;
+                    var tex = m_Result as Texture;
+                    m_Bitmap = tex.TransferToBMP(m_Bitmap, 0.45f, exposure);
+                    this.renderResultBox.BackgroundImage = m_Bitmap;
+                    if (this.tonemappingCheckBox.Checked)
+                        this.retonemappingButton.Enabled = true;
+                }
+                else
+                {
+                    this.renderResultBox.BackgroundImage = null;
+                    this.retonemappingButton.Enabled = false;
+                }
 
                 this.progressBar.Value = 0;
             }
@@ -310,7 +332,17 @@ namespace PathTracerForm
 
                     Log.Info($"渲染目标像素:({x},{y})");
 
-                    m_Result = m_Scene.RenderDebugSinglePixel(x, y, traceTimes, sampleType, numSamples, width, height);
+                    var pt = new ASL.PathTracer.PathTracer(m_Scene);
+                    RenderConfig config = new RenderConfig()
+                    {
+                        traceTimes = traceTimes,
+                        samplerType = sampleType,
+                        numSamples = numSamples,
+                        numSets = 83,
+                        width = width,
+                        height = height,
+                    };
+                    m_Result = pt.RenderDebugSinglePixel(x, y, config);
 
                     if (m_Result != null)
                     {
@@ -330,13 +362,31 @@ namespace PathTracerForm
             float p = ((float)progress) / total;
             int percent = (int)(p * 100.0f);
             this.progressBar.Value = percent;
+
+            ////if (renderJobResult != null && renderJobResult is PathTracerRenderJobResult)
+            ////{
+            ////    var r = (PathTracerRenderJobResult)renderJobResult;
+            ////    for(int i=0;i<r.tileWidth;i++)
+            ////    {
+            ////        for(int j=0;j<r.tileHeight;j++)
+            ////        {
+            ////            ASL.PathTracer.Color col = r.GetPixel(i, j);
+            ////            col.Gamma(0.45f);
+            ////            col.ClampColor();
+            ////            System.Drawing.Color c = System.Drawing.Color.FromArgb((int)(col.r * 255.0f),
+            ////                (int)(col.g * 255.0f), (int)(col.b * 255.0f));
+            ////            m_Bitmap.SetPixel((int)m_Bitmap.Width - 1 - (i + r.x), (int)m_Bitmap.Height - 1 - (j + r.y), c);
+            ////        }
+            ////    }
+            ////}
+            //this.renderResultBox.BackgroundImage = m_Bitmap;
         }
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(this.renderResultBox.BackgroundImage == null)
+            if (m_Result == null)
                 return;
-            this.saveFileDialog.Filter = "BMP文件|*.bmp";
+            this.saveFileDialog.Filter = m_Result.GetExtensions();
             DialogResult result = this.saveFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -345,10 +395,7 @@ namespace PathTracerForm
                     return;
                 }
 
-                FileStream stream = new FileStream(this.saveFileDialog.FileName, FileMode.Create, FileAccess.Write);
-                this.renderResultBox.BackgroundImage.Save(stream, ImageFormat.Bmp);
-
-                stream.Close();
+                m_Result.Save(this.saveFileDialog.FileName);
             }
         }
 
@@ -378,23 +425,6 @@ namespace PathTracerForm
             }
         }
 
-        private void SaveHDRToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.renderResultBox.BackgroundImage == null)
-                return;
-            this.saveFileDialog.Filter = "HDR文件|*.hdr";
-            DialogResult result = this.saveFileDialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                if (string.IsNullOrEmpty(this.saveFileDialog.FileName))
-                {
-                    return;
-                }
-                
-                m_Result.SaveToHDR(this.saveFileDialog.FileName);
-            }
-        }
-
         private void TonemappingCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             this.exposureInputBox.Enabled = this.tonemappingCheckBox.Checked;
@@ -419,9 +449,37 @@ namespace PathTracerForm
                     exposure = float.Parse(this.exposureInputBox.Text);
                 }
 
-                m_Bitmap = m_Result.TransferToBMP(m_Bitmap, 0.45f, exposure);
-                this.renderResultBox.BackgroundImage = m_Bitmap;
+                if (m_Result is Texture)
+                {
+                    var tex = m_Result as Texture;
+                    m_Bitmap = tex.TransferToBMP(m_Bitmap, 0.45f, exposure);
+                    this.renderResultBox.BackgroundImage = m_Bitmap;
+                }
+                else
+                {
+                    this.renderResultBox.BackgroundImage = null;
+                }
             }
+        }
+
+        private void OnAddLog(Log.LogItem logItem)
+        {
+            ListViewItem item = new ListViewItem();
+            item.Text = logItem.logType.ToString();
+            item.SubItems.Add(logItem.message);
+            ASL.PathTracer.Color foreCol = logItem.GetFontColor();
+            ASL.PathTracer.Color backCol = logItem.GetBackColor();
+            int foreColARGB = foreCol.ToARGB();
+            int backColARGB = backCol.ToARGB();
+            item.ForeColor = System.Drawing.Color.FromArgb(foreColARGB);
+            item.BackColor = System.Drawing.Color.FromArgb(backColARGB);
+
+            this.logListView.Items.Add(item);
+        }
+
+        private void OnClearLog()
+        {
+            this.logListView.Items.Clear();
         }
     }
 }

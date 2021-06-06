@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Xml.Serialization;
 
@@ -37,7 +36,7 @@ namespace ASL.PathTracer
             }
         }
 
-        public bool Execute(System.Action<int, int> progressCallBackAction = null)
+        public bool Execute(RenderJobCallBackDelegate progressCallBackAction = null)
         {
             bool result = false;
             if (renderTasks != null)
@@ -106,7 +105,7 @@ namespace ASL.PathTracer
         [XmlAttribute(AttributeName = "FinishCmd")]
         public string finishCommand;
 
-        public bool Execute(System.Action<int, int> progressCallBackAction = null)
+        public bool Execute(RenderJobCallBackDelegate progressCallBackAction = null)
         {
             if (string.IsNullOrEmpty(scenePath))
                 return false;
@@ -124,21 +123,33 @@ namespace ASL.PathTracer
             if (width <= 0 || height <= 0)
                 return false;
             var scene = Scene.Create(scenePath);
-            var tex = scene.Render(bounceTimes, samplerType, numSamples, (uint)width, (uint)height, RenderChannel.Full, 83, progressCallBackAction);
+            var pt = new PathTracer(scene);
+            RenderConfig config = new RenderConfig()
+            {
+                traceTimes = bounceTimes,
+                samplerType = samplerType,
+                numSamples = numSamples,
+                numSets = 83,
+                width = (uint)width,
+                height = (uint)height,
+            };
+            var tex = pt.Render(config, progressCallBackAction);
             
             if (outputFileInfo.Directory.Exists)
                 outputFileInfo.Directory.Create();
-            //if (saveHDR)
+            if (saveHDR)
             {
-                tex.SaveToHDR(Path.Combine(outputFileInfo.FullName, ".hdr"));
+                tex.Save(Path.Combine(outputFileInfo.FullName, ".hdr"));
+                //tex.SaveToHDR(Path.Combine(outputFileInfo.FullName, ".hdr"));
             }
-            //else
+            else
             {
-                var bitmap = tex.TransferToBMP(null, 0.45f, tonemapping ? exposure : -1.0f);
-                FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
-                bitmap.Save(stream, ImageFormat.Bmp);
-                stream.Close();
-                bitmap.Dispose();
+                //var bitmap = tex.TransferToBMP(null, 0.45f, tonemapping ? exposure : -1.0f);
+                //FileStream stream = new FileStream(outputFileInfo.FullName, FileMode.Create, FileAccess.Write);
+                //bitmap.Save(stream, ImageFormat.Bmp);
+                //stream.Close();
+                //bitmap.Dispose();
+                tex.Save(outputFileInfo.FullName);
             }
 
             return true;

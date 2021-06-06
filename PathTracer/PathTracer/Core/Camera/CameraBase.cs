@@ -6,25 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASL.PathTracer
 {
-    /// <summary>
-    /// 渲染通道
-    /// </summary>
-    public enum RenderChannel
-    {
-        Full,
-        SkyLight,
-        Albedo,
-        Roughness,
-        Metallic,
-        WorldNormal,
-        Occlusion,
-        Emissive,
-        Alpha,
-        DiffuseNoLighting,
-        Diffuse,
-        DirectionalLightShadow,
-    }
-
+  
     /// <summary>
     /// 相机基类
     /// </summary>
@@ -38,11 +20,7 @@ namespace ASL.PathTracer
 
         public Vector3 forward { get; private set; }
 
-        protected Texture m_RenderTarget;
-
-        private SamplerType m_SamplerType;
-        private int m_NumSamples;
-        private int m_NumSets;
+        public Texture renderTarget { get; private set; }
 
         public CameraBase(Vector3 position, Vector3 euler)
         {
@@ -88,8 +66,8 @@ namespace ASL.PathTracer
 
         public void SetRenderTarget(Texture renderTarget)
         {
-            m_RenderTarget = renderTarget;
-            if (m_RenderTarget == null)
+            this.renderTarget = renderTarget;
+            if (this.renderTarget == null)
                 return;
 
             ModifyResolution(renderTarget.width, renderTarget.height);
@@ -97,65 +75,6 @@ namespace ASL.PathTracer
 
         protected virtual void ModifyResolution(uint width, uint height) { }
 
-        public void SetSampler(SamplerType samplerType, int numSamples, int numSets = 83)
-        {
-            m_SamplerType = samplerType;
-            m_NumSamples = numSamples;
-            m_NumSets = numSets;
-        }
-
         public abstract Ray GetRay(int x, int y, SamplerBase sampler);
-
-        //public abstract Ray GetRayWithoutSampler(float x, float y);
-
-        /// <summary>
-        /// 执行相机渲染
-        /// </summary>
-        /// <param name="scene"></param>
-        /// <param name="renderChannel"></param>
-        /// <param name="progressCallBackAction">渲染进度回调</param>
-        public void Render(Scene scene, System.Action<int, int> progressCallBackAction = null)
-        {
-            if (scene == null)
-                throw new System.ArgumentNullException();
-            if (m_RenderTarget == null)
-                throw new System.NullReferenceException("未设置RenderTarget");
-
-            RenderJob job = new RenderJob(m_SamplerType, m_NumSamples, m_NumSets, m_RenderTarget.width, m_RenderTarget.height, scene, this);
-
-            for (int j = 0; j < m_RenderTarget.height; j += 32)
-            {
-                for (int i = 0; i < m_RenderTarget.width; i += 32)
-                {
-                    job.AddTile(i, j);
-                }
-            }
-            job.Render(m_RenderTarget, progressCallBackAction);
-
-        }
-
-        internal Color RenderPixelToColor(int x, int y, SamplerBase sampler, RenderState renderState, Scene scene)
-        {
-            //if (renderChannel == RenderChannel.Full)
-            {
-                Color col = Color.black;
-                sampler.ResetSampler(); //重置采样器状态
-                renderState.ResetState(); //重置渲染状态
-                while (sampler.NextSample())
-                {
-                    Ray ray = GetRay(x, y, sampler);
-                    col += scene.tracer.Tracing(ray, sampler, renderState);
-                }
-
-                col.a = 1.0f;
-                return col;
-            }
-            //else
-            //{
-            //    //如果只渲染某个通道，则调用PreviewTracing
-            //    Ray ray = GetRayWithoutSampler(x + 0.5f, y + 0.5f);
-            //    return scene.tracer.PreviewTracing(ray, renderChannel);
-            //}
-        }
     }
 }

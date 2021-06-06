@@ -9,27 +9,40 @@ namespace ASL.PathTracer
 	/// <summary>
 	/// 几何体基类
 	/// </summary>
-    public abstract class Geometry
+    public abstract class Geometry : IAABB
     {
-        public Shader shader;
+        public Material material;
 
-        public Geometry(Shader shader)
+        protected Bounds m_bounds;
+
+        public Geometry(Material material)
         {
-            this.shader = shader;
+            this.material = material;
         }
 
-        public bool RayCast(Ray ray, double epsilon, ref RayCastHit hit)
+        public Bounds GetBounds()
         {
-            if(RayCastGeometry(ray, epsilon, ref hit))
+            return m_bounds;
+        }
+
+        public bool RayCast(Ray ray, ref RayCastHit hit)
+        {
+            if(RayCastGeometry(ray, ref hit))
             {
                 //如果射线检测成功，则额外判断一下shader是否允许cull，用于实现材质的alpha裁剪等功能
-                if (hit.shader != null && hit.shader.ShouldCull(ray, hit))
+                if (hit.material != null && hit.material.ShouldCull(ray, hit))
                     return false;
                 return true;
             }
             return false;
         }
 
-        protected abstract bool RayCastGeometry(Ray ray, double epsilon, ref RayCastHit hit);
+        public abstract Vector3 Sample(SamplerBase sampler);
+
+        public abstract Vector3 GetNormal(Vector3 point);
+
+        public abstract float GetPDF();
+
+        protected abstract bool RayCastGeometry(Ray ray, ref RayCastHit hit);
     }
 }
