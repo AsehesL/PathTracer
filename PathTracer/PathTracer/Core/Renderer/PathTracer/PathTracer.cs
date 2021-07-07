@@ -158,7 +158,7 @@ namespace ASL.PathTracer
         {
             m_Shader = new PathTracerShader(this);
             m_SkyShader = new PathTracerSkyShader(this);
-            this.sampleDirectLight = sampleDirectLight;
+            this.sampleDirectLight = false;// sampleDirectLight;
         }
 
         protected override IRenderResult OnRender(RenderConfig config, RenderJobCallBackDelegate progressCallBackAction)

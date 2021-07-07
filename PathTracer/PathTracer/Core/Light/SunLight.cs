@@ -25,27 +25,6 @@ namespace ASL.PathTracer
 
         public bool renderParticipatingMedia;
 
-        //public Vector3 SampleSunDirection(SamplerBase sampler)
-        //{
-        //    Vector2 diskSp = sampler.SampleUnitDisk() * kR;
-        //    Vector3 sp = new Vector3(diskSp.x, diskSp.y, 1.0).normalized;
-
-        //    Vector3 w = sunDirection;
-        //    Vector3 u = Vector3.Cross(new Vector3(0.00424f, 1, 0.00764f), w);
-        //    u.Normalize();
-        //    Vector3 v = Vector3.Cross(u, w);
-        //    Vector3 l = sp.x * u + sp.y * v + sp.z * w;
-        //    if (Vector3.Dot(l, sunDirection) < 0.0)
-        //        l = -sp.x * u - sp.y * v - sp.z * w;
-        //    l.Normalize();
-        //    return l;
-        //}
-
-        //public Color GetSunLightColor()
-        //{
-        //    return sunIntensity * sunColor;
-        //}
-
         public override Vector3 Sample(SamplerBase sampler, Vector3 hitPoint)
         {
             return hitPoint + (sunDirection * -1.0) * kEarthSurfaceToSun + sampler.SampleSphere() * kSunRadius;

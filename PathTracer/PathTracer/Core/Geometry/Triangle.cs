@@ -127,11 +127,11 @@ namespace ASL.PathTracer
             hit.material = material;
             hit.geometry = this;
             hit.distance = rt;
-            //if (back)
-            //    hit.normal = -1.0 * hit.normal;
-            if (hit.isBackFace)
-                hit.hit -= hit.normal * 0.00000000000001;
-            else
+            if (back)
+                hit.normal = -1.0 * hit.normal;
+            //if (hit.isBackFace)
+            //    hit.hit -= hit.normal * 0.00000000000001;
+            //else
                 hit.hit += hit.normal * 0.00000000000001;
             //hit.distance = Vector3.Distance(hit.hit, ray.origin);
 

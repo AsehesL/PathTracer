@@ -60,14 +60,14 @@ namespace ASL.PathTracer
                         if (material != null && !material.ShouldRenderBackFace())
                             return false;
                         hit.isBackFace = true;
-                        //hit.normal *= -1;
+                        hit.normal *= -1;
                     }
                     else
                         hit.isBackFace = false;
 
-                    if (hit.isBackFace)
-                        hit.hit -= hit.normal * 0.00000000000001;
-                    else
+                    //if (hit.isBackFace)
+                    //    hit.hit -= hit.normal * 0.00000000000001;
+                    //else
                         hit.hit += hit.normal * 0.00000000000001;
                     //hit.distance = Vector3.Distance(hit.hit, ray.origin);
 
@@ -95,14 +95,14 @@ namespace ASL.PathTracer
                         if (material != null && !material.ShouldRenderBackFace())
                             return false;
                         hit.isBackFace = true;
-                        //hit.normal *= -1;
+                        hit.normal *= -1;
                     }
                     else
                         hit.isBackFace = false;
 
-                    if (hit.isBackFace)
-                        hit.hit -= hit.normal * 0.00000000000001;
-                    else
+                    //if (hit.isBackFace)
+                    //    hit.hit -= hit.normal * 0.00000000000001;
+                    //else
                         hit.hit += hit.normal * 0.00000000000001;
                     //hit.distance = Vector3.Distance(hit.hit, ray.origin);
 

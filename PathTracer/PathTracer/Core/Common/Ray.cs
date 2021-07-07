@@ -12,10 +12,20 @@ namespace ASL.PathTracer
 
         public Vector3 direction;
 
+        public bool isDiffuseRay;
+
         public Ray(Vector3 origin, Vector3 direction)
         {
             this.origin = origin;
             this.direction = direction;
+            this.isDiffuseRay = false;
+        }
+
+        public Ray(Vector3 origin, Vector3 direction, bool diffuseRay)
+        {
+            this.origin = origin;
+            this.direction = direction;
+            this.isDiffuseRay = diffuseRay;
         }
 
         public override string ToString()

@@ -249,6 +249,7 @@ namespace PathTracerForm
             this.progressBar.Maximum = 100;
             var pt = new ASL.PathTracer.PathTracer(m_Scene);
             //var pt = new ASL.PathTracer.VolumeTextureRenderer(m_Scene);
+            ///var pt = new ASL.PathTracer.PRTRenderer(m_Scene);
             RenderConfig config = new RenderConfig()
             {
                 traceTimes = traceTimes,

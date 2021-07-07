@@ -112,6 +112,14 @@ namespace ASL.PathTracer
             this.a = ((float)a32) / 255.0f;
         }
 
+        public bool IsCloseToZero()
+        {
+            if (r >= float.Epsilon) return false;
+            if (g >= float.Epsilon) return false;
+            if (b >= float.Epsilon) return false;
+            return true;
+        }
+
         public int ToARGB()
         {
             int red = (int)(r * 255.0f);
@@ -149,6 +157,11 @@ namespace ASL.PathTracer
         public float Luminance()
         {
             return r * 0.22f + g * 0.707f + b * 0.071f;
+        }
+
+        public float Average()
+        {
+            return (r + g + b) / 3.0f;
         }
 
         public void ClampColor()

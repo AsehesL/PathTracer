@@ -8,28 +8,24 @@ namespace ASL.PathTracer
 {
     class PathTracerShader
     {
-        struct MaterialProperty
+        //struct MaterialProperty
+        //{
+        //    public Color albedo;
+        //    public Vector3 worldNormal;
+        //    public float opacity;
+        //    public float metallic;
+        //    public float roughness;
+        //}
+        private enum ShadingType
         {
-            public Color albedo;
-            public Vector3 worldNormal;
-            public float opacity;
-            public float metallic;
-            public float roughness;
+            Diffuse,
+            Reflect,
+            Refract,
         }
 
-        protected BRDF DiffuseBRDF
-        {
-            get { return m_DisneyDiffuseBRDF; }
-        }
+        private BRDF m_LambertaianBRDF = new LambertatianBRDF();
 
-        protected BRDF SpecularBRDF
-        {
-            get { return m_CookTorranceBRDF; }
-        }
-
-        private LambertatianBRDF m_LambertaianBRDF = new LambertatianBRDF();
-
-        private DisneyDiffuseBRDF m_DisneyDiffuseBRDF = new DisneyDiffuseBRDF();
+        private BRDF m_DisneyDiffuseBRDF = new DisneyDiffuseBRDF();
 
         private CookTorranceBRDF m_CookTorranceBRDF = new CookTorranceBRDF();
 
@@ -43,199 +39,130 @@ namespace ASL.PathTracer
         {
             if (hit.depth > m_PathTracer.tracingTimes)
             {
-                if (material.IsEmissive() && m_PathTracer.sampleDirectLight)
+                if (material.IsEmissive() && m_PathTracer.sampleDirectLight && ray.isDiffuseRay)
                     return Color.black;
                 return material.GetEmissive(hit);
             }
             if (material.IsEmissive())
             {
-                if (m_PathTracer.sampleDirectLight && hit.depth != 0)
+                if (m_PathTracer.sampleDirectLight && hit.depth != 0 && ray.isDiffuseRay)
                     return Color.black;
                 return material.GetEmissive(hit);
             }
-            Color result = Color.black;
 
-            MaterialProperty property;
+            float refractive = material.GetRefractive(hit);
+            float metallic = material.GetMetallic(hit);
+            float roughness = material.GetRoughness(hit);
+            float opacity = material.GetOpacity(hit); 
+            Color albedo = material.GetAlbedo(hit);
+            Vector3 worldNormal = material.GetWorldNormal(hit);
 
-            property.worldNormal = material.GetWorldNormal(hit);
-            property.opacity = material.GetOpacity(hit);
-            property.metallic = material.GetMetallic(hit);
-            property.roughness = material.GetRoughness(hit);
-            property.albedo = material.GetAlbedo(hit);
+            float ndv = (float)Math.Max(0.0f, Vector3.Dot(worldNormal, -1.0 * ray.direction));
 
-            if (m_PathTracer.sampleDirectLight)
-                result += ShadeDirectLights(property, sampler, ray, hit);
+            if (hit.isBackFace)
+                refractive = 1.0f / refractive;
 
-            result += material.GetOcclusion(hit) * ShadeAmbientLight(property, sampler, ray, hit);
+            float F0 = (1.0f - refractive) / (1.0f + refractive);
+            F0 = F0 * F0;
+            if (F0 > 0.04f)
+                F0 = 0.04f;
+            Color F0Col = Color.Lerp(new Color(F0, F0, F0), albedo, metallic);
 
-            return result + material.GetEmissive(hit);
-        }
+            Color fresnel = Fresnel.FresnelSchlick(ndv, F0Col, roughness);
 
-        private Color ShadeDirectLights(MaterialProperty property, SamplerBase sampler, Ray ray, RayCastHit hit)
-        {
-            if (m_PathTracer.scene.lights == null)
-                return Color.black;
-            Color lightColor = Color.black;
-            for (int i=0;i<m_PathTracer.scene.lights.Count;i++)
+            float fl = fresnel.Average();
+
+            ShadingType shadingType = ShadingType.Reflect;
+
+            double russianRoulette = sampler.GetRandom();
+            if (fl > russianRoulette)
             {
-                lightColor += ShadeDirectLight(m_PathTracer.scene.lights[i], property, sampler, ray, hit);
+                shadingType = ShadingType.Reflect;
             }
-            return lightColor;
-        }
-
-        private Color ShadeDirectLight(Light light, MaterialProperty property, SamplerBase sampler, Ray ray, RayCastHit hit)
-        {
-            if (light == null)
-                return Color.black;
-            if (property.opacity >= 1.0f - float.Epsilon || (property.opacity > float.Epsilon && sampler.GetRandom() < property.opacity))
+            else if (fl + (1.0f - fl) * (1.0f - opacity) > russianRoulette)
             {
-                float ndv = (float)Math.Max(0.0f, Vector3.Dot(property.worldNormal, -1.0 * ray.direction));
-                if (property.metallic >= 1.0f - float.Epsilon || (property.metallic > float.Epsilon && sampler.GetRandom() < property.metallic))
-                {
-                    // Metallic
-
-                    Vector3 F = BRDF.FresnelSchlickRoughness(ndv, new Vector3(property.albedo.r, property.albedo.g, property.albedo.b), property.roughness);
-
-                    Vector3 surfacePoint = light.Sample(sampler, hit.hit);
-                    Vector3 L = (surfacePoint - hit.hit).normalized;
-
-                    Ray LRay = new Ray(hit.hit, L);
-
-                    Color col = default(Color);
-
-                    Vector3 surfaceNormal = default(Vector3);
-
-                    bool isVisible = light.L(m_PathTracer.scene.sceneData, LRay, out col, out surfaceNormal);
-                    if (!isVisible)
-                        return Color.black;
-
-                    float brdf = SpecularBRDF.F(ray.direction * -1.0, L, hit.hit, property.worldNormal, property.roughness);
-
-                    float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
-
-                    return new Color(col.r * (float)F.x, col.g * (float)F.y, col.b * (float)F.z, col.a) * ndl * brdf * light.G(LRay, surfacePoint, surfaceNormal) / light.GetPDF();
-                }
-                else
-                {
-                    float F = BRDF.FresnelSchlickRoughness(ndv, 0.04f, property.roughness);
-                    if (sampler.GetRandom() < F)
-                    {
-                        // Specular
-
-                        Vector3 surfacePoint = light.Sample(sampler, hit.hit);
-                        Vector3 L = (surfacePoint - hit.hit).normalized;
-
-                        Ray LRay = new Ray(hit.hit, L);
-
-                        Color col = default(Color);
-
-                        Vector3 surfaceNormal = default(Vector3);
-
-                        bool isVisible = light.L(m_PathTracer.scene.sceneData, LRay, out col, out surfaceNormal);
-                        if (!isVisible)
-                            return Color.black;
-
-                        float brdf = SpecularBRDF.F(ray.direction * -1.0, L, hit.hit, property.worldNormal, property.roughness);
-
-                        float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
-
-                        return col * ndl * brdf * light.G(LRay, surfacePoint, surfaceNormal) / light.GetPDF();
-                    }
-                    else
-                    {
-                        // Diffuse
-
-                        Vector3 surfacePoint = light.Sample(sampler, hit.hit);
-                        Vector3 L = (surfacePoint - hit.hit).normalized;
-
-                        Ray LRay = new Ray(hit.hit, L);
-
-                        Color col = default(Color);
-
-                        Vector3 surfaceNormal = default(Vector3);
-
-                        bool isVisible = light.L(m_PathTracer.scene.sceneData, LRay, out col, out surfaceNormal);
-                        if (!isVisible)
-                            return Color.black;
-
-                        float brdf = DiffuseBRDF.F(ray.direction * -1.0, L, hit.hit, property.worldNormal, property.roughness);
-
-                        float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
-
-                        return property.albedo * col * ndl * brdf * light.G(LRay, surfacePoint, surfaceNormal) / light.GetPDF();
-                    }
-                }
+                shadingType = ShadingType.Refract;
             }
             else
             {
-                return Color.black;
+                shadingType = ShadingType.Diffuse;
             }
-        }
 
-        private Color ShadeAmbientLight(MaterialProperty property, SamplerBase sampler, Ray ray, RayCastHit hit)
-        {
-            if (property.opacity >= 1.0f - float.Epsilon || (property.opacity > float.Epsilon && sampler.GetRandom() < property.opacity))
+            if (shadingType == ShadingType.Diffuse)
             {
-                float ndv = (float)Math.Max(0.0f, Vector3.Dot(property.worldNormal, -1.0 * ray.direction));
-                if (property.metallic >= 1.0f - float.Epsilon || (property.metallic > float.Epsilon && sampler.GetRandom() < property.metallic))
-                {
-                    // Metallic
+                if (1.0f - metallic < float.Epsilon)
+                    return Color.black;
 
-                    Vector3 F = BRDF.FresnelSchlickRoughness(ndv, new Vector3(property.albedo.r, property.albedo.g, property.albedo.b), property.roughness);
+                if (albedo.IsCloseToZero())
+                    return Color.black;
 
-                    Vector3 L = default(Vector3);
-                    float pdf = 1.0f;
+                Vector3 sp = sampler.SampleHemiSphere();
+                Vector3 wi = Vector3.ONB(worldNormal, sp);
+                float pdf = (float)(sp.z / Math.PI);
 
-                    float brdf = SpecularBRDF.SampleF(sampler, ray.direction * -1, hit.hit, property.worldNormal, property.roughness, out L, out pdf);
+                double ndl = Vector3.Dot(worldNormal, wi);
 
-                    Ray lray = new Ray(hit.hit, L);
+                if (ndl <= 0.0)
+                    return Color.black;
 
-                    Color col = m_PathTracer.PathTracing(lray, sampler, hit.depth + 1);
-                    float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
+                float brdf = (roughness < float.Epsilon ? m_LambertaianBRDF : m_DisneyDiffuseBRDF).SampleBRDF(sampler, ray.direction * -1.0, wi, hit.hit, worldNormal, roughness);
 
-                    return new Color(col.r * (float)F.x, col.g * (float)F.y, col.b * (float)F.z, col.a) * ndl * brdf / pdf;
-                }
-                else
-                {
-                    float F = BRDF.FresnelSchlickRoughness(ndv, 0.04f, property.roughness);
-                    if (sampler.GetRandom() < F)
-                    {
-                        // Specular
+                if (brdf < float.Epsilon)
+                    return Color.black;
 
-                        Vector3 L = default(Vector3);
-                        float pdf = 1.0f;
+                Ray diffuseRay = new Ray(hit.hit, wi, true);
 
-                        float brdf = SpecularBRDF.SampleF(sampler, ray.direction * -1, hit.hit, property.worldNormal, property.roughness, out L, out pdf);
+                Color L = m_PathTracer.PathTracing(diffuseRay, sampler, hit.depth + 1);
 
-                        Ray lray = new Ray(hit.hit, L);
-
-                        Color col = m_PathTracer.PathTracing(lray, sampler, hit.depth + 1);
-                        float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
-
-                        return col * ndl * brdf / pdf;
-                    }
-                    else
-                    {
-                        // Diffuse
-
-                        Vector3 L = default(Vector3);
-                        float pdf = 1.0f;
-
-                        float brdf = DiffuseBRDF.SampleF(sampler, ray.direction * -1, hit.hit, property.worldNormal, property.roughness, out L, out pdf);
-
-                        Ray lray = new Ray(hit.hit, L);
-
-                        Color col = m_PathTracer.PathTracing(lray, sampler, hit.depth + 1);
-                        float ndl = (float)Math.Max(Vector3.Dot(property.worldNormal, L), 0.0);
-
-                        return property.albedo * col * ndl * brdf / pdf;
-                    }
-                }
+                return albedo * L * brdf * (1.0f - metallic) * (float)ndl / pdf;
             }
-            else
+            if (shadingType == ShadingType.Reflect)
             {
-                return Color.black;
+                if (albedo.IsCloseToZero())
+                    return Color.black;
+
+                Vector3 sp = sampler.SampleHemiSphere(roughness);
+                Vector3 spnormal = Vector3.ONB(worldNormal, sp);
+                Vector3 wo = ray.direction * -1.0;
+                Vector3 wi = Vector3.Reflect(wo, spnormal);
+                float pdf = (float)(sp.z / Math.PI);
+
+                double ndl = Vector3.Dot(worldNormal, wi);
+
+                if (ndl <= 0.0)
+                    return Color.black;
+
+                float brdf = m_CookTorranceBRDF.SampleBRDF(sampler, wo, wi, hit.hit, worldNormal, roughness);
+
+                if (brdf < float.Epsilon)
+                    return Color.black;
+
+                Ray specularRay = new Ray(hit.hit, wi, false);
+
+                Color L = m_PathTracer.PathTracing(specularRay, sampler, hit.depth + 1);
+
+                return Color.Lerp(Color.white, fresnel, metallic) * L * brdf * (float)ndl / pdf;
             }
+            if (shadingType == ShadingType.Refract)
+            {
+
+            }
+            return Color.black;
+
+            //MaterialProperty property;
+
+            //property.worldNormal = material.GetWorldNormal(hit);
+            //property.opacity = material.GetOpacity(hit);
+            //property.metallic = material.GetMetallic(hit);
+            //property.roughness = material.GetRoughness(hit);
+            //property.albedo = material.GetAlbedo(hit);
+
+            //if (m_PathTracer.sampleDirectLight)
+            //    result += ShadeDirectLights(property, sampler, ray, hit);
+
+            //result += material.GetOcclusion(hit) * ShadeAmbientLight(property, sampler, ray, hit);
+
+            //return result + material.GetEmissive(hit);
         }
 
         //private Color RenderAmbientLight(Material material, SamplerBase sampler, Ray ray, RenderChannel renderChannel, RayCastHit hit, Vector3 worldNormal, int depth)
